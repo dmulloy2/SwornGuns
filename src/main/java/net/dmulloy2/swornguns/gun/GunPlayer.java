@@ -204,16 +204,16 @@ public class GunPlayer {
 			if (ammoLeft < 0)
 				ammoLeft = 0;
 			leftInClip = currentAmmo - ammoLeft;
-			add = ChatColor.YELLOW + "    /u00AB" + Integer.toString(leftInClip) + " /uFFE8 " + Integer.toString(ammoLeft) + "/u00BB";
+			add = ChatColor.YELLOW + "    \u00AB" + Integer.toString(leftInClip) + " \uFFE8 " + Integer.toString(ammoLeft) + "\u00BB";
 			if (current.reloading) {
 				int reloadSize = 4;
 				double reloadFrac = (current.getReloadTime() - current.gunReloadTimer) / current.getReloadTime();
 				int amt = (int)Math.round(reloadFrac * reloadSize);
 				for (int ii = 0; ii < amt; ii++) {
-					refresh = refresh + "/u25AA";
+					refresh = refresh + "\u25AA";
 				}
 				for (int ii = 0; ii < reloadSize - amt; ii++) {
-					refresh = refresh + "/u25AB";
+					refresh = refresh + "\u25AB";
 				}
 
 				add = ChatColor.RED + "    " + new StringBuffer(refresh).reverse() + "RELOADING" + refresh;

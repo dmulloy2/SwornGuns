@@ -10,14 +10,6 @@ public class PermissionInterface {
 	}
 	
 	public static boolean canFireGun(Player player, Gun gun) {
-		if (!gun.needsPermission) {
-			return true;
-		}
-
-		if (player.hasPermission(gun.node) || player.isOp()) {
-			return true;
-		}
-		
-		return false;
+		return (player.hasPermission(gun.node) || !gun.needsPermission);
 	}
 }
