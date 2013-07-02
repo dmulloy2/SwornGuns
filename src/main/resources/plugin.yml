@@ -20,3 +20,6 @@ permissions:
   swornguns.reload:
     description: Lets you reload the plugin
     default: false
+  swornguns.fire:
+    description: Per-gun permissions
+    default: op
