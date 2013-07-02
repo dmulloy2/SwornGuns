@@ -58,9 +58,9 @@ public class Bullet {
 			Class<? extends Projectile> mclass = null;
     	
 			String check = gun.projType.toLowerCase().replaceAll("_", "").replaceAll(" ", "");
-			if (check.equals("egg")) {
+			if (check.equalsIgnoreCase("egg")) {
     			mclass = Egg.class;
-			} else if (check.equals("arrow")) {
+			} else if (check.equalsIgnoreCase("arrow")) {
 				mclass = Arrow.class;
 			} else {
 				mclass = Snowball.class;
@@ -221,7 +221,7 @@ public class Bullet {
 			ArrayList<Entity> entities = (ArrayList<Entity>)this.projectile.getNearbyEntities(c, c, c);
 			for (int i = 0; i < entities.size(); i++) {
 				if ((entities.get(i) instanceof LivingEntity)) {
-					EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(this.shooter.getPlayer(), (Entity)entities.get(i), EntityDamageByEntityEvent.DamageCause.CUSTOM, 0);
+					EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(this.shooter.getPlayer(), (Entity)entities.get(i), EntityDamageByEntityEvent.DamageCause.CUSTOM, 0.0D);
 					Bukkit.getServer().getPluginManager().callEvent(e);
 					if ((!e.isCancelled()) && 
 							(((LivingEntity)entities.get(i)).hasLineOfSight(this.projectile))) {
@@ -241,7 +241,7 @@ public class Bullet {
 			ArrayList<Entity> entities = (ArrayList<Entity>)this.projectile.getNearbyEntities(c, c, c);
 			for (int i = 0; i < entities.size(); i++) {
 				if ((entities.get(i) instanceof LivingEntity)) {
-					EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(this.shooter.getPlayer(), (Entity)entities.get(i), EntityDamageByEntityEvent.DamageCause.CUSTOM, 0);
+					EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(this.shooter.getPlayer(), (Entity)entities.get(i), EntityDamageByEntityEvent.DamageCause.CUSTOM, 0.0D);
 					Bukkit.getServer().getPluginManager().callEvent(e);
 					if ((!e.isCancelled()) && 
 							(((LivingEntity)entities.get(i)).hasLineOfSight(this.projectile))) {

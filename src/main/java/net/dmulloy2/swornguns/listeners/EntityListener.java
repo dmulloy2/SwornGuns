@@ -107,7 +107,7 @@ public class EntityListener implements Listener {
 						event.setDamage((int)Math.ceil(damage * mult));
 						int armorPenetration = bullet.getGun().getArmorPenetration();
 						if (armorPenetration > 0) {
-							int health = hurt.getHealth();
+							int health = (int) hurt.getHealth();
 							int newHealth = health - armorPenetration;
 							if (newHealth < 0) {
 								newHealth = 0;

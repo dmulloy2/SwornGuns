@@ -13,12 +13,8 @@ public class PermissionInterface {
 		if (!gun.needsPermission) {
 			return true;
 		}
-		
-		if (player.hasPermission("swornguns.fire.*") || player.isOp()) {
-			return true;
-		}
-		
-		if (player.hasPermission(gun.node)) {
+
+		if (player.hasPermission(gun.node) || player.isOp()) {
 			return true;
 		}
 		
