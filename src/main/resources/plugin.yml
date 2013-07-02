@@ -1,0 +1,26 @@
+name: SwornGuns
+main: net.dmulloy2.swornguns.SwornGuns
+version: 1.0
+author: dmulloy2
+commands: 
+  swornguns:
+    description: SwornGuns root command
+    usage: /<command> <args>
+    aliases: [guns]
+permissions:
+  swornguns.*:
+    description: Allows access to all SwornGuns features
+    default: false
+    children:
+      swornguns.toggle: true
+      sworngins.reload: true
+      swornguns.fire.*: true
+  swornguns.toggle:
+    description: Allows usage of /pvpgunplus toggle
+    default: true
+  swornguns.reload:
+    description: Lets you reload the plugin
+    default: false
+  swornguns.fire.*:
+    description: Allows the firing of all weapons
+    default: false
