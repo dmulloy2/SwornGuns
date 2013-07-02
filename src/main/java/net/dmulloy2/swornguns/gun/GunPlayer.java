@@ -50,7 +50,7 @@ public class GunPlayer {
 			List<Gun> tempgun = getGunsByType(hand);
 			List<Gun> canFire = new ArrayList<Gun>();
 			for (int i = 0; i < tempgun.size(); i++) {
-				if ((PermissionInterface.checkPermission(this.controller, ((Gun)tempgun.get(i)).node)) || (!((Gun)tempgun.get(i)).needsPermission)) {
+				if (PermissionInterface.canFireGun(controller, tempgun.get(i))) {
 					canFire.add((Gun)tempgun.get(i));
 				}
 			}
@@ -102,13 +102,15 @@ public class GunPlayer {
 	}
 
 	private void fireGun(Gun gun) {
-		if ((PermissionInterface.checkPermission(this.controller, gun.node)) || (!gun.needsPermission)) {
+		if (PermissionInterface.canFireGun(controller, gun)) {
 			if (gun.timer <= 0) {
 				this.currentlyFiring = gun;
 				gun.firing = true;
 			}
-		} else if ((gun.permissionMessage != null) && (gun.permissionMessage.length() > 0)) {
-			this.controller.sendMessage(gun.permissionMessage);
+		} else {
+			if ((gun.permissionMessage != null) && (gun.permissionMessage.length() > 0)) {
+				this.controller.sendMessage(gun.permissionMessage);
+			}
 		}
 	}
 
@@ -173,7 +175,7 @@ public class GunPlayer {
 		int amtGun = tempgun.size();
 		if (amtGun > 0) {
 			for (int i = 0; i < tempgun.size(); i++) {
-				if ((PermissionInterface.checkPermission(this.controller, ((Gun)tempgun.get(i)).node)) || (!((Gun)tempgun.get(i)).needsPermission)) {
+				if (PermissionInterface.canFireGun(controller, tempgun.get(i))) {
 					Gun current = (Gun)tempgun.get(i);
 					if ((current.getGunMaterial() != null) && (current.getGunMaterial().getId() == item.getTypeId())) {
 						byte gunDat = ((Gun)tempgun.get(i)).getGunTypeByte();

@@ -106,7 +106,7 @@ public class SwornGuns extends JavaPlugin {
 				String filename = children[i];
 				WeaponReader f = new WeaponReader(this, new File(path + "/" + filename), "gun");
 				if (f.loaded) {
-					f.ret.node = ("pvpgunplus." + filename.toLowerCase());
+					f.ret.node = ("swornguns.fire." + filename.toLowerCase());
 					this.loadedGuns.add(f.ret);
 					f.ret.setIsThrowable(true);
 					getLogger().info("Loaded Projectile: " + f.ret.getName());
@@ -128,7 +128,7 @@ public class SwornGuns extends JavaPlugin {
 				  String filename = children[i];
 				  WeaponReader f = new WeaponReader(this, new File(path + "/" + filename), "gun");
 				  if (f.loaded) {
-					  f.ret.node = ("pvpgunplus." + filename.toLowerCase());
+					  f.ret.node = ("swornguns.fire." + filename.toLowerCase());
 					  this.loadedGuns.add(f.ret);
 					  getLogger().info("Loaded Gun: " + f.ret.getName());
 				  } else {
