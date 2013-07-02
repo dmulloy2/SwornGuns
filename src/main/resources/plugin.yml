@@ -14,13 +14,9 @@ permissions:
     children:
       swornguns.toggle: true
       sworngins.reload: true
-      swornguns.fire.*: true
   swornguns.toggle:
     description: Allows usage of /pvpgunplus toggle
     default: true
   swornguns.reload:
     description: Lets you reload the plugin
-    default: false
-  swornguns.fire.*:
-    description: Allows the firing of all weapons
     default: false
