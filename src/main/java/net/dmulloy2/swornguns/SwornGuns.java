@@ -69,20 +69,19 @@ public class SwornGuns extends JavaPlugin {
 
 	private void startup(boolean init) {
 		new UpdateTimer().runTaskTimer(this, 20L, 1L);
-
-		File dir = new File(getPluginFolder());
-		if (!dir.exists()) {
-			dir.mkdir();
+		
+		if (!getDataFolder().exists()) {
+			getDataFolder().mkdir();
 		}
-
-		File dir2 = new File(getPluginFolder() + "/guns");
-		if (!dir2.exists()) {
-			dir2.mkdir();
+		
+		File guns = new File(getDataFolder(), "guns");
+		if (!guns.exists()) {
+			guns.mkdir();
 		}
-
-		dir2 = new File(getPluginFolder() + "/projectile");
-		if (!dir2.exists()) {
-			dir2.mkdir();
+		
+		File projectile = new File(getDataFolder(), "projectile");
+		if (!projectile.exists()) {
+			projectile.mkdir();
 		}
 
 		if (init) {
@@ -92,19 +91,14 @@ public class SwornGuns extends JavaPlugin {
 
 		getOnlinePlayers();
 	}
-
-	private final String getPluginFolder() {
-		return getDataFolder().getAbsolutePath();
-	}
-
+	
 	private void loadProjectile() {
-		String path = getPluginFolder() + "/projectile";
-		File dir = new File(path);
+		File dir = new File(getDataFolder(), "projectile");
 		String[] children = dir.list();
 		if (children != null) {
 			for (int i = 0; i < children.length; i++) {
 				String filename = children[i];
-				WeaponReader f = new WeaponReader(this, new File(path + "/" + filename), "gun");
+				WeaponReader f = new WeaponReader(this, new File(dir, filename), "gun");
 				if (f.loaded) {
 					f.ret.node = ("swornguns.fire." + filename.toLowerCase());
 					this.loadedGuns.add(f.ret);
@@ -120,24 +114,23 @@ public class SwornGuns extends JavaPlugin {
 	}
 
 	private void loadGuns() {
-		String path = getPluginFolder() + "/guns";
-		  File dir = new File(path);
-		  String[] children = dir.list();
-		  if (children != null) {
-			  for (int i = 0; i < children.length; i++) {
-				  String filename = children[i];
-				  WeaponReader f = new WeaponReader(this, new File(path + "/" + filename), "gun");
-				  if (f.loaded) {
-					  f.ret.node = ("swornguns.fire." + filename.toLowerCase());
-					  this.loadedGuns.add(f.ret);
-					  getLogger().info("Loaded Gun: " + f.ret.getName());
-				  } else {
-					  getLogger().info("Failed To Load Gun: " + f.ret.getName());
-				  }
-			  }
-		  } else {
-			  getLogger().warning("Could not find any guns to load!");
-		  }
+		File dir = new File(getDataFolder(), "guns");
+		String[] children = dir.list();
+		if (children != null) {
+			for (int i = 0; i < children.length; i++) {
+				String filename = children[i];
+				WeaponReader f = new WeaponReader(this, new File(dir, filename), "gun");
+				if (f.loaded) {
+					f.ret.node = ("swornguns.fire." + filename.toLowerCase());
+					this.loadedGuns.add(f.ret);
+					getLogger().info("Loaded Gun: " + f.ret.getName());
+				} else {
+					getLogger().info("Failed To Load Gun: " + f.ret.getName());
+				}
+			}
+		} else {
+			getLogger().warning("Could not find any guns to load!");
+		}
 	}
 
 	public void reload(boolean b) {

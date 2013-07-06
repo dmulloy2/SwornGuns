@@ -8,6 +8,7 @@ import net.dmulloy2.swornguns.util.InventoryHelper;
 import net.dmulloy2.swornguns.util.PermissionInterface;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -38,79 +39,75 @@ public class GunPlayer {
 	public boolean isAimedIn() {
 		return (controller != null && controller.isOnline() && controller.hasPotionEffect(PotionEffectType.SLOW));
 	}
-
-	public boolean onClick(String clickType) {
-		if (!this.enabled) {
-			return false;
+	
+	public void onClick(String clickType) {
+		ItemStack inHand = controller.getItemInHand();
+		if (inHand == null || inHand.getType() == Material.AIR) {
+			return;
 		}
 		
-		Gun holding = null;
-		ItemStack hand = this.controller.getItemInHand();
-		if (hand != null) {
-			List<Gun> tempgun = getGunsByType(hand);
-			List<Gun> canFire = new ArrayList<Gun>();
-			for (int i = 0; i < tempgun.size(); i++) {
-				if (PermissionInterface.canFireGun(controller, tempgun.get(i))) {
-					canFire.add((Gun)tempgun.get(i));
-				}
-			}
-			if ((tempgun.size() > canFire.size()) && (canFire.size() == 0)) {
-				if ((((Gun)tempgun.get(0)).permissionMessage != null) && (((Gun)tempgun.get(0)).permissionMessage.length() > 0))
-					this.controller.sendMessage(((Gun)tempgun.get(0)).permissionMessage);
-				return false;
-			}
-			tempgun.clear();
-			for (int i = 0; i < canFire.size(); i++) {
-				Gun check = (Gun)canFire.get(i);
-				byte gunDat = check.getGunTypeByte();
-				byte itmDat = hand.getData().getData();
-				
-				if ((gunDat == itmDat) || (check.ignoreItemData))
-					holding = check;
-			}
-			canFire.clear();
+		if (getGunsByType(inHand).isEmpty()) {
+			return;
 		}
-		if (holding != null) {
-			if (((holding.canClickRight) || (holding.canAimRight())) && (clickType.equals("right"))) {
-				if (!holding.canAimRight()) {
-					holding.heldDownTicks += 1;
-					holding.lastFired = 0;
-					if (this.currentlyFiring == null)
-						fireGun(holding);
+		
+		Gun gun = null;
+		boolean canFire = false;
+		for (Gun g : getGunsByType(inHand)) {
+			if (PermissionInterface.canFireGun(controller, g)) {
+				canFire = true;
+				gun = g;
+				break;
+			}
+		}
+
+		if (clickType.equalsIgnoreCase("right")) {
+			if (gun.canClickRight || gun.canAimRight()) {
+				if (!gun.canAimRight()) {
+					gun.heldDownTicks += 1;
+					gun.lastFired = 0;
+					if (currentlyFiring == null) {
+						fireGun(gun, canFire);
+					}
 				} else {
-					checkAim();
+					checkAim(canFire);
 				}
-			} else if (((holding.canClickLeft) || (holding.canAimLeft())) && (clickType.equals("left"))) {
-				if (!holding.canAimLeft()) {
-					holding.heldDownTicks = 0;
-					if (this.currentlyFiring == null)
-						fireGun(holding);
+			}
+		} else if (clickType.equalsIgnoreCase("left")) {
+			if (gun.canClickLeft || gun.canAimLeft()) {
+				if (!gun.canAimLeft()) {
+					gun.heldDownTicks += 1;
+					gun.lastFired = 0;
+					if (currentlyFiring == null) {
+						fireGun(gun, canFire);
+					}
 				} else {
-					checkAim();
+					checkAim(canFire);
 				}
 			}
 		}
-		return true;
 	}
 
-	protected void checkAim() {
+	protected void checkAim(boolean canFire) {
+		if (! canFire) {
+			return;
+		}
+		
 		if (isAimedIn()) {
-			this.controller.removePotionEffect(PotionEffectType.SLOW);
+			controller.removePotionEffect(PotionEffectType.SLOW);
 		} else {
-			this.controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
+			controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
 		}
 	}
 
-	private void fireGun(Gun gun) {
-		if (PermissionInterface.canFireGun(controller, gun)) {
-			if (gun.timer <= 0) {
-				this.currentlyFiring = gun;
-				gun.firing = true;
-			}
-		} else {
-			if ((gun.permissionMessage != null) && (gun.permissionMessage.length() > 0)) {
-				this.controller.sendMessage(gun.permissionMessage);
-			}
+	private void fireGun(Gun gun, boolean canFire) {
+		if (! canFire) {
+			controller.sendMessage(ChatColor.RED + "You cannot fire this gun!");
+			return;
+		}
+		
+		if (gun.timer <= 0) {
+			this.currentlyFiring = gun;
+			gun.firing = true;
 		}
 	}
 

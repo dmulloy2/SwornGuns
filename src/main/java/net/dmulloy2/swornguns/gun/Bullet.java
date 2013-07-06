@@ -1,6 +1,7 @@
 package net.dmulloy2.swornguns.gun;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.dmulloy2.swornguns.SwornGunExplosion;
 import net.dmulloy2.swornguns.SwornGuns;
@@ -199,18 +200,23 @@ public class Bullet {
 				this.projectile.teleport(this.projectile.getLocation().add(0.0D, 1.0D, 0.0D));
 			}
 			int c = (int)this.shotFrom.getExplodeRadius();
-			ArrayList<Entity> entities = (ArrayList<Entity>)this.projectile.getNearbyEntities(c, c, c);
-			for (int i = 0; i < entities.size(); i++)
-				if (((entities.get(i) instanceof LivingEntity)) && 
-						(((LivingEntity)entities.get(i)).hasLineOfSight(this.projectile))) {
-					int dmg = this.shotFrom.getExplosionDamage();
-					if (dmg == -1) {
-						dmg = this.shotFrom.getGunDamage();
+			List<Entity> entities = projectile.getNearbyEntities(c, c, c);
+			for (Entity entity : entities) {
+				if (entity instanceof LivingEntity) {
+					LivingEntity lentity = (LivingEntity)entity;
+					EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, EntityDamageByEntityEvent.DamageCause.ENTITY_EXPLOSION, 0.0D);
+					plugin.getServer().getPluginManager().callEvent(event);
+					if (! event.isCancelled()) {
+						int dmg = shotFrom.getExplosionDamage();
+						if (dmg == -1) {
+							dmg = shotFrom.getGunDamage();
+						}
+						
+						lentity.setLastDamage(0);
+						lentity.damage(dmg, shooter.getPlayer());
 					}
-					((LivingEntity)entities.get(i)).setLastDamage(0);
-					((LivingEntity)entities.get(i)).damage(dmg, this.shooter.getPlayer());
-					((LivingEntity)entities.get(i)).setLastDamage(0);
 				}
+			}
 		}
 	}
 
@@ -218,16 +224,18 @@ public class Bullet {
 		if (this.shotFrom.getFireRadius() > 0.0D) {
 			this.lastLocation.getWorld().playSound(this.lastLocation, Sound.GLASS, 20.0F, 20.0F);
 			int c = (int)this.shotFrom.getFireRadius();
-			ArrayList<Entity> entities = (ArrayList<Entity>)this.projectile.getNearbyEntities(c, c, c);
-			for (int i = 0; i < entities.size(); i++) {
-				if ((entities.get(i) instanceof LivingEntity)) {
-					EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(this.shooter.getPlayer(), (Entity)entities.get(i), EntityDamageByEntityEvent.DamageCause.CUSTOM, 0.0D);
-					Bukkit.getServer().getPluginManager().callEvent(e);
-					if ((!e.isCancelled()) && 
-							(((LivingEntity)entities.get(i)).hasLineOfSight(this.projectile))) {
-						((LivingEntity)entities.get(i)).setFireTicks(140);
-						((LivingEntity)entities.get(i)).setLastDamage(0);
-						((LivingEntity)entities.get(i)).damage(1, this.shooter.getPlayer());
+			List<Entity> entities = projectile.getNearbyEntities(c, c, c);
+			for (Entity entity : entities) {
+				if (entity instanceof LivingEntity) {
+					LivingEntity lentity = (LivingEntity)entity;
+					EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, EntityDamageByEntityEvent.DamageCause.FIRE_TICK, 0.0D);
+					plugin.getServer().getPluginManager().callEvent(event);
+					if (! event.isCancelled()) {
+						if (lentity.hasLineOfSight(projectile)) {
+							lentity.setFireTicks(140);
+							lentity.setLastDamage(0);
+							lentity.damage(1.0D, shooter.getPlayer());
+						}
 					}
 				}
 			}
