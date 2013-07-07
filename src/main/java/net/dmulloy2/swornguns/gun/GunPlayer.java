@@ -59,6 +59,10 @@ public class GunPlayer {
 				break;
 			}
 		}
+		
+		if (gun == null) {
+			return;
+		}
 
 		if (clickType.equalsIgnoreCase("right")) {
 			if (gun.canClickRight || gun.canAimRight()) {
