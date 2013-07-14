@@ -69,7 +69,7 @@ public class EntityListener implements Listener {
 					if (bullet != null) {
 						Gun used = bullet.getGun();
 						GunPlayer shooter = bullet.getShooter();
-
+						
 						SwornGunsKillEntityEvent pvpgunkill = new SwornGunsKillEntityEvent(shooter, used, dead);
 						this.plugin.getServer().getPluginManager().callEvent(pvpgunkill);
 					}
@@ -104,7 +104,7 @@ public class EntityListener implements Listener {
 							mult = 2.0D;
 						}
 						hurt.setLastDamage(0);
-						event.setDamage((int)Math.ceil(damage * mult));
+						event.setDamage(Math.ceil(damage * mult));
 						int armorPenetration = bullet.getGun().getArmorPenetration();
 						if (armorPenetration > 0) {
 							int health = (int) hurt.getHealth();

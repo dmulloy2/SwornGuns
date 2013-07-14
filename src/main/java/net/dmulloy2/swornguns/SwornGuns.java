@@ -242,7 +242,7 @@ public class SwornGuns extends JavaPlugin {
 	public void addEffect(EffectType effectType) {
 		this.effects.add(effectType);
 	}
-
+	
 	public class UpdateTimer extends BukkitRunnable {
 		@Override
 		public void run() {
