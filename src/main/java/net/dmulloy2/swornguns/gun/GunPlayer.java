@@ -50,22 +50,17 @@ public class GunPlayer {
 		if (byType.isEmpty()) {
 			return;
 		}
-		
+
 		Gun gun = null;
-		boolean canFire = false;
-	
-		for (int i = byType.size(); i >= 0; i--) {
-			Gun g = byType.get(i);
-			if (PermissionInterface.canFireGun(controller, g)) {
-				canFire = true;
-				gun = g;
-				break;
-			}
+		for (int i = byType.size() - 1; i >= 0; i--) {
+			gun = byType.get(i);
 		}
 		
 		if (gun == null) {
 			return;
 		}
+		
+		boolean canFire = PermissionInterface.canFireGun(controller, gun);
 
 		if (clickType.equalsIgnoreCase("right")) {
 			if (gun.canClickRight || gun.canAimRight()) {
@@ -154,12 +149,14 @@ public class GunPlayer {
 	protected void renameGuns(Player p) {
 		Inventory inv = p.getInventory();
 		ItemStack[] items = inv.getContents();
-		for (int i = 0; i < items.length; i++)
+		for (int i = 0; i < items.length; i++) {
 			if (items[i] != null) {
 				String name = getGunName(items[i]);
-				if ((name != null) && (name.length() > 0))
+				if ((name != null) && (name.length() > 0)) {
 					setName(items[i], name);
+				}
 			}
+		}
 	}
 
 	protected List<Gun> getGunsByType(ItemStack item) {
@@ -171,21 +168,21 @@ public class GunPlayer {
 		}
 
 		return ret;
-  }
+	}
 
 	protected String getGunName(ItemStack item) {
 		String ret = "";
 		List<Gun> tempgun = getGunsByType(item);
 		int amtGun = tempgun.size();
 		if (amtGun > 0) {
-			for (int i = 0; i < tempgun.size(); i++) {
-				if (PermissionInterface.canFireGun(controller, tempgun.get(i))) {
-					Gun current = (Gun)tempgun.get(i);
+			for (int i = tempgun.size() - 1; i >= 0; i--) {
+				Gun current = tempgun.get(i);
+				if (PermissionInterface.canFireGun(controller, current)) {
 					if ((current.getGunMaterial() != null) && (current.getGunMaterial().getId() == item.getTypeId())) {
-						byte gunDat = ((Gun)tempgun.get(i)).getGunTypeByte();
+						byte gunDat = current.getGunTypeByte();
 						byte itmDat = item.getData().getData();
 						
-						if ((gunDat == itmDat) || (((Gun)tempgun.get(i)).ignoreItemData)) {
+						if ((gunDat == itmDat) || (current.ignoreItemData)) {
 							return getGunName(current);
 						}
 					}
