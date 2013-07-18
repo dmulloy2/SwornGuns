@@ -46,13 +46,16 @@ public class GunPlayer {
 			return;
 		}
 		
-		if (getGunsByType(inHand).isEmpty()) {
+		List<Gun> byType = getGunsByType(inHand);
+		if (byType.isEmpty()) {
 			return;
 		}
 		
 		Gun gun = null;
 		boolean canFire = false;
-		for (Gun g : getGunsByType(inHand)) {
+	
+		for (int i = byType.size(); i >= 0; i--) {
+			Gun g = byType.get(i);
 			if (PermissionInterface.canFireGun(controller, g)) {
 				canFire = true;
 				gun = g;
@@ -67,7 +70,7 @@ public class GunPlayer {
 		if (clickType.equalsIgnoreCase("right")) {
 			if (gun.canClickRight || gun.canAimRight()) {
 				if (!gun.canAimRight()) {
-					gun.heldDownTicks += 1;
+					gun.heldDownTicks++;
 					gun.lastFired = 0;
 					if (currentlyFiring == null) {
 						fireGun(gun, canFire);
@@ -79,7 +82,7 @@ public class GunPlayer {
 		} else if (clickType.equalsIgnoreCase("left")) {
 			if (gun.canClickLeft || gun.canAimLeft()) {
 				if (!gun.canAimLeft()) {
-					gun.heldDownTicks += 1;
+					gun.heldDownTicks++;
 					gun.lastFired = 0;
 					if (currentlyFiring == null) {
 						fireGun(gun, canFire);
