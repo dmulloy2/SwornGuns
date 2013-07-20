@@ -1,6 +1,6 @@
 name: SwornGuns
 main: net.dmulloy2.swornguns.SwornGuns
-version: 1.0
+version: 1.0.1
 author: dmulloy2
 commands: 
   swornguns:
