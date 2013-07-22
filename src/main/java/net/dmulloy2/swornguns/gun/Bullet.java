@@ -254,11 +254,13 @@ public class Bullet {
 			double c = shotFrom.getFlashRadius();
 			List<Entity> entities = projectile.getNearbyEntities(c, c, c);
 			for (Entity entity : entities) {
-				LivingEntity lentity = (LivingEntity)entity;
-				EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, EntityDamageByEntityEvent.DamageCause.CUSTOM, 0.0D);
-				if (! event.isCancelled()) {
-					if (lentity.hasLineOfSight(projectile)) {
-						lentity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 1));
+				if (entity instanceof LivingEntity) {
+					LivingEntity lentity = (LivingEntity)entity;
+					EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, EntityDamageByEntityEvent.DamageCause.CUSTOM, 0.0D);
+					if (! event.isCancelled()) {
+						if (lentity.hasLineOfSight(projectile)) {
+							lentity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 1));
+						}
 					}
 				}
 			}
