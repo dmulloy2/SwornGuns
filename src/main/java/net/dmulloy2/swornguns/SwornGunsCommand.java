@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 
 public class SwornGunsCommand implements CommandExecutor {
 	private final SwornGuns plugin;
+	
 	public SwornGunsCommand(final SwornGuns plugin) {
 		this.plugin = plugin;
 	}

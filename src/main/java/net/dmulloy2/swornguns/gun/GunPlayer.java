@@ -46,13 +46,14 @@ public class GunPlayer {
 			return;
 		}
 
-		if (getGunsByType(inHand).isEmpty()) {
+		List<Gun> gunsCanFire = getGunsByType(inHand);
+		if (gunsCanFire.isEmpty()) {
 			return;
 		}
 
 		Gun gun = null;
 		boolean canFire = false;
-		for (Gun g : getGunsByType(inHand)) {
+		for (Gun g : gunsCanFire) {
 			if (PermissionInterface.canFireGun(controller, g)) {
 				canFire = true;
 				gun = g;
@@ -146,7 +147,7 @@ public class GunPlayer {
 			}
 		}
 		renameGuns(this.controller);
-  }
+	}
 
 	protected void renameGuns(Player p) {
 		Inventory inv = p.getInventory();

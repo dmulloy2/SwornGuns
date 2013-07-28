@@ -25,6 +25,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 
 public class EntityListener implements Listener {
 	private final SwornGuns plugin;
+	
 	public EntityListener(final SwornGuns plugin) {
 		this.plugin = plugin;
 	}
@@ -94,9 +95,10 @@ public class EntityListener implements Listener {
 					if ((isNear(proj.getLocation(), hurt.getEyeLocation(), 0.26D)) && (bullet.getGun().canHeadShot())) {
 						headshot = true;
 					}
-					SwornGunsDamageEntityEvent pvpgundmg = new SwornGunsDamageEntityEvent(event, bullet.getShooter(), bullet.getGun(), event.getEntity(), headshot);
-					this.plugin.getServer().getPluginManager().callEvent(pvpgundmg);
-					if (!pvpgundmg.isCancelled()) {
+					SwornGunsDamageEntityEvent pvpgundmg = new SwornGunsDamageEntityEvent(event, bullet.getShooter(), bullet.getGun(), 
+							event.getEntity(), headshot);
+					plugin.getServer().getPluginManager().callEvent(pvpgundmg);
+					if (! pvpgundmg.isCancelled()) {
 						double damage = pvpgundmg.getDamage();
 						double mult = 1.0D;
 						if (pvpgundmg.isHeadshot()) {

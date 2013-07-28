@@ -161,7 +161,7 @@ public class WeaponReader {
 			in.close();
 			fstream.close();
 		} catch (Exception e) {
-			plugin.getLogger().severe("Error loading guns: " + e.getMessage());
+			plugin.getLogger().severe("Error loading gun \"" + this.file.getName() + "\": " + e.getMessage());
 		}
 
 		for (String line : file) {

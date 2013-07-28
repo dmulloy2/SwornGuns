@@ -14,6 +14,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 
 public class SwornGunExplosion {
 	private final Location location;
+	
 	public SwornGunExplosion(final Location location) {
 		this.location = location;
 	}
