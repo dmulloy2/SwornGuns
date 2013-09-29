@@ -1,0 +1,34 @@
+# SwornGuns Configuration
+# This is mostly for realism features
+# By dmulloy2
+
+blood-effect:
+  enabled: true
+  block-id: 152
+  # Block break effect when entities are hit
+  # Defaults to redstone block
+  guns-only: false
+  # Do blood effect for only guns
+
+smoke-effect: true
+# Smoke effect when entities are hit by a bullet
+
+bullet-sound:
+  enabled: true
+  sound: MAGMACUBE_JUMP
+  # Sound made when an entity is hit by a bullet
+  # A list of valid sounds can be found here:
+  # http://jd.bukkit.org/rb/apidocs/org/bukkit/Sound.html
+
+block-shatter:
+# Blocks broken when shot
+  enabled: true
+  blocks:
+    - leaves
+    - glass
+    - thin_glass
+    - sand
+    - gravel
+    
+block-crack: true
+# Crackable blocks crack when shot
