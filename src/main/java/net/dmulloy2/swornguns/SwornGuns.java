@@ -58,7 +58,9 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		permissionHandler = new PermissionHandler(this);
 		commandHandler = new CommandHandler(this);
 		logHandler = new LogHandler(this);
-		
+
+		saveDefaultConfig();
+
 		commandHandler.setCommandPrefix("swornguns");
 		commandHandler.registerCommand(new CmdHelp(this));
 		commandHandler.registerCommand(new CmdList(this));
