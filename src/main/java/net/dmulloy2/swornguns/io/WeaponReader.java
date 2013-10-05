@@ -1,15 +1,18 @@
 package net.dmulloy2.swornguns.io;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
-import java.util.Map.Entry;
-import java.util.logging.Level;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 
 import org.bukkit.Effect;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 /**
  * @author dmulloy2
@@ -18,9 +21,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class WeaponReader
 {
 	private final SwornGuns plugin;
-	
+
 	private boolean loaded;
-	
+
 	private File file;
 	private Gun ret;
 
@@ -28,18 +31,22 @@ public class WeaponReader
 	{
 		this.plugin = plugin;
 		this.file = file;
-		
+
 		this.ret = new Gun(file.getName(), plugin);
 		this.ret.setFileName(file.getName().toLowerCase());
 		this.ret.setNode("swornguns.fire." + file.getName().toLowerCase());
-		
+
 		load();
 	}
 
-	private void computeData(String var, String val)
+	private final void computeData(String str)
 	{
 		try
 		{
+			if (str.indexOf("=") > 0)
+			{
+				String var = str.substring(0, str.indexOf("=")).toLowerCase();
+				String val = str.substring(str.indexOf("=") + 1);
 				if (var.equals("gunname"))
 					ret.setName(val);
 				if (var.equals("guntype"))
@@ -128,6 +135,8 @@ public class WeaponReader
 					ret.setReleaseTime(Integer.parseInt(val));
 				if (var.equals("reloadtype"))
 					ret.setReloadType(val);
+				if (var.equals("priority"))
+					ret.setPriority(Integer.parseInt(val));
 				if (var.equals("play_effect_on_release"))
 				{
 					String[] effDat = val.split(",");
@@ -150,32 +159,49 @@ public class WeaponReader
 						ret.setReleaseEffect(effect);
 					}
 				}
+			}
 		}
 		catch (Exception e)
 		{
-			plugin.getLogHandler().log(Level.SEVERE, "Could not load gun {0}: {1}", file.getName(), e.getMessage());
-			
+			plugin.getLogger().severe("Could not load gun: " + file + ": " + e.getMessage());
 			this.loaded = false;
 		}
 	}
 
-	public void load()
+	public final void load()
 	{
 		this.loaded = true;
-		
-		YamlConfiguration fc = YamlConfiguration.loadConfiguration(file);
-		
-		for (Entry<String, Object> entry : fc.getValues(true).entrySet())
+		List<String> file = new ArrayList<String>();
+		try
 		{
-			computeData(entry.getKey(), "" + entry.getValue());
+			FileInputStream fstream = new FileInputStream(this.file.getAbsolutePath());
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String strLine;
+			while ((strLine = br.readLine()) != null)
+			{
+				file.add(strLine);
+			}
+			br.close();
+			in.close();
+			fstream.close();
+		}
+		catch (Exception e)
+		{
+			plugin.getLogger().severe("Error loading gun \"" + this.file.getName() + "\": " + e.getMessage());
+		}
+
+		for (String line : file)
+		{
+			computeData(line);
 		}
 	}
-	
+
 	public final boolean isLoaded()
 	{
 		return loaded;
 	}
-	
+
 	public final Gun getGun()
 	{
 		return ret;
