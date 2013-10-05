@@ -13,6 +13,8 @@ import net.dmulloy2.swornguns.util.InventoryHelper;
 import net.dmulloy2.swornrpg.SwornRPG;
 import net.dmulloy2.swornrpg.io.PlayerDataCache;
 import net.dmulloy2.swornrpg.types.PlayerData;
+import net.dmulloy2.ultimatearena.arenas.Arena;
+import net.dmulloy2.ultimatearena.types.FieldType;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -389,22 +391,42 @@ public class GunPlayer
 
 		this.guns = sortedMap;
 	}
-	
-	private PlayerData swornRPGData;
-	
+
+	public final int getAmmoAmountNeeded(Gun gun)
+	{
+		int ret = gun.getAmmoAmtNeeded();
+		if (isPlayerInArena() || unlimitedAmmoEnabled())
+			ret = 0;
+		
+		return ret;
+	}
+
+	private PlayerData data;
+
 	public final boolean unlimitedAmmoEnabled()
 	{
-		if (swornRPGData == null)
+		if (data == null)
 		{
 			PluginManager pm = plugin.getServer().getPluginManager();
 			if (pm.isPluginEnabled("SwornRPG"))
 			{
 				SwornRPG srpg = (SwornRPG) pm.getPlugin("SwornRPG");
 				PlayerDataCache cache = srpg.getPlayerDataCache();
-				swornRPGData = cache.getData(controller);
+				data = cache.getData(controller);
 			}
 		}
 		
-		return swornRPGData != null && swornRPGData.isUnlimitedAmmoEnabled();
+		return data != null && data.isUnlimitedAmmoEnabled();
+	}
+	
+	public final boolean isPlayerInArena()
+	{
+		if (plugin.getUltimateArena().isPlayerPlayingArena(controller))
+		{
+			Arena ar = plugin.getUltimateArena().getArenaPlayer(controller).getArena();
+			return ar.getType() != FieldType.HUNGER;
+		}
+		
+		return false;
 	}
 }

@@ -9,8 +9,6 @@ import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.FormatUtil;
 import net.dmulloy2.swornguns.util.MaterialUtil;
 import net.dmulloy2.swornguns.util.Util;
-import net.dmulloy2.ultimatearena.arenas.Arena;
-import net.dmulloy2.ultimatearena.types.FieldType;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -110,19 +108,7 @@ public class Gun
 	{
 		if (owner != null && owner.getPlayer().isOnline() && ! owner.getPlayer().isDead() && ! reloading)
 		{
-			int ammoAmtNeeded = this.ammoAmtNeeded;
-			if (plugin.getUltimateArena().isPlayerPlayingArena(owner.getPlayer()))
-			{
-				Arena ar = plugin.getUltimateArena().getArenaPlayer(owner.getPlayer()).getArena();
-				if (ar.getType() != FieldType.HUNGER)
-					ammoAmtNeeded = 0;
-				else
-					return;
-			}
-			
-			if (owner.unlimitedAmmoEnabled())
-				ammoAmtNeeded = 0;
-
+			int ammoAmtNeeded = owner.getAmmoAmountNeeded(this);
 			if ((owner.checkAmmo(this, ammoAmtNeeded) && ammoAmtNeeded > 0) || ammoAmtNeeded == 0)
 			{
 				owner.removeAmmo(this, ammoAmtNeeded);
