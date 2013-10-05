@@ -366,7 +366,7 @@ public class GunPlayer
 			map1.get(gun.getGunMaterial()).add(gun);
 		}
 
-		List<Gun> sortedMap = new ArrayList<Gun>();
+		List<Gun> sortedGuns = new ArrayList<Gun>();
 
 		for (Entry<Material, List<Gun>> entry : map1.entrySet())
 		{
@@ -386,14 +386,11 @@ public class GunPlayer
 				}
 			});
 
-			for (Entry<Gun, Integer> entry1 : sortedEntries)
-			{
-				sortedMap.add(entry1.getKey());
-				break;
-			}
+			Gun gun = sortedEntries.get(0).getKey();
+			sortedGuns.add(gun);
 		}
 
-		this.guns = sortedMap;
+		this.guns = sortedGuns;
 	}
 
 	public final int getAmmoAmountNeeded(Gun gun)

@@ -307,6 +307,7 @@ public class Gun
 		g.releaseTime = this.releaseTime;
 		g.canGoPastMaxDistance = this.canGoPastMaxDistance;
 		g.permissionMessage = this.permissionMessage;
+		g.priority = this.priority;
 
 		if (getReleaseEffect() != null)
 		{

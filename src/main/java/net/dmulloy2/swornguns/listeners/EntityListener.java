@@ -121,7 +121,6 @@ public class EntityListener implements Listener
 		event.getEntity().remove();
 	}
 
-//  Remove the event API for now, hopefully this fixes some lag
 //	@EventHandler(priority = EventPriority.HIGHEST)
 //	public void onEntityDeath(EntityDeathEvent event)
 //	{
@@ -129,11 +128,11 @@ public class EntityListener implements Listener
 //		if (dead.getLastDamageCause() != null)
 //		{
 //			EntityDamageEvent e = dead.getLastDamageCause();
-//			if ((e instanceof EntityDamageByEntityEvent))
+//			if (e instanceof EntityDamageByEntityEvent)
 //			{
 //				EntityDamageByEntityEvent ede = (EntityDamageByEntityEvent) e;
 //				Entity damager = ede.getDamager();
-//				if ((damager instanceof Projectile))
+//				if (damager instanceof Projectile)
 //				{
 //					Projectile proj = (Projectile) damager;
 //					Bullet bullet = plugin.getBullet(proj);
@@ -141,7 +140,7 @@ public class EntityListener implements Listener
 //					{
 //						Gun used = bullet.getShotFrom();
 //						GunPlayer shooter = bullet.getShooter();
-
+//
 //						SwornGunsKillEntityEvent sworngunskill = new SwornGunsKillEntityEvent(shooter, used, dead);
 //						plugin.getServer().getPluginManager().callEvent(sworngunskill);
 //					}
