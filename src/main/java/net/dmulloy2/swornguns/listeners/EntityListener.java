@@ -123,8 +123,8 @@ public class EntityListener implements Listener
 					}
 					SwornGunsDamageEntityEvent sworngunsdmg = new SwornGunsDamageEntityEvent(event, bullet.getShooter(),
 							bullet.getShotFrom(), event.getEntity(), headshot);
-					plugin.getServer().getPluginManager().callEvent(sworngunsdmg);
-					if (!sworngunsdmg.isCancelled())
+//					plugin.getServer().getPluginManager().callEvent(sworngunsdmg);
+					if (! sworngunsdmg.isCancelled())
 					{
 						double damage = sworngunsdmg.getDamage();
 						double mult = 1.0D;

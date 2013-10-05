@@ -147,6 +147,26 @@ public class Util
 			player.playEffect(loc, effect, i);
 		}
 	}
+	
+	/**
+	 * Plays an effect to all online players
+	 * 
+	 * @param effect
+	 *            - Effect type to play
+	 * @param loc
+	 *            - Location where the effect should be played
+	 * @param i
+	 *            - Data
+	 */
+
+	@SuppressWarnings("deprecation") // TODO: Is there a replacement for this?
+	public static void playEffect(Effect effect, Location loc, int data)
+	{
+		for (Player player : Bukkit.getOnlinePlayers())
+		{
+			player.playEffect(loc, effect, data);
+		}
+	}
 
 	/**
 	 * Returns whether or not two locations are identical

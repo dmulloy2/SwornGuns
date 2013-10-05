@@ -347,14 +347,18 @@ public class GunPlayer
 		for (Gun gun : plugin.getLoadedGuns())
 		{
 			if (plugin.getPermissionHandler().canFireGun(controller, gun))
-				loadedGuns.add(gun);
+			{
+				Gun g = gun.copy();
+				g.setOwner(this);
+				loadedGuns.add(g);
+			}
 		}
 
 		HashMap<Material, List<Gun>> map1 = new HashMap<Material, List<Gun>>();
 
 		for (Gun gun : loadedGuns)
 		{
-			if (!map1.containsKey(gun.getGunMaterial()))
+			if (! map1.containsKey(gun.getGunMaterial()))
 			{
 				map1.put(gun.getGunMaterial(), new ArrayList<Gun>());
 			}
@@ -428,5 +432,11 @@ public class GunPlayer
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "GunPlayer { name = " + controller.getName() + " }";
 	}
 }

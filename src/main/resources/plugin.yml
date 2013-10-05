@@ -2,7 +2,7 @@ name: SwornGuns
 main: net.dmulloy2.swornguns.SwornGuns
 version: "${project.version}"
 author: dmulloy2
-softdepend: [UltimateArena]
+softdepend: [UltimateArena, SwornRPG]
 commands: 
   swornguns:
     description: SwornGuns root command

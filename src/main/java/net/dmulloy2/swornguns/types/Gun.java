@@ -510,4 +510,10 @@ public class Gun
 		for (int i = 0; i < sounds.length; i++)
 			gunSound.add(sounds[i]);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "Gun { name = " + gunName + ", type = " + gunType + ", priority = " + priority + " }";
+	}
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
+import net.dmulloy2.swornguns.util.FormatUtil;
 
 import org.bukkit.Effect;
 
@@ -104,9 +105,9 @@ public class WeaponReader
 				if (var.equals("canaimright"))
 					ret.setCanAimRight(Boolean.parseBoolean(val));
 				if (var.equals("outofammomessage"))
-					ret.setOutOfAmmoMessage(val);
+					ret.setOutOfAmmoMessage(FormatUtil.format(val));
 				if (var.equals("permissionmessage"))
-					ret.setPermissionMessage(val);
+					ret.setPermissionMessage(FormatUtil.format(val));
 				if (var.equals("bullettype"))
 					ret.setProjType(val);
 				if (var.equals("needspermission"))

@@ -32,3 +32,6 @@ block-shatter:
     
 block-crack: true
 # Crackable blocks crack when shot
+
+debug: false
+# Debug
