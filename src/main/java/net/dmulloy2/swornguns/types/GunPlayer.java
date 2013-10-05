@@ -10,6 +10,9 @@ import java.util.Map.Entry;
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.InventoryHelper;
+import net.dmulloy2.swornrpg.SwornRPG;
+import net.dmulloy2.swornrpg.io.PlayerDataCache;
+import net.dmulloy2.swornrpg.types.PlayerData;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -17,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -41,93 +45,70 @@ public class GunPlayer
 		this.plugin = plugin;
 		this.controller = player;
 		this.enabled = true;
-		
+
 		calculateGuns();
+	}
+
+	public void handleClick(String clickType)
+	{
+		ItemStack inHand = controller.getItemInHand();
+		if (inHand == null || inHand.getType() == Material.AIR)
+			return;
+
+		Gun gun = getGun(inHand.getType());
+		if (gun == null)
+			return;
+
+		if (plugin.getPermissionHandler().canFireGun(controller, gun))
+		{
+			if (clickType.equalsIgnoreCase("right"))
+			{
+				if (gun.isCanClickRight() || gun.isCanAimRight())
+				{
+					if (! gun.isCanAimRight())
+					{
+						gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
+						gun.setLastFired(0);
+						if (currentlyFiring == null)
+						{
+							fireGun(gun);
+						}
+					}
+					else
+					{
+						checkAim();
+					}
+				}
+			}
+			else if (clickType.equalsIgnoreCase("left"))
+			{
+				if (gun.isCanClickLeft() || gun.isCanAimLeft())
+				{
+					if (! gun.isCanAimLeft())
+					{
+						gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
+						gun.setLastFired(0);
+						if (currentlyFiring == null)
+						{
+							fireGun(gun);
+						}
+					}
+					else
+					{
+						checkAim();
+					}
+				}
+			}
+		}
 	}
 
 	public boolean isAimedIn()
 	{
-		return (controller != null && controller.isOnline() && controller.hasPotionEffect(PotionEffectType.SLOW));
+		return controller != null && controller.isOnline() && controller.hasPotionEffect(PotionEffectType.SLOW);
 	}
 
-	public void onClick(String clickType)
+	protected void checkAim()
 	{
-		ItemStack inHand = controller.getItemInHand();
-		if (inHand == null || inHand.getType() == Material.AIR)
-		{
-			return;
-		}
-
-		List<Gun> gunsCanFire = getGunsByType(inHand);
-		if (gunsCanFire.isEmpty())
-		{
-			return;
-		}
-
-		Gun gun = null;
-		boolean canFire = false;
-		for (Gun g : gunsCanFire)
-		{
-			if (plugin.getPermissionHandler().canFireGun(controller, g))
-			{
-				canFire = true;
-				gun = g;
-				break;
-			}
-		}
-
-		if (gun == null)
-		{
-			return;
-		}
-
-		if (clickType.equalsIgnoreCase("right"))
-		{
-			if (gun.isCanClickRight() || gun.isCanAimRight())
-			{
-				if (! gun.isCanAimRight())
-				{
-					gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
-					gun.setLastFired(0);
-					if (currentlyFiring == null)
-					{
-						fireGun(gun, canFire);
-					}
-				}
-				else
-				{
-					checkAim(canFire);
-				}
-			}
-		}
-		else if (clickType.equalsIgnoreCase("left"))
-		{
-			if (gun.isCanClickLeft() || gun.isCanAimLeft())
-			{
-				if (! gun.isCanAimLeft())
-				{
-					gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
-					gun.setLastFired(0);
-					if (currentlyFiring == null)
-					{
-						fireGun(gun, canFire);
-					}
-				}
-				else
-				{
-					checkAim(canFire);
-				}
-			}
-		}
-	}
-
-	protected void checkAim(boolean canFire)
-	{
-		if (!canFire)
-		{
-			return;
-		}
-
 		if (isAimedIn())
 		{
 			controller.removePotionEffect(PotionEffectType.SLOW);
@@ -138,18 +119,12 @@ public class GunPlayer
 		}
 	}
 
-	private void fireGun(Gun gun, boolean canFire)
+	private void fireGun(Gun gun)
 	{
-		if (!canFire)
-		{
-			controller.sendMessage(ChatColor.RED + "You cannot fire this gun!");
-			return;
-		}
-
 		if (gun.getTimer() <= 0)
 		{
 			this.currentlyFiring = gun;
-			
+
 			gun.setFiring(true);
 		}
 	}
@@ -157,13 +132,13 @@ public class GunPlayer
 	public void tick()
 	{
 		this.ticks++;
-		
+
 		if (controller != null)
 		{
 			ItemStack hand = controller.getItemInHand();
-			
+
 			this.lastHeldItem = hand;
-			
+
 			if (ticks % 10 == 0 && hand != null)
 			{
 				if (plugin.getGun(hand.getType()) == null)
@@ -171,7 +146,7 @@ public class GunPlayer
 					controller.removePotionEffect(PotionEffectType.SLOW);
 				}
 			}
-			
+
 			for (Gun g : guns)
 			{
 				if (g != null)
@@ -182,18 +157,18 @@ public class GunPlayer
 					{
 						g.finishReloading();
 					}
-					
+
 					if (hand != null && g.getGunMaterial() == hand.getType() && isAimedIn() && ! g.isCanAimLeft() && ! g.isCanAimRight())
 					{
 						controller.removePotionEffect(PotionEffectType.SLOW);
 					}
-					
+
 					if (currentlyFiring != null && g.getTimer() <= 0 && currentlyFiring.equals(g))
 						this.currentlyFiring = null;
 				}
 			}
 		}
-		
+
 		renameGuns(controller);
 	}
 
@@ -242,7 +217,7 @@ public class GunPlayer
 					if (current.getGunMaterial() != null && current.getGunMaterial() == item.getType())
 					{
 						byte gunDat = current.getGunByte();
-						
+
 						@SuppressWarnings("deprecation") // TODO
 						byte itmDat = item.getData().getData();
 
@@ -267,9 +242,8 @@ public class GunPlayer
 			int ammoLeft = 0;
 			int maxInClip = current.getMaxClipSize();
 
-			int currentAmmo = (int) Math.floor(InventoryHelper.amtItem(this.controller.getInventory(), current.getAmmoType(),
-					current.getAmmoByte())
-					/ current.getAmmoAmtNeeded());
+			int currentAmmo = (int) Math.floor(InventoryHelper.amtItem(controller.getInventory(), current.getAmmoType(),
+					current.getAmmoByte()) / current.getAmmoAmtNeeded());
 			ammoLeft = currentAmmo - maxInClip + current.getRoundsFired();
 			if (ammoLeft < 0)
 				ammoLeft = 0;
@@ -292,7 +266,7 @@ public class GunPlayer
 				add = ChatColor.RED + "    " + new StringBuffer(refresh).reverse() + "RELOADING" + refresh;
 			}
 		}
-		
+
 		return current.getName() + add;
 	}
 
@@ -335,7 +309,7 @@ public class GunPlayer
 
 	public boolean checkAmmo(Gun gun, int amount)
 	{
-		return InventoryHelper.amtItem(this.controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte()) >= amount;
+		return InventoryHelper.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte()) >= amount;
 	}
 
 	public void removeAmmo(Gun gun, int amount)
@@ -363,22 +337,22 @@ public class GunPlayer
 
 		return null;
 	}
-	
+
 	public void calculateGuns()
 	{
 		List<Gun> loadedGuns = new ArrayList<Gun>();
-		
+
 		for (Gun gun : plugin.getLoadedGuns())
 		{
 			if (plugin.getPermissionHandler().canFireGun(controller, gun))
 				loadedGuns.add(gun);
 		}
-		
+
 		HashMap<Material, List<Gun>> map1 = new HashMap<Material, List<Gun>>();
-		
+
 		for (Gun gun : loadedGuns)
 		{
-			if (! map1.containsKey(gun.getGunMaterial()))
+			if (!map1.containsKey(gun.getGunMaterial()))
 			{
 				map1.put(gun.getGunMaterial(), new ArrayList<Gun>());
 			}
@@ -387,7 +361,7 @@ public class GunPlayer
 		}
 
 		List<Gun> sortedMap = new ArrayList<Gun>();
-		
+
 		for (Entry<Material, List<Gun>> entry : map1.entrySet())
 		{
 			HashMap<Gun, Integer> priorityMap = new HashMap<Gun, Integer>();
@@ -395,7 +369,7 @@ public class GunPlayer
 			{
 				priorityMap.put(gun, gun.getPriority());
 			}
-			
+
 			List<Entry<Gun, Integer>> sortedEntries = new ArrayList<Entry<Gun, Integer>>(priorityMap.entrySet());
 			Collections.sort(sortedEntries, new Comparator<Entry<Gun, Integer>>()
 			{
@@ -405,24 +379,32 @@ public class GunPlayer
 					return -entry1.getValue().compareTo(entry2.getValue());
 				}
 			});
-			
+
 			for (Entry<Gun, Integer> entry1 : sortedEntries)
 			{
 				sortedMap.add(entry1.getKey());
 				break;
 			}
 		}
-		
+
 		this.guns = sortedMap;
+	}
+	
+	private PlayerData swornRPGData;
+	
+	public final boolean unlimitedAmmoEnabled()
+	{
+		if (swornRPGData == null)
+		{
+			PluginManager pm = plugin.getServer().getPluginManager();
+			if (pm.isPluginEnabled("SwornRPG"))
+			{
+				SwornRPG srpg = (SwornRPG) pm.getPlugin("SwornRPG");
+				PlayerDataCache cache = srpg.getPlayerDataCache();
+				swornRPGData = cache.getData(controller);
+			}
+		}
 		
-		// Clear out stuff
-		loadedGuns.clear();
-		loadedGuns = null;
-		
-		map1.clear();
-		map1 = null;
-		
-		sortedMap.clear();
-		sortedMap = null;
+		return swornRPGData != null && swornRPGData.isUnlimitedAmmoEnabled();
 	}
 }

@@ -22,6 +22,7 @@ import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
 import net.dmulloy2.swornguns.util.FormatUtil;
+import net.dmulloy2.ultimatearena.UltimateArenaAPI;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -42,6 +43,8 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	private @Getter PermissionHandler permissionHandler;
 	private @Getter CommandHandler commandHandler;
 	private @Getter LogHandler logHandler;
+	
+	private @Getter UltimateArenaAPI ultimateArena;
 
 	private @Getter List<Bullet> bullets = new ArrayList<Bullet>();
 	private @Getter List<Gun> loadedGuns = new ArrayList<Gun>();
@@ -58,6 +61,8 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		permissionHandler = new PermissionHandler(this);
 		commandHandler = new CommandHandler(this);
 		logHandler = new LogHandler(this);
+		
+		ultimateArena = UltimateArenaAPI.hookIntoUA(this);
 
 		saveDefaultConfig();
 

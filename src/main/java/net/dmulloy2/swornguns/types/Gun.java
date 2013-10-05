@@ -6,10 +6,11 @@ import java.util.Random;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.api.events.SwornGunsFireEvent;
 import net.dmulloy2.swornguns.util.FormatUtil;
 import net.dmulloy2.swornguns.util.MaterialUtil;
 import net.dmulloy2.swornguns.util.Util;
+import net.dmulloy2.ultimatearena.arenas.Arena;
+import net.dmulloy2.ultimatearena.types.FieldType;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,7 +24,7 @@ import org.bukkit.util.Vector;
  */
 
 @Data
-public class Gun implements Comparable<Gun>
+public class Gun
 {
 	private boolean canHeadshot;
 	private boolean isThrowable;
@@ -107,101 +108,118 @@ public class Gun implements Comparable<Gun>
 
 	public void shoot()
 	{
-		if (owner != null && owner.getPlayer().isOnline() && ! reloading)
+		if (owner != null && owner.getPlayer().isOnline() && ! owner.getPlayer().isDead() && ! reloading)
 		{
-			SwornGunsFireEvent event = new SwornGunsFireEvent(owner, this);
-			plugin.getServer().getPluginManager().callEvent(event);
-			
-			if (! event.isCancelled())
+			int ammoAmtNeeded = this.ammoAmtNeeded;
+			if (plugin.getUltimateArena().isPlayerPlayingArena(owner.getPlayer()))
 			{
-				if ((owner.checkAmmo(this, event.getAmountAmmoNeeded()) && event.getAmountAmmoNeeded() > 0) ||
-						event.getAmountAmmoNeeded() == 0)
-				{
-					owner.removeAmmo(this, event.getAmountAmmoNeeded());
-					
-					if (needsReload())
-					{
-						reloadGun();
-						return;
-					}
-					
-					doRecoil(owner.getPlayer());
-					
-					this.changed = true;
-					this.roundsFired++;
-					
-					for (int i = 0; i < gunSound.size(); i++)
-					{
-						Sound sound = Util.getSound(gunSound.get(i));
-						if (sound != null)
-						{
-							if (localGunSound)
-								owner.getPlayer().playSound(owner.getPlayer().getLocation(), sound, (float) gunVolume, 2.0F);
-							else
-								owner.getPlayer().getWorld().playSound(owner.getPlayer().getLocation(), sound, (float) gunVolume, 2.0F);
-						}
-					}
-					
-					for (int i = 0; i < bulletsPerClick; i++)
-					{
-						int acc = (int) (event.getGunAccuracy() * 1000.0D);
-
-						if (acc <= 0)
-							acc = 1;
-						
-						Location ploc = owner.getPlayer().getLocation();
-						
-						Random rand = new Random();
-						
-						double dir = -ploc.getYaw() - 90.0F;
-						double pitch = -ploc.getPitch();
-						double xwep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
-						double ywep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
-						double zwep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
-						double xd = Math.cos(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch)) + xwep;
-						double yd = Math.sin(Math.toRadians(pitch)) + ywep;
-						double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch)) + zwep;
-						
-						Vector vec = new Vector(xd, yd, zd);
-						vec.multiply(bulletSpeed);
-						
-						Bullet bullet = new Bullet(plugin, owner, vec, this);
-						plugin.addBullet(bullet);
-					}
-
-					attemptReload();
-				}
+				Arena ar = plugin.getUltimateArena().getArenaPlayer(owner.getPlayer()).getArena();
+				if (ar.getType() != FieldType.HUNGER)
+					ammoAmtNeeded = 0;
 				else
+					return;
+			}
+			
+			if (owner.unlimitedAmmoEnabled())
+				ammoAmtNeeded = 0;
+
+			if ((owner.checkAmmo(this, ammoAmtNeeded) && ammoAmtNeeded > 0) || ammoAmtNeeded == 0)
+			{
+				owner.removeAmmo(this, ammoAmtNeeded);
+
+				if (needsReload())
 				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
-					owner.getPlayer().sendMessage(outOfAmmoMessage);
-					
-					finishShooting();
+					reloadGun();
+					return;
 				}
+
+				doRecoil(owner.getPlayer());
+
+				this.changed = true;
+				this.roundsFired++;
+
+				for (int i = 0; i < gunSound.size(); i++)
+				{
+					Sound sound = Util.getSound(gunSound.get(i));
+					if (sound != null)
+					{
+						if (localGunSound)
+							owner.getPlayer().playSound(owner.getPlayer().getLocation(), sound, (float) gunVolume, 2.0F);
+						else
+							owner.getPlayer().getWorld().playSound(owner.getPlayer().getLocation(), sound, (float) gunVolume, 2.0F);
+					}
+				}
+
+				double accuracy = this.accuracy;
+				if ((owner.getPlayer().isSneaking()) && (accuracy_crouched > -1.0D))
+				{
+					accuracy = accuracy_crouched;
+				}
+				if ((owner.isAimedIn()) && (accuracy_aimed > -1.0D))
+				{
+					accuracy = accuracy_aimed;
+				}
+
+				for (int i = 0; i < bulletsPerClick; i++)
+				{
+					int acc = (int) (accuracy * 1000.0D);
+
+					if (acc <= 0)
+						acc = 1;
+
+					Location ploc = owner.getPlayer().getLocation();
+
+					Random rand = new Random();
+
+					double dir = -ploc.getYaw() - 90.0F;
+					double pitch = -ploc.getPitch();
+					double xwep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
+					double ywep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
+					double zwep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
+					double xd = Math.cos(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch)) + xwep;
+					double yd = Math.sin(Math.toRadians(pitch)) + ywep;
+					double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch)) + zwep;
+
+					Vector vec = new Vector(xd, yd, zd);
+					vec.multiply(bulletSpeed);
+
+					Bullet bullet = new Bullet(plugin, owner, vec, this);
+					plugin.addBullet(bullet);
+				}
+
+				attemptReload();
+			}
+			else
+			{
+				owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
+				owner.getPlayer().sendMessage(outOfAmmoMessage);
+
+				finishShooting();
 			}
 		}
 	}
-	
+
 	public void clear()
 	{
-		try
-		{
-			finalize();
-		}
-		catch (Throwable e)
-		{
-			//
-		}
+//		try
+//		{
+//			finalize();
+//		}
+//		catch (Throwable e)
+//		{
+//			//
+//		}
 	}
-	
+
 	public boolean needsReload()
 	{
 		return ((roundsFired >= maxClipSize) && (hasClip));
 	}
-	
+
 	public void attemptReload()
 	{
-		if (needsReload()) reloadGun();
+		if (needsReload())
+			reloadGun();
 	}
 
 	public void tick()
@@ -217,7 +235,7 @@ public class Gun implements Comparable<Gun>
 			{
 				finishReloading();
 			}
-			
+
 			this.reloading = false;
 		}
 
@@ -227,15 +245,15 @@ public class Gun implements Comparable<Gun>
 		{
 			this.heldDownTicks = 0;
 		}
-		
-		if ((heldDownTicks >= 2 && timer <= 0) || firing && ! reloading)
+
+		if ((heldDownTicks >= 2 && timer <= 0) || firing && !reloading)
 		{
 			if (roundsPerBurst > 1)
 			{
 				if (ticks % bulletDelay == 0)
 				{
-					this.bulletsShot ++;
-					
+					this.bulletsShot++;
+
 					if (bulletsShot <= roundsPerBurst)
 						shoot();
 					else
@@ -256,7 +274,7 @@ public class Gun implements Comparable<Gun>
 	public Gun copy()
 	{
 		Gun g = new Gun(gunName, plugin);
-		
+
 		g.gunName = this.gunName;
 		g.gunType = this.gunType;
 		g.gunByte = this.gunByte;
@@ -303,12 +321,12 @@ public class Gun implements Comparable<Gun>
 		g.releaseTime = this.releaseTime;
 		g.canGoPastMaxDistance = this.canGoPastMaxDistance;
 		g.permissionMessage = this.permissionMessage;
-		
+
 		if (getReleaseEffect() != null)
 		{
 			g.setReleaseEffect(this.getReleaseEffect().clone());
 		}
-		
+
 		return g;
 	}
 
@@ -351,10 +369,10 @@ public class Gun implements Comparable<Gun>
 					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.FIRE_IGNITE, 2.0F, 2.0F);
 					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_OPEN, 1.0F, 2.0F);
 				}
-				
+
 				if (amtReload == reloadTime / 2)
 					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.PISTON_RETRACT, 0.33F, 2.0F);
-				
+
 				if (amtReload == reloadTime - 4)
 				{
 					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.FIRE_IGNITE, 2.0F, 2.0F);
@@ -370,13 +388,13 @@ public class Gun implements Comparable<Gun>
 				{
 					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.PISTON_EXTEND, 1.0F, 2.0F);
 				}
-				
+
 				if (timer == 6)
 				{
 					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.PISTON_RETRACT, 1.0F, 2.0F);
 				}
 			}
-			
+
 			if (getReloadType().equalsIgnoreCase("bolt"))
 			{
 				if (timer == getBulletDelayTime() - 4)
@@ -397,10 +415,10 @@ public class Gun implements Comparable<Gun>
 			double xd = Math.cos(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
 			double yd = Math.sin(Math.toRadians(pitch));
 			double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
-			
+
 			Vector vec = new Vector(xd, yd, zd);
 			vec.multiply(recoil / 2.0D).setY(0);
-			
+
 			player.setVelocity(player.getVelocity().add(vec));
 		}
 	}
@@ -436,16 +454,17 @@ public class Gun implements Comparable<Gun>
 
 	public Material getAmmoMaterial()
 	{
-//		return Material.getMaterial(ammoType);
+		// return Material.getMaterial(ammoType);
 		return ammoType;
 	}
 
 	public Material getGunMaterial()
 	{
-//		Material mat = Material.getMaterial(getGunType());
-//		if (mat == null)
-//			plugin.getLogHandler().log(Level.WARNING, "Null material in gun \"{0}\". Type ID: {1}", gunName, getGunType());
-//		
+		// Material mat = Material.getMaterial(getGunType());
+		// if (mat == null)
+		// plugin.getLogHandler().log(Level.WARNING,
+		// "Null material in gun \"{0}\". Type ID: {1}", gunName, getGunType());
+		//
 		return gunType;
 	}
 
@@ -460,7 +479,7 @@ public class Gun implements Comparable<Gun>
 		{
 			return str.substring(0, str.indexOf(":"));
 		}
-		
+
 		return str;
 	}
 
@@ -471,16 +490,16 @@ public class Gun implements Comparable<Gun>
 			String news = str.substring(str.indexOf(":") + 1, str.length());
 			return Byte.parseByte(news);
 		}
-		
+
 		return -1;
 	}
-	
+
 	public void setGunType(String val)
 	{
 		this.gunType = MaterialUtil.getMaterial(getValueFromString(val));
 
 		this.gunByte = getByteDataFromString(val);
-		
+
 		if (gunByte == -1)
 		{
 			this.setIgnoreItemData(true);
@@ -492,7 +511,7 @@ public class Gun implements Comparable<Gun>
 	{
 		this.ammoType = MaterialUtil.getMaterial(getValueFromString(val));
 		this.ammoByte = getByteDataFromString(val);
-		
+
 		if (ammoByte == -1)
 		{
 			this.ammoByte = 0;
@@ -504,24 +523,5 @@ public class Gun implements Comparable<Gun>
 		String[] sounds = val.split(",");
 		for (int i = 0; i < sounds.length; i++)
 			gunSound.add(sounds[i]);
-	}
-
-	@Override
-	public int compareTo(Gun other)
-	{
-		int otherPriority = other.getPriority();
-		
-		if (priority > otherPriority)
-		{
-			return 1;
-		}
-		else if (priority == otherPriority)
-		{
-			return 0;
-		}
-		else
-		{
-			return -1;
-		}
 	}
 }

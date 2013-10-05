@@ -108,7 +108,7 @@ public class PlayerListener implements Listener
 				GunPlayer gp = plugin.getGunPlayer(player);
 				if (gp != null)
 				{
-					gp.onClick(clickType);
+					gp.handleClick(clickType);
 				}
 			}
 		}
