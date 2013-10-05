@@ -17,7 +17,6 @@ import net.dmulloy2.swornguns.handlers.PermissionHandler;
 import net.dmulloy2.swornguns.io.WeaponReader;
 import net.dmulloy2.swornguns.listeners.EntityListener;
 import net.dmulloy2.swornguns.listeners.PlayerListener;
-import net.dmulloy2.swornguns.listeners.RealismListener;
 import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
@@ -76,7 +75,6 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new PlayerListener(this), this);
 		pm.registerEvents(new EntityListener(this), this);
-		pm.registerEvents(new RealismListener(this), this);
 
 		new UpdateTimer().runTaskTimer(this, 20L, 1L);
 
