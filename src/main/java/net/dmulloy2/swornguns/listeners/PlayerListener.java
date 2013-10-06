@@ -24,7 +24,6 @@ import org.bukkit.inventory.ItemStack;
 public class PlayerListener implements Listener
 {
 	private final SwornGuns plugin;
-
 	public PlayerListener(SwornGuns plugin)
 	{
 		this.plugin = plugin;
@@ -39,7 +38,7 @@ public class PlayerListener implements Listener
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerKick(PlayerKickEvent event)
 	{
-		if (!event.isCancelled())
+		if (! event.isCancelled())
 		{
 			onDisconnect(event.getPlayer());
 		}
