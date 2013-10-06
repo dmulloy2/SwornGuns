@@ -6,7 +6,6 @@ import java.util.List;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.util.MaterialUtil;
-import net.dmulloy2.swornguns.util.Util;
 
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
@@ -25,7 +24,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -148,75 +146,55 @@ public class EntityListener implements Listener
 //			}
 //		}
 //	}
-
+	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
 	{
 		if (event.isCancelled())
-		{
 			return;
-		}
-		Entity damager = event.getDamager();
-		if ((event.getEntity() instanceof LivingEntity))
+		
+		if (event.getEntity() instanceof LivingEntity)
 		{
 			LivingEntity hurt = (LivingEntity) event.getEntity();
-			if ((damager instanceof Projectile))
+			if (event.getDamager() instanceof Projectile)
 			{
-				Projectile proj = (Projectile) damager;
+				Projectile proj = (Projectile) event.getDamager();
 				Bullet bullet = plugin.getBullet(proj);
 				if (bullet != null)
 				{
-					boolean headshot = false;
-					if ((isNear(proj.getLocation(), hurt.getEyeLocation(), 0.26D)) && (bullet.getShotFrom().isCanHeadshot()))
+					// Realism start - gun effects
+					World world = hurt.getWorld();
+
+					if (plugin.getConfig().getBoolean("blood-effect.enabled"))
 					{
-						headshot = true;
+						Material mat = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
+						world.playEffect(hurt.getLocation(), Effect.STEP_SOUND, mat);
+						world.playEffect(hurt.getLocation().add(0, 1, 0), Effect.STEP_SOUND, mat);
 					}
 
-					// Realism start - gun effects
-					EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(bullet.getShooter().getPlayer(),
-							hurt, DamageCause.ENTITY_ATTACK, (double) event.getDamage());
-					plugin.getServer().getPluginManager().callEvent(damageEvent);
-					if (! damageEvent.isCancelled())
+					if (plugin.getConfig().getBoolean("smoke-effect"))
 					{
-						World world = hurt.getWorld();
+						world.playEffect(bullet.getShooter().getPlayer().getLocation(), Effect.SMOKE, 5);
+					}
 
-						if (plugin.getConfig().getBoolean("blood-effect.enabled"))
-						{
-							int blockId = plugin.getConfig().getInt("blood-effect.block-id");
-							world.playEffect(hurt.getLocation(), Effect.STEP_SOUND, blockId);
-							world.playEffect(hurt.getLocation().add(0, 1, 0), Effect.STEP_SOUND, blockId);
-						}
-				
-						if (plugin.getConfig().getBoolean("smoke-effect"))
-						{
-							world.playEffect(bullet.getShooter().getPlayer().getLocation(), Effect.SMOKE, 5);
-						}
-
-						if (plugin.getConfig().getBoolean("bullet-sound.enabled"))
-						{
-							Sound sound = Sound.valueOf(plugin.getConfig().getString("bullet-sound.sound").toUpperCase());
-							world.playSound(hurt.getLocation(), sound, 10, 1);
-						}
+					if (plugin.getConfig().getBoolean("bullet-sound.enabled"))
+					{
+						Sound sound = Sound.valueOf(plugin.getConfig().getString("bullet-sound.sound").toUpperCase());
+						world.playSound(hurt.getLocation(), sound, 10, 1);
 					}
 					// Realism end
 
-//					Remove event API for now, see if it fixes lag
-//					SwornGunsDamageEntityEvent sworngunsdmg = new SwornGunsDamageEntityEvent(event, bullet.getShooter(),
-//							bullet.getShotFrom(), event.getEntity(), headshot);
-//					plugin.getServer().getPluginManager().callEvent(sworngunsdmg);
-//					if (! sworngunsdmg.isCancelled())
-//					{
-						double damage = bullet.getShotFrom().getGunDamage();
-						double mult = 1.0D;
-						if (headshot)
-						{
-							Util.playEffect(Effect.ZOMBIE_DESTROY_DOOR, hurt.getLocation(), 3);
-							mult = 2.0D;
-						}
+					double damage = bullet.getShotFrom().getGunDamage();
+					double mult = 1.0D;
+					if (isNear(proj.getLocation(), hurt.getEyeLocation(), 0.26D) && bullet.getShotFrom().isCanHeadshot())
+						mult = 2.0D;
+
+					if (! hurt.isDead() && hurt.getHealth() > 0)
+					{
 						hurt.setLastDamage(0);
 						event.setDamage(Math.ceil(damage * mult));
 						int armorPenetration = bullet.getShotFrom().getArmorPenetration();
-						if (armorPenetration > 0)
+						if (armorPenetration > 0 && hurt.getHealth() - event.getDamage() > 0)
 						{
 							int health = (int) hurt.getHealth();
 							int newHealth = health - armorPenetration;
@@ -228,6 +206,7 @@ public class EntityListener implements Listener
 							{
 								newHealth = 20;
 							}
+
 							hurt.setHealth(newHealth);
 						}
 
@@ -239,7 +218,7 @@ public class EntityListener implements Listener
 					{
 						event.setCancelled(true);
 					}
-//				}
+				}
 			}
 		}
 	}
@@ -272,14 +251,16 @@ public class EntityListener implements Listener
 		{
 			if (plugin.getConfig().getBoolean("blood-effect.guns-only") == false)
 			{
-				int blockId = plugin.getConfig().getInt("blood-effect.block-id");
-				world.playEffect(entity.getLocation(), Effect.STEP_SOUND, blockId);
-				world.playEffect(entity.getLocation().add(0, 1, 0), Effect.STEP_SOUND, blockId);
+				Material mat = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
+				world.playEffect(entity.getLocation(), Effect.STEP_SOUND, mat);
+				world.playEffect(entity.getLocation().add(0, 1, 0), Effect.STEP_SOUND, mat);
 			}
 		}
 	}
+	// Realism end
 
-	public boolean checkFactions(Location loc, boolean safeZoneCheck)
+	// Realism start - factions check
+	public boolean checkFactions(Location location, boolean safeZoneCheck)
 	{
 		PluginManager pm = plugin.getServer().getPluginManager();
 		if (pm.isPluginEnabled("Factions"))
@@ -288,33 +269,17 @@ public class EntityListener implements Listener
 			String version = pl.getDescription().getVersion();
 			if (version.startsWith("1.6."))
 			{
-				Faction otherFaction = Board.getFactionAt(new FLocation(loc));
-				if (safeZoneCheck)
-				{
-					if (otherFaction.isWarZone() || otherFaction.isSafeZone())
-						return true;
-				}
-				else
-				{
-					if (otherFaction.isWarZone())
-						return true;
-				}
+				Faction otherFaction = Board.getFactionAt(new FLocation(location));
+				return safeZoneCheck ? (otherFaction.isWarZone() || otherFaction.isSafeZone()) : otherFaction.isWarZone();
 			}
 		}
+		
 		if (pm.isPluginEnabled("SwornNations"))
 		{
-			Faction otherFaction = Board.getFactionAt(new FLocation(loc));
-			if (safeZoneCheck)
-			{
-				if (otherFaction.isWarZone() || otherFaction.isSafeZone())
-					return true;
-			}
-			else
-			{
-				if (otherFaction.isWarZone())
-					return true;
-			}
+			Faction otherFaction = Board.getFactionAt(new FLocation(location));
+			return safeZoneCheck ? (otherFaction.isWarZone() || otherFaction.isSafeZone()) : otherFaction.isWarZone();
 		}
+		
 		return false;
 	}
 	// Realism end
