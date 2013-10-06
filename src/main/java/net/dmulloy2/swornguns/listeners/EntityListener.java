@@ -89,28 +89,41 @@ public class EntityListener implements Listener
 //			plugin.getServer().getPluginManager().callEvent(evv);
 
 			// Realism start - block cracking
-			BlockBreakEvent blockBreak = new BlockBreakEvent(b, bullet.getShooter().getPlayer());
-			plugin.getServer().getPluginManager().callEvent(blockBreak);
-			if (! blockBreak.isCancelled() && ! checkFactions(b.getLocation(), true))
+			boolean applicable = false;
+			
+			if (! checkFactions(b.getLocation(), true))
 			{
 				if (plugin.getConfig().getBoolean("block-crack"))
 				{
 					if (mat == Material.STONE)
-					{
-						b.setType(Material.COBBLESTONE);
-						return;
-					}
-
-					if (mat == Material.SMOOTH_BRICK)
-					{
-//						((SmoothBrick) block.getState().getData()).setTexture(Texture.CRACKED);
-//						return;
-					}
+						applicable = true;
 				}
 				
 				if (shatterBlocks.contains(mat))
+					applicable = true;
+			}
+
+			if (plugin.getUltimateArena().isPlayerPlayingArena(bullet.getShooter().getPlayer()))
+				applicable = false;
+			
+			if (applicable)
+			{
+				BlockBreakEvent blockBreak = new BlockBreakEvent(b, bullet.getShooter().getPlayer());
+				plugin.getServer().getPluginManager().callEvent(blockBreak);
+				if (! blockBreak.isCancelled())
 				{
-					b.breakNaturally();
+					if (plugin.getConfig().getBoolean("block-crack"))
+					{
+						if (mat == Material.STONE)
+						{
+							b.setType(Material.COBBLESTONE);
+						}
+					}
+
+					if (shatterBlocks.contains(mat))
+					{
+						b.breakNaturally();
+					}
 				}
 			}
 			// Realism end
@@ -167,9 +180,12 @@ public class EntityListener implements Listener
 
 					if (plugin.getConfig().getBoolean("blood-effect.enabled"))
 					{
-						Material mat = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
-						world.playEffect(hurt.getLocation(), Effect.STEP_SOUND, mat);
-						world.playEffect(hurt.getLocation().add(0, 1, 0), Effect.STEP_SOUND, mat);
+						if (plugin.getConfig().getBoolean("blood-effect.guns-only"))
+						{
+							Material mat = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
+							world.playEffect(hurt.getLocation(), Effect.STEP_SOUND, mat);
+							world.playEffect(hurt.getLocation().add(0, 1, 0), Effect.STEP_SOUND, mat);
+						}
 					}
 
 					if (plugin.getConfig().getBoolean("smoke-effect"))
@@ -249,7 +265,7 @@ public class EntityListener implements Listener
 		
 		if (plugin.getConfig().getBoolean("blood-effect.enabled"))
 		{
-			if (plugin.getConfig().getBoolean("blood-effect.guns-only") == false)
+			if (! plugin.getConfig().getBoolean("blood-effect.guns-only"))
 			{
 				Material mat = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
 				world.playEffect(entity.getLocation(), Effect.STEP_SOUND, mat);
