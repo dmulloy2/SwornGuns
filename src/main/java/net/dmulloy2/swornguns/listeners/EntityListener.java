@@ -103,7 +103,7 @@ public class EntityListener implements Listener
 					applicable = true;
 			}
 
-			if (plugin.getUltimateArena().isPlayerPlayingArena(bullet.getShooter().getPlayer()))
+			if (plugin.getUltimateArena().isInArena(bullet.getShooter().getPlayer()))
 				applicable = false;
 			
 			if (applicable)

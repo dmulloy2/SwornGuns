@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.InventoryHelper;
-import net.dmulloy2.swornrpg.SwornRPG;
 import net.dmulloy2.swornrpg.io.PlayerDataCache;
 import net.dmulloy2.swornrpg.types.PlayerData;
 import net.dmulloy2.ultimatearena.arenas.Arena;
@@ -22,7 +21,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -408,26 +406,21 @@ public class GunPlayer
 	{
 		if (data == null)
 		{
-			PluginManager pm = plugin.getServer().getPluginManager();
-			if (pm.isPluginEnabled("SwornRPG"))
-			{
-				SwornRPG srpg = (SwornRPG) pm.getPlugin("SwornRPG");
-				PlayerDataCache cache = srpg.getPlayerDataCache();
-				data = cache.getData(controller);
-			}
+			PlayerDataCache cache = plugin.getSwornRPG().getPlayerDataCache();
+			data = cache.getData(controller);
 		}
-		
+
 		return data != null && data.isUnlimitedAmmoEnabled();
 	}
 	
 	public final boolean isPlayerInArena()
 	{
-		if (plugin.getUltimateArena().isPlayerPlayingArena(controller))
+		if (plugin.getUltimateArena().isInArena(controller))
 		{
 			Arena ar = plugin.getUltimateArena().getArenaPlayer(controller).getArena();
 			return ar.getType() != FieldType.HUNGER;
 		}
-		
+
 		return false;
 	}
 	

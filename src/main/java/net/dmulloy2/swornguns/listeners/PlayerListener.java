@@ -24,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 public class PlayerListener implements Listener
 {
 	private final SwornGuns plugin;
+
 	public PlayerListener(SwornGuns plugin)
 	{
 		this.plugin = plugin;
@@ -38,7 +39,7 @@ public class PlayerListener implements Listener
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerKick(PlayerKickEvent event)
 	{
-		if (! event.isCancelled())
+		if (!event.isCancelled())
 		{
 			onDisconnect(event.getPlayer());
 		}
@@ -60,19 +61,22 @@ public class PlayerListener implements Listener
 	{
 		Item dropped = event.getItemDrop();
 		Player dropper = event.getPlayer();
-		GunPlayer gp = this.plugin.getGunPlayer(dropper);
+		GunPlayer gp = plugin.getGunPlayer(dropper);
 		if (gp != null)
 		{
 			ItemStack lastHold = gp.getLastItemHeld();
 			if (lastHold != null)
 			{
 				Gun gun = gp.getGun(dropped.getItemStack().getType());
-				if (gun != null && lastHold.isSimilar(dropped.getItemStack()))
+				if (gun != null)
 				{
-					if (gun.needsReload())
+					if (lastHold.getType() == dropped.getItemStack().getType())
 					{
-						gun.reloadGun();
-						event.setCancelled(true);
+						if (gun.isHasClip() && gun.isChanged() && gun.isReloadGunOnDrop())
+						{
+							gun.reloadGun();
+							event.setCancelled(true);
+						}
 					}
 				}
 			}
@@ -82,12 +86,6 @@ public class PlayerListener implements Listener
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
-		Player player = event.getPlayer();
-		if (player == null)
-		{
-			return;
-		}
-
 		if (event.hasItem())
 		{
 			ItemStack item = event.getItem();
@@ -97,14 +95,11 @@ public class PlayerListener implements Listener
 				Action action = event.getAction();
 
 				if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK || action == Action.PHYSICAL)
-				{
 					clickType = "left";
-				}
 				else
-				{
 					clickType = "right";
-				}
 
+				Player player = event.getPlayer();
 				GunPlayer gp = plugin.getGunPlayer(player);
 				if (gp != null)
 				{

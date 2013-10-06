@@ -22,7 +22,8 @@ import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
 import net.dmulloy2.swornguns.util.FormatUtil;
-import net.dmulloy2.ultimatearena.UltimateArenaAPI;
+import net.dmulloy2.swornrpg.SwornRPG;
+import net.dmulloy2.ultimatearena.UltimateArena;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -30,6 +31,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -44,7 +46,8 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	private @Getter CommandHandler commandHandler;
 	private @Getter LogHandler logHandler;
 	
-	private @Getter UltimateArenaAPI ultimateArena;
+	private @Getter UltimateArena ultimateArena;
+	private @Getter SwornRPG swornRPG;
 
 	private @Getter List<Bullet> bullets = new ArrayList<Bullet>();
 	private @Getter List<Gun> loadedGuns = new ArrayList<Gun>();
@@ -61,10 +64,12 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		permissionHandler = new PermissionHandler(this);
 		commandHandler = new CommandHandler(this);
 		logHandler = new LogHandler(this);
-		
-		ultimateArena = UltimateArenaAPI.hookIntoUA(this);
 
 		saveDefaultConfig();
+
+		// Integration
+		hookIntoSwornRPG();
+		hookIntoUltimateArena();
 
 		commandHandler.setCommandPrefix("swornguns");
 		commandHandler.registerCommand(new CmdHelp(this));
@@ -133,7 +138,33 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 
 		logHandler.log("{0} has been disabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
 	}
+
+	private void hookIntoUltimateArena()
+	{
+		PluginManager pm = getServer().getPluginManager();
+		if (pm.isPluginEnabled("UltimateArena"))
+		{
+			Plugin pl = pm.getPlugin("UltimateArena");
+			if (pl instanceof UltimateArena)
+			{
+				ultimateArena = (UltimateArena) pl;
+			}
+		}
+	}
 	
+	private void hookIntoSwornRPG()
+	{
+		PluginManager pm = getServer().getPluginManager();
+		if (pm.isPluginEnabled("SwornRPG"))
+		{
+			Plugin pl = pm.getPlugin("SwornRPG");
+			if (pl instanceof SwornRPG)
+			{
+				swornRPG = (SwornRPG) pl;
+			}
+		}
+	}
+
 	private void loadProjectiles()
 	{
 		int loaded = 0;
