@@ -258,13 +258,16 @@ public class Bullet
 					LivingEntity lentity = (LivingEntity) entity;
 					if (! lentity.isDead() && lentity.getHealth() > 0.0D)
 					{
-						int dmg = shotFrom.getExplosionDamage();
-						if (dmg == -1)
-							dmg = shotFrom.getGunDamage();
-							
-						lentity.setLastDamage(0.0D);
-						lentity.damage(dmg, shooter.getPlayer());
-						lentity.setLastDamage(0.0D);
+						if (lentity.hasLineOfSight(projectile))
+						{
+							int dmg = shotFrom.getExplosionDamage();
+							if (dmg == -1)
+								dmg = shotFrom.getGunDamage();
+								
+							lentity.setLastDamage(0.0D);
+							lentity.damage(dmg, shooter.getPlayer());
+							lentity.setLastDamage(0.0D);
+						}
 					}
 				}
 			}
