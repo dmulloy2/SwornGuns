@@ -205,7 +205,7 @@ public class EntityListener implements Listener
 					if (isNear(proj.getLocation(), hurt.getEyeLocation(), 0.26D) && bullet.getShotFrom().isCanHeadshot())
 						mult = 2.0D;
 
-					if (! hurt.isDead() && hurt.getHealth() > 0)
+					if (! hurt.isDead() || hurt.getHealth() > 0)
 					{
 						hurt.setLastDamage(0);
 						event.setDamage(Math.ceil(damage * mult));
