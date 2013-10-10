@@ -83,7 +83,7 @@ public class Bullet
 
 			((Projectile) projectile).setShooter(owner.getPlayer());
 
-			this.startLocation = this.projectile.getLocation();
+			this.startLocation = projectile.getLocation();
 		}
 
 		if (shotFrom.getReleaseTime() == -1)
@@ -283,14 +283,16 @@ public class Bullet
 				if (entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
-					
-					EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D);
-					plugin.getServer().getPluginManager().callEvent(event);
-					if (! event.isCancelled())
+					if (lentity.getHealth() > 0 && ! lentity.isDead())
 					{
-						lentity.setFireTicks(140);
-						lentity.setLastDamage(0);
-						lentity.damage(1, shooter.getPlayer());
+						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D);
+						plugin.getServer().getPluginManager().callEvent(event);
+						if (! event.isCancelled())
+						{
+							lentity.setFireTicks(140);
+							lentity.setLastDamage(0);
+							lentity.damage(1, shooter.getPlayer());
+						}
 					}
 				}
 			}
@@ -309,14 +311,16 @@ public class Bullet
 				if (entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
-
-					EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D);
-					plugin.getServer().getPluginManager().callEvent(event);
-					if (! event.isCancelled())
+					if (lentity.getHealth() > 0 && ! lentity.isDead())
 					{
-						if (lentity.hasLineOfSight(projectile))
+						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D);
+						plugin.getServer().getPluginManager().callEvent(event);
+						if (! event.isCancelled())
 						{
-							lentity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 1));
+							if (lentity.hasLineOfSight(projectile))
+							{
+								lentity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 1));
+							}
 						}
 					}
 				}
