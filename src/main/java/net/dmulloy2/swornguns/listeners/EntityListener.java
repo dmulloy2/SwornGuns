@@ -205,12 +205,12 @@ public class EntityListener implements Listener
 					if (isNear(proj.getLocation(), hurt.getEyeLocation(), 0.26D) && bullet.getShotFrom().isCanHeadshot())
 						mult = 2.0D;
 
-					if (! hurt.isDead() || hurt.getHealth() > 0)
+					if (! hurt.isDead() || hurt.getHealth() > 0.0D)
 					{
-						hurt.setLastDamage(0);
+						hurt.setLastDamage(0.0D);
 						event.setDamage(Math.ceil(damage * mult));
 						int armorPenetration = bullet.getShotFrom().getArmorPenetration();
-						if (armorPenetration > 0 && hurt.getHealth() - event.getDamage() > 0)
+						if (armorPenetration > 0 && hurt.getHealth() - event.getDamage() > 0.0D)
 						{
 							int health = (int) hurt.getHealth();
 							int newHealth = health - armorPenetration;
@@ -248,7 +248,7 @@ public class EntityListener implements Listener
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onEntityDamage(EntityDamageEvent event)
 	{
-		if (event.isCancelled() || event.getDamage() <= 0)
+		if (event.isCancelled() || event.getDamage() <= 0.0D)
 			return;
 
 		Entity entity = event.getEntity();
