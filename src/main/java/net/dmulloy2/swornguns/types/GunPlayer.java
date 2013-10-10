@@ -406,8 +406,11 @@ public class GunPlayer
 	{
 		if (data == null)
 		{
-			PlayerDataCache cache = plugin.getSwornRPG().getPlayerDataCache();
-			data = cache.getData(controller);
+			if (plugin.getSwornRPG() != null)
+			{
+				PlayerDataCache cache = plugin.getSwornRPG().getPlayerDataCache();
+				data = cache.getData(controller);
+			}
 		}
 
 		return data != null && data.isUnlimitedAmmoEnabled();
@@ -415,10 +418,13 @@ public class GunPlayer
 	
 	public final boolean isPlayerInArena()
 	{
-		if (plugin.getUltimateArena().isInArena(controller))
+		if (plugin.getUltimateArena() != null)
 		{
-			Arena ar = plugin.getUltimateArena().getArenaPlayer(controller).getArena();
-			return ar.getType() != FieldType.HUNGER;
+			if (plugin.getUltimateArena().isInArena(controller))
+			{
+				Arena ar = plugin.getUltimateArena().getArenaPlayer(controller).getArena();
+				return ar.getType() != FieldType.HUNGER;
+			}
 		}
 
 		return false;

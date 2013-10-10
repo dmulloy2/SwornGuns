@@ -60,34 +60,36 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	public void onEnable()
 	{
 		long start = System.currentTimeMillis();
-		
+
+		// Handlers
 		permissionHandler = new PermissionHandler(this);
 		commandHandler = new CommandHandler(this);
 		logHandler = new LogHandler(this);
 
+		// Configuration
 		saveDefaultConfig();
+		reloadConfig();
 
 		// Integration
 		hookIntoSwornRPG();
 		hookIntoUltimateArena();
 
+		// Register commands
 		commandHandler.setCommandPrefix("swornguns");
 		commandHandler.registerCommand(new CmdHelp(this));
 		commandHandler.registerCommand(new CmdList(this));
 		commandHandler.registerCommand(new CmdReload(this));
 		commandHandler.registerCommand(new CmdToggle(this));
 		
+		// Register events
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new PlayerListener(this), this);
 		pm.registerEvents(new EntityListener(this), this);
 
+		// Update timer :I
 		new UpdateTimer().runTaskTimer(this, 20L, 1L);
 
-		if (! getDataFolder().exists())
-		{
-			getDataFolder().mkdir();
-		}
-
+		// Files
 		File guns = new File(getDataFolder(), "guns");
 		if (! guns.exists())
 		{
@@ -100,6 +102,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 			projectile.mkdir();
 		}
 
+		// Load guns
 		loadGuns();
 		loadProjectiles();
 			
@@ -116,6 +119,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		long start = System.currentTimeMillis();
 		
 		getServer().getScheduler().cancelTasks(this);
+		getServer().getServicesManager().unregisterAll(this);
 
 		for (int i = 0; i < bullets.size(); i++)
 		{
@@ -324,12 +328,12 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 
 	public void removeBullet(Bullet bullet)
 	{
-		this.bullets.remove(bullet);
+		bullets.remove(bullet);
 	}
 
 	public void addBullet(Bullet bullet)
 	{
-		this.bullets.add(bullet);
+		bullets.add(bullet);
 	}
 
 	public Bullet getBullet(Entity proj)

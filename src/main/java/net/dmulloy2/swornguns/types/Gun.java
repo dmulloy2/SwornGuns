@@ -1,6 +1,7 @@
 package net.dmulloy2.swornguns.types;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -85,8 +86,8 @@ public class Gun
 	private String gunName;
 	private String fileName;
 	private String projType = "";
-	private String outOfAmmoMessage = "";
-	private String permissionMessage = "";
+//	private String outOfAmmoMessage = "";
+//	private String permissionMessage = "";
 
 	private SwornGuns plugin;
 
@@ -96,11 +97,11 @@ public class Gun
 
 	private List<String> gunSound = new ArrayList<String>();
 
-	public Gun(final String name, final SwornGuns plugin)
+	public Gun(String name, SwornGuns plugin)
 	{
 		this.gunName = name;
 		this.fileName = name;
-		this.outOfAmmoMessage = "Out of ammo!";
+//		this.outOfAmmoMessage = "Out of ammo!";
 		this.plugin = plugin;
 	}
 
@@ -178,7 +179,7 @@ public class Gun
 			else
 			{
 				owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
-				owner.getPlayer().sendMessage(outOfAmmoMessage);
+				owner.getPlayer().sendMessage(FormatUtil.format("&6This gun needs &c{0}", FormatUtil.getFriendlyName(gunType)));
 
 				finishShooting();
 			}
@@ -187,14 +188,7 @@ public class Gun
 
 	public void clear()
 	{
-//		try
-//		{
-//			finalize();
-//		}
-//		catch (Throwable e)
-//		{
-//			//
-//		}
+		this.owner = null;
 	}
 
 	public boolean needsReload()
@@ -232,7 +226,7 @@ public class Gun
 			this.heldDownTicks = 0;
 		}
 
-		if ((heldDownTicks >= 2 && timer <= 0) || firing && !reloading)
+		if ((heldDownTicks >= 2 && timer <= 0) || firing && ! reloading)
 		{
 			if (roundsPerBurst > 1)
 			{
@@ -288,30 +282,30 @@ public class Gun
 		g.hasSmokeTrail = this.hasSmokeTrail;
 		g.armorPenetration = this.armorPenetration;
 		g.isThrowable = this.isThrowable;
-		g.setIgnoreItemData(this.ignoreItemData);
-		g.outOfAmmoMessage = this.outOfAmmoMessage;
-		g.setProjType(this.projType);
-		g.setNeedsPermission(this.needsPermission);
+		g.ignoreItemData = this.ignoreItemData;
+//		g.outOfAmmoMessage = this.outOfAmmoMessage;
+		g.projType = this.projType;
+		g.needsPermission = this.needsPermission;
 		g.node = this.node;
 		g.gunSound = this.gunSound;
-		g.setBulletDelayTime(this.bulletDelayTime);
-		g.setHasClip(this.hasClip);
-		g.setMaxClipSize(this.maxClipSize);
-		g.setReloadGunOnDrop(this.reloadGunOnDrop);
+		g.bulletDelayTime = this.bulletDelayTime;
+		g.hasClip = this.hasClip;
+		g.maxClipSize = this.maxClipSize;
+		g.reloadGunOnDrop = this.reloadGunOnDrop;
 		g.localGunSound = this.localGunSound;
 		g.fileName = this.fileName;
 		g.explosionDamage = this.explosionDamage;
 		g.recoil = this.recoil;
 		g.knockback = this.knockback;
-		g.setReloadType(this.reloadType);
+		g.reloadType = this.reloadType;
 		g.releaseTime = this.releaseTime;
 		g.canGoPastMaxDistance = this.canGoPastMaxDistance;
-		g.permissionMessage = this.permissionMessage;
+//		g.permissionMessage = this.permissionMessage;
 		g.priority = this.priority;
 
-		if (getReleaseEffect() != null)
+		if (releaseEffect != null)
 		{
-			g.setReleaseEffect(this.getReleaseEffect().clone());
+			g.releaseEffect = this.releaseEffect.clone();
 		}
 
 		return g;
@@ -430,7 +424,7 @@ public class Gun
 	private void finishShooting()
 	{
 		this.bulletsShot = 0;
-		this.timer = getBulletDelayTime();
+		this.timer = bulletDelayTime;
 		this.firing = false;
 	}
 
@@ -441,17 +435,11 @@ public class Gun
 
 	public Material getAmmoMaterial()
 	{
-		// return Material.getMaterial(ammoType);
 		return ammoType;
 	}
 
 	public Material getGunMaterial()
 	{
-		// Material mat = Material.getMaterial(getGunType());
-		// if (mat == null)
-		// plugin.getLogHandler().log(Level.WARNING,
-		// "Null material in gun \"{0}\". Type ID: {1}", gunName, getGunType());
-		//
 		return gunType;
 	}
 
@@ -487,9 +475,9 @@ public class Gun
 
 		this.gunByte = getByteDataFromString(val);
 
-		if (gunByte == -1)
+		if (gunByte < 0)
 		{
-			this.setIgnoreItemData(true);
+			this.ignoreItemData = true;
 			this.gunByte = 0;
 		}
 	}
@@ -499,7 +487,7 @@ public class Gun
 		this.ammoType = MaterialUtil.getMaterial(getValueFromString(val));
 		this.ammoByte = getByteDataFromString(val);
 
-		if (ammoByte == -1)
+		if (ammoByte < 0)
 		{
 			this.ammoByte = 0;
 		}
@@ -508,8 +496,7 @@ public class Gun
 	public void addGunSounds(String val)
 	{
 		String[] sounds = val.split(",");
-		for (int i = 0; i < sounds.length; i++)
-			gunSound.add(sounds[i]);
+		gunSound.addAll(Arrays.asList(sounds));
 	}
 	
 	@Override

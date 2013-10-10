@@ -10,6 +10,7 @@ import net.dmulloy2.swornguns.util.FormatUtil;
  * @author dmulloy2
  */
 
+// TODO: Paginate this?
 public class CmdHelp extends PaginatedCommand
 {
 	public CmdHelp(SwornGuns plugin)
