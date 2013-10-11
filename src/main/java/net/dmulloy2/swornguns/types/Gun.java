@@ -179,7 +179,7 @@ public class Gun
 			else
 			{
 				owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
-				owner.getPlayer().sendMessage(FormatUtil.format("&6This gun needs &c{0}", FormatUtil.getFriendlyName(gunType)));
+				owner.getPlayer().sendMessage(FormatUtil.format("&6This gun needs &c{0}", FormatUtil.getFriendlyName(ammoType)));
 
 				finishShooting();
 			}
