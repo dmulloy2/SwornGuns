@@ -98,7 +98,7 @@ public class Bullet
 
 	public void tick()
 	{
-		if (!dead)
+		if (! dead)
 		{
 			this.ticks++;
 			if (projectile != null)
@@ -256,17 +256,23 @@ public class Bullet
 				if (entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
-					if (! lentity.isDead() && lentity.getHealth() > 0.0D)
+					if (! lentity.isDead() || lentity.getHealth() > 0.0D)
 					{
-						if (lentity.hasLineOfSight(projectile))
+						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM,
+								0.0D);
+						plugin.getServer().getPluginManager().callEvent(event);
+						if (! event.isCancelled())
 						{
-							int dmg = shotFrom.getExplosionDamage();
-							if (dmg == -1)
-								dmg = shotFrom.getGunDamage();
-								
-							lentity.setLastDamage(0.0D);
-							lentity.damage(dmg, shooter.getPlayer());
-							lentity.setLastDamage(0.0D);
+							if (lentity.hasLineOfSight(projectile))
+							{
+								int dmg = shotFrom.getExplosionDamage();
+								if (dmg == -1)
+									dmg = shotFrom.getGunDamage();
+	
+								lentity.setLastDamage(0.0D);
+								lentity.damage(dmg, shooter.getPlayer());
+								lentity.setLastDamage(0.0D);
+							}
 						}
 					}
 				}
@@ -286,10 +292,10 @@ public class Bullet
 				if (entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
-					if (! lentity.isDead() && lentity.getHealth() > 0.0D)
+					if (! lentity.isDead() || lentity.getHealth() > 0.0D)
 					{
-						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, 
-								DamageCause.CUSTOM, 0.0D);
+						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM,
+								0.0D);
 						plugin.getServer().getPluginManager().callEvent(event);
 						if (! event.isCancelled())
 						{
@@ -315,10 +321,10 @@ public class Bullet
 				if (entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
-					if (! lentity.isDead() && lentity.getHealth() > 0.0D)
+					if (! lentity.isDead() || lentity.getHealth() > 0.0D)
 					{
-						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, 
-								DamageCause.CUSTOM, 0.0D);
+						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM,
+								0.0D);
 						plugin.getServer().getPluginManager().callEvent(event);
 						if (! event.isCancelled())
 						{
