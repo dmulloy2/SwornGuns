@@ -160,7 +160,7 @@ public class EntityListener implements Listener
 //		}
 //	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
 	{
 		if (event.isCancelled())
