@@ -98,7 +98,7 @@ public class Bullet
 
 	public void tick()
 	{
-		if (! dead)
+		if (! dead && shooter.getPlayer().getHealth() > 0.0D)
 		{
 			this.ticks++;
 			if (projectile != null)

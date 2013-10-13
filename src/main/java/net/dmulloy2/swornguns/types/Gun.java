@@ -107,7 +107,7 @@ public class Gun
 
 	public void shoot()
 	{
-		if (owner != null && owner.getPlayer().isOnline() && ! owner.getPlayer().isDead() && ! reloading)
+		if (owner != null && owner.getPlayer().isOnline() && owner.getPlayer().getHealth() > 0.0D && ! reloading)
 		{
 			int ammoAmtNeeded = owner.getAmmoAmountNeeded(this);
 			if ((owner.checkAmmo(this, ammoAmtNeeded) && ammoAmtNeeded > 0) || ammoAmtNeeded == 0)
