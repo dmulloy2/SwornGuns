@@ -25,6 +25,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
@@ -205,7 +206,7 @@ public class EntityListener implements Listener
 					if (isNear(proj.getLocation(), hurt.getEyeLocation(), 0.26D) && bullet.getShotFrom().isCanHeadshot())
 						mult = 2.0D;
 
-					if (! hurt.isDead() || hurt.getHealth() > 0.0D)
+					if (hurt.getHealth() > 0.0D)
 					{
 						hurt.setLastDamage(0.0D);
 						event.setDamage(Math.ceil(damage * mult));
@@ -260,6 +261,9 @@ public class EntityListener implements Listener
 			if (((Player)entity).getGameMode() == GameMode.CREATIVE)
 				return;
 		}
+		
+		if (event.getCause() == DamageCause.DROWNING || event.getCause() == DamageCause.LAVA)
+			return;
 
 		World world = entity.getWorld();
 		

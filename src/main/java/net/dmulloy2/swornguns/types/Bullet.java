@@ -256,7 +256,7 @@ public class Bullet
 				if (entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
-					if (! lentity.isDead() || lentity.getHealth() > 0.0D)
+					if (lentity.getHealth() > 0.0D)
 					{
 						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM,
 								0.0D);
@@ -292,7 +292,7 @@ public class Bullet
 				if (entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
-					if (! lentity.isDead() || lentity.getHealth() > 0.0D)
+					if (lentity.getHealth() > 0.0D)
 					{
 						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM,
 								0.0D);
@@ -321,7 +321,7 @@ public class Bullet
 				if (entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
-					if (! lentity.isDead() || lentity.getHealth() > 0.0D)
+					if (lentity.getHealth() > 0.0D)
 					{
 						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM,
 								0.0D);
