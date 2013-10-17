@@ -300,7 +300,7 @@ public class Bullet
 						if (! event.isCancelled())
 						{
 							lentity.setFireTicks(140);
-							lentity.setLastDamage(0);
+							lentity.setLastDamage(0.0D);
 							lentity.damage(1, shooter.getPlayer());
 						}
 					}

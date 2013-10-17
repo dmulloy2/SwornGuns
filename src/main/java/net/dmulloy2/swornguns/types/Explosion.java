@@ -24,6 +24,9 @@ public class Explosion
 		this.location = location;
 	}
 
+	/**
+	 * Creates the explotion
+	 */
 	public void explode()
 	{
 		World world = location.getWorld();
@@ -35,16 +38,12 @@ public class Explosion
 
 		firework.setFireworkMeta(meta);
 
-		try
-		{
-			playFirework(world, location, firework);
-		}
-		catch (Exception e)
-		{
-			//
-		}
+		playFirework(location, firework);
 	}
 
+	/**
+	 * Firework type
+	 */
 	private FireworkEffect.Type getType()
 	{
 		Random rand = new Random();
@@ -57,6 +56,9 @@ public class Explosion
 		return type;
 	}
 
+	/**
+	 * Firework type
+	 */
 	private FireworkEffect getEffect()
 	{
 		List<Color> c = getColors();
@@ -67,6 +69,9 @@ public class Explosion
 		return e;
 	}
 
+	/**
+	 * Firework colors
+	 */
 	private List<Color> getColors()
 	{
 		List<Color> c = new ArrayList<Color>();
@@ -81,34 +86,49 @@ public class Explosion
 
 		return c;
 	}
-	
-	// ---- Fireworks, created by codename_b ---- //
-	private Method world_getHandle = null;
-	private Method nms_world_broadcastEntityEffect = null;
-	private Method firework_getHandle = null;
 
-	public void playFirework(World world, Location loc, Firework firework) throws Exception
+	/**
+	 * Plays the firework effect
+	 * 
+	 * @param loc - {@link Location} to spawn firework at
+	 * @param firework - {@link Firework} to spawn
+	 */
+	public void playFirework(Location loc, Firework firework)
 	{
-		Object nms_world = null;
-		Object nms_firework = null;
-
-		if (world_getHandle == null)
+		try
 		{
-			world_getHandle = getMethod(world.getClass(), "getHandle");
-			firework_getHandle = getMethod(firework.getClass(), "getHandle");
+			World world = loc.getWorld();
+
+			Method world_getHandle = null;
+			Method nms_world_broadcastEntityEffect = null;
+			Method firework_getHandle = null;
+
+			Object nms_world = null;
+			Object nms_firework = null;
+
+			if (world_getHandle == null)
+			{
+				world_getHandle = getMethod(world.getClass(), "getHandle");
+				firework_getHandle = getMethod(firework.getClass(), "getHandle");
+			}
+
+			nms_world = world_getHandle.invoke(world, (Object[]) null);
+			nms_firework = firework_getHandle.invoke(firework, (Object[]) null);
+
+			if (nms_world_broadcastEntityEffect == null)
+			{
+				nms_world_broadcastEntityEffect = getMethod(nms_world.getClass(), "broadcastEntityEffect");
+			}
+
+			nms_world_broadcastEntityEffect.invoke(nms_world, nms_firework, (byte) 17);
+
+			firework.remove();
 		}
-
-		nms_world = world_getHandle.invoke(world, (Object[]) null);
-		nms_firework = firework_getHandle.invoke(firework, (Object[]) null);
-
-		if (nms_world_broadcastEntityEffect == null)
+		catch (Exception e)
 		{
-			nms_world_broadcastEntityEffect = getMethod(nms_world.getClass(), "broadcastEntityEffect");
+			if (firework != null)
+				firework.remove();
 		}
-
-		nms_world_broadcastEntityEffect.invoke(nms_world, new Object[] { nms_firework, (byte) 17 });
-
-		firework.remove();
 	}
 
 	private Method getMethod(Class<?> cl, String method)
@@ -116,11 +136,9 @@ public class Explosion
 		for (Method m : cl.getMethods())
 		{
 			if (m.getName().equals(method))
-			{
 				return m;
-			}
 		}
-		
+
 		return null;
 	}
 }
