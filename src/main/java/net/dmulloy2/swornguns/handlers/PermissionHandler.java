@@ -37,7 +37,12 @@ public class PermissionHandler
 	
 	public final boolean canFireGun(Player player, Gun gun)
 	{
-		return (gun.isNeedsPermission() ? hasPermission(player, gun.getNode()) : true);
+		if (gun.isNeedsPermission())
+		{
+			return hasPermission(player, gun.getNode()) || player.hasPermission("swornguns.*");
+		}
+		
+		return true;
 	}
 
 	public final String getPermissionString(Permission permission)

@@ -176,6 +176,17 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		File dir = new File(getDataFolder(), "projectile");
 		
 		File[] children = dir.listFiles();
+		if (children.length == 0)
+		{
+			String[] stock = new String[] { "flashbang", "grenade", "molotov", "smokegrenade" };
+			for (String s : stock)
+			{
+				saveResource("projectile" + File.separator + s, false);
+			}
+		}
+
+		children = dir.listFiles();
+
 		for (File child : children)
 		{
 			WeaponReader reader = new WeaponReader(this, child);
@@ -203,6 +214,19 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		File dir = new File(getDataFolder(), "guns");
 		
 		File[] children = dir.listFiles();
+		if (children.length == 0)
+		{
+			String[] stock = new String[] { "AutoShotgun", "DoubleBarrel", "Flamethrower", "Pistol", "Rifle", "RocketLauncher", "Shotgun",
+					"Sniper" };
+
+			for (String s : stock)
+			{
+				saveResource("guns" + File.separator + s, false);
+			}
+		}
+
+		children = dir.listFiles();
+
 		for (File child : children)
 		{
 			WeaponReader reader = new WeaponReader(this, child);
