@@ -104,9 +104,13 @@ public class EntityListener implements Listener
 					applicable = true;
 			}
 
-			if (plugin.getUltimateArena().isInArena(bullet.getShooter().getPlayer()))
-				applicable = false;
-			
+			// UltimateArena - check for inside arena
+			if (plugin.getUltimateArena() != null)
+			{
+				if (plugin.getUltimateArena().isInArena(bullet.getShooter().getPlayer()))
+					applicable = false;
+			}
+
 			if (applicable)
 			{
 				BlockBreakEvent blockBreak = new BlockBreakEvent(b, bullet.getShooter().getPlayer());
