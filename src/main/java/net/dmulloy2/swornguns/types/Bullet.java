@@ -96,7 +96,7 @@ public class Bullet
 		}
 	}
 
-	public void tick()
+	public final void tick()
 	{
 		if (! dead && shooter.getPlayer().getHealth() > 0.0D)
 		{
@@ -167,7 +167,7 @@ public class Bullet
 		}
 	}
 
-	public void remove()
+	public final void remove()
 	{
 		this.dead = true;
 
@@ -179,7 +179,7 @@ public class Bullet
 		destroy();
 	}
 
-	public void onHit()
+	public final void onHit()
 	{
 		if (released)
 			return;
@@ -233,6 +233,7 @@ public class Bullet
 					new Explosion(lastLocation).explode();
 				}
 
+				// TODO: Fix double kills with this...
 				explode();
 				fireSpread();
 				flash();
@@ -240,7 +241,7 @@ public class Bullet
 		}
 	}
 
-	public void explode()
+	private final void explode()
 	{
 		if (shotFrom.getExplodeRadius() > 0.0D)
 		{
@@ -280,7 +281,7 @@ public class Bullet
 		}
 	}
 
-	public void fireSpread()
+	private final void fireSpread()
 	{
 		if (shotFrom.getFireRadius() > 0.0D)
 		{
@@ -309,7 +310,7 @@ public class Bullet
 		}
 	}
 
-	public void flash()
+	private final void flash()
 	{
 		if (shotFrom.getFlashRadius() > 0.0D)
 		{
@@ -339,7 +340,7 @@ public class Bullet
 		}
 	}
 
-	public void destroy()
+	public final void destroy()
 	{
 		this.projectile = null;
 		this.velocity = null;

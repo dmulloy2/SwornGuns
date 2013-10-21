@@ -110,7 +110,7 @@ public abstract class SwornGunsCommand implements CommandExecutor
 	public final String getUsageTemplate(final boolean displayHelp)
 	{
 		StringBuilder ret = new StringBuilder();
-		ret.append("&b/ua ");
+		ret.append("&b/swornguns ");
 
 		ret.append(name);
 

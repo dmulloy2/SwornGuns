@@ -27,7 +27,7 @@ public class Explosion
 	/**
 	 * Creates the explotion
 	 */
-	public void explode()
+	public final void explode()
 	{
 		World world = location.getWorld();
 		Firework firework = world.spawn(location, Firework.class);
@@ -44,7 +44,7 @@ public class Explosion
 	/**
 	 * Firework type
 	 */
-	private FireworkEffect.Type getType()
+	private final FireworkEffect.Type getType()
 	{
 		Random rand = new Random();
 		FireworkEffect.Type type = FireworkEffect.Type.BALL_LARGE;
@@ -59,7 +59,7 @@ public class Explosion
 	/**
 	 * Firework type
 	 */
-	private FireworkEffect getEffect()
+	private final FireworkEffect getEffect()
 	{
 		List<Color> c = getColors();
 		FireworkEffect.Type type = getType();
@@ -72,7 +72,7 @@ public class Explosion
 	/**
 	 * Firework colors
 	 */
-	private List<Color> getColors()
+	private final List<Color> getColors()
 	{
 		List<Color> c = new ArrayList<Color>();
 		c.add(Color.RED);
@@ -93,7 +93,7 @@ public class Explosion
 	 * @param loc - {@link Location} to spawn firework at
 	 * @param firework - {@link Firework} to spawn
 	 */
-	public void playFirework(Location loc, Firework firework)
+	public final void playFirework(Location loc, Firework firework)
 	{
 		try
 		{
@@ -131,7 +131,7 @@ public class Explosion
 		}
 	}
 
-	private Method getMethod(Class<?> cl, String method)
+	private final Method getMethod(Class<?> cl, String method)
 	{
 		for (Method m : cl.getMethods())
 		{

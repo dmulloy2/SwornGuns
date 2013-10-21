@@ -18,8 +18,8 @@ import net.dmulloy2.ultimatearena.types.FieldType;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -31,12 +31,14 @@ import org.bukkit.potion.PotionEffectType;
 @Data
 public class GunPlayer
 {
-	private int ticks;
-	private Player controller;
 	private ItemStack lastHeldItem;
-	private List<Gun> guns;
 	private Gun currentlyFiring;
+	private Player controller;
+	private List<Gun> guns;
+
 	private boolean enabled;
+	private boolean aimedIn;
+	private int ticks;
 
 	private final SwornGuns plugin;
 
@@ -49,7 +51,7 @@ public class GunPlayer
 		calculateGuns();
 	}
 
-	public void handleClick(String clickType)
+	public final void handleClick(String clickType)
 	{
 		ItemStack inHand = controller.getItemInHand();
 		if (inHand == null || inHand.getType() == Material.AIR)
@@ -102,24 +104,26 @@ public class GunPlayer
 		}
 	}
 
-	public boolean isAimedIn()
+	public final boolean isAimedIn()
 	{
-		return controller != null && controller.isOnline() && controller.hasPotionEffect(PotionEffectType.SLOW);
+		return aimedIn;
 	}
 
-	protected void checkAim()
+	private final void checkAim()
 	{
-		if (isAimedIn())
+		if (aimedIn)
 		{
 			controller.removePotionEffect(PotionEffectType.SLOW);
+			this.aimedIn = false;
 		}
 		else
 		{
 			controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
+			this.aimedIn = true;
 		}
 	}
 
-	private void fireGun(Gun gun)
+	private final void fireGun(Gun gun)
 	{
 		if (gun.getTimer() <= 0)
 		{
@@ -129,7 +133,7 @@ public class GunPlayer
 		}
 	}
 
-	public void tick()
+	public final void tick()
 	{
 		this.ticks++;
 
@@ -144,6 +148,7 @@ public class GunPlayer
 				if (plugin.getGun(hand.getType()) == null)
 				{
 					controller.removePotionEffect(PotionEffectType.SLOW);
+					this.aimedIn = false;
 				}
 			}
 
@@ -161,6 +166,7 @@ public class GunPlayer
 					if (hand != null && g.getGunMaterial() == hand.getType() && isAimedIn() && ! g.isCanAimLeft() && ! g.isCanAimRight())
 					{
 						controller.removePotionEffect(PotionEffectType.SLOW);
+						this.aimedIn = false;
 					}
 
 					if (currentlyFiring != null && g.getTimer() <= 0 && currentlyFiring.equals(g))
@@ -169,70 +175,85 @@ public class GunPlayer
 			}
 		}
 
-		renameGuns(controller);
+		renameGuns();
 	}
 
-	protected void renameGuns(Player p)
+	private final void renameGuns()
 	{
-		Inventory inv = p.getInventory();
-		ItemStack[] items = inv.getContents();
-		for (int i = 0; i < items.length; i++)
+		PlayerInventory inv = controller.getInventory();
+		for (ItemStack item : inv.getContents())
 		{
-			if (items[i] != null)
+			if (item != null && item.getType() != Material.AIR)
 			{
-				String name = getGunName(items[i]);
+				String name = getGunName(item);
 				if (name != null && ! name.isEmpty())
 				{
-					setName(items[i], name);
+					ItemMeta meta = item.getItemMeta();
+					meta.setDisplayName(name);
+					item.setItemMeta(meta);
 				}
 			}
 		}
 	}
 
-	protected List<Gun> getGunsByType(ItemStack item)
+	private final String getGunName(ItemStack item)
 	{
-		List<Gun> ret = new ArrayList<Gun>();
-		for (Gun gun : guns)
+		Gun gun = getGun(item.getType());
+		if (gun != null)
 		{
-			if (gun.getGunMaterial() == item.getType())
+			if (plugin.getPermissionHandler().canFireGun(controller, gun))
 			{
-				ret.add(gun);
+				return getGunName(gun);
 			}
 		}
 
-		return ret;
+		return "";
 	}
 
-	protected String getGunName(ItemStack item)
-	{
-		String ret = "";
-		List<Gun> tempgun = getGunsByType(item);
-		int amtGun = tempgun.size();
-		if (amtGun > 0)
-		{
-			for (Gun current : tempgun)
-			{
-				if (plugin.getPermissionHandler().canFireGun(controller, current))
-				{
-					if (current.getGunMaterial() != null && current.getGunMaterial() == item.getType())
-					{
-						byte gunDat = current.getGunByte();
+//	private final List<Gun> getGunsByType(ItemStack item)
+//	{
+//		List<Gun> ret = new ArrayList<Gun>();
+//		for (Gun gun : guns)
+//		{
+//			if (gun.getGunMaterial() == item.getType())
+//			{
+//				ret.add(gun);
+//			}
+//		}
+//
+//		return ret;
+//	}
 
-						@SuppressWarnings("deprecation") // TODO
-						byte itmDat = item.getData().getData();
+//	protected String getGunName(ItemStack item)
+//	{
+//		String ret = "";
+//		List<Gun> tempgun = getGunsByType(item);
+//		int amtGun = tempgun.size();
+//		if (amtGun > 0)
+//		{
+//			for (Gun current : tempgun)
+//			{
+//				if (plugin.getPermissionHandler().canFireGun(controller, current))
+//				{
+//					if (current.getGunMaterial() != null && current.getGunMaterial() == item.getType())
+//					{
+//						byte gunDat = current.getGunByte();
+//
+//						@SuppressWarnings("deprecation") // TODO
+//						byte itmDat = item.getData().getData();
+//
+//						if ((gunDat == itmDat) || (current.isIgnoreItemData()))
+//						{
+//							return getGunName(current);
+//						}
+//					}
+//				}
+//			}
+//		}
+//		return ret;
+//	}
 
-						if ((gunDat == itmDat) || (current.isIgnoreItemData()))
-						{
-							return getGunName(current);
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-
-	private String getGunName(Gun current)
+	private final String getGunName(Gun current)
 	{
 		String add = "";
 		String refresh = "";
@@ -270,21 +291,21 @@ public class GunPlayer
 		return current.getName() + add;
 	}
 
-	protected ItemStack setName(ItemStack item, String name)
-	{
-		ItemMeta im = item.getItemMeta();
-		im.setDisplayName(name);
-		item.setItemMeta(im);
+//	protected ItemStack setName(ItemStack item, String name)
+//	{
+//		ItemMeta im = item.getItemMeta();
+//		im.setDisplayName(name);
+//		item.setItemMeta(im);
+//
+//		return item;
+//	}
 
-		return item;
+	public final Player getPlayer()
+	{
+		return controller;
 	}
 
-	public Player getPlayer()
-	{
-		return this.controller;
-	}
-
-	public void unload()
+	public final void unload()
 	{
 		this.controller = null;
 		this.currentlyFiring = null;
@@ -295,7 +316,7 @@ public class GunPlayer
 		}
 	}
 
-	public void reloadAllGuns()
+	public final void reloadAllGuns()
 	{
 		for (Gun gun : guns)
 		{
@@ -307,12 +328,12 @@ public class GunPlayer
 		}
 	}
 
-	public boolean checkAmmo(Gun gun, int amount)
+	public final boolean checkAmmo(Gun gun, int amount)
 	{
 		return InventoryHelper.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte()) >= amount;
 	}
 
-	public void removeAmmo(Gun gun, int amount)
+	public final void removeAmmo(Gun gun, int amount)
 	{
 		if (amount == 0)
 		{
@@ -322,12 +343,12 @@ public class GunPlayer
 		InventoryHelper.removeItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte(), amount);
 	}
 
-	public ItemStack getLastItemHeld()
+	public final ItemStack getLastItemHeld()
 	{
-		return this.lastHeldItem;
+		return lastHeldItem;
 	}
 
-	public Gun getGun(Material material)
+	public final Gun getGun(Material material)
 	{
 		for (Gun check : guns)
 		{
@@ -338,7 +359,7 @@ public class GunPlayer
 		return null;
 	}
 
-	public void calculateGuns()
+	private final void calculateGuns()
 	{
 		List<Gun> loadedGuns = new ArrayList<Gun>();
 

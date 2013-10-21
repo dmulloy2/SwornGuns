@@ -8,15 +8,15 @@ public enum Permission
 {
 	RELOAD;
 
-	public final String node;
+	private final String node;
 
 	Permission()
 	{
 		this.node = toString().toLowerCase().replaceAll("_", ".");
 	}
 
-	public String getNode()
+	public final String getNode()
 	{
-		return this.node;
+		return node;
 	}
 }

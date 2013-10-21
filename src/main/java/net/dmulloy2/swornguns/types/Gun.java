@@ -86,8 +86,6 @@ public class Gun
 	private String gunName;
 	private String fileName;
 	private String projType = "";
-//	private String outOfAmmoMessage = "";
-//	private String permissionMessage = "";
 
 	private SwornGuns plugin;
 
@@ -101,11 +99,13 @@ public class Gun
 	{
 		this.gunName = name;
 		this.fileName = name;
-//		this.outOfAmmoMessage = "Out of ammo!";
 		this.plugin = plugin;
 	}
 
-	public void shoot()
+	/**
+	 * Handles the actual shooting of the gun
+	 */
+	public final void shoot()
 	{
 		if (owner != null && owner.getPlayer().isOnline() && owner.getPlayer().getHealth() > 0.0D && ! reloading)
 		{
@@ -114,7 +114,7 @@ public class Gun
 			{
 				owner.removeAmmo(this, ammoAmtNeeded);
 
-				if (needsReload())
+				if (roundsFired >= maxClipSize && hasClip)
 				{
 					reloadGun();
 					return;
@@ -138,11 +138,12 @@ public class Gun
 				}
 
 				double accuracy = this.accuracy;
-				if ((owner.getPlayer().isSneaking()) && (accuracy_crouched > -1.0D))
+				if (owner.getPlayer().isSneaking() && accuracy_crouched > -1.0D)
 				{
 					accuracy = accuracy_crouched;
 				}
-				if ((owner.isAimedIn()) && (accuracy_aimed > -1.0D))
+
+				if (owner.isAimedIn() && accuracy_aimed > -1.0D)
 				{
 					accuracy = accuracy_aimed;
 				}
@@ -174,7 +175,8 @@ public class Gun
 					plugin.addBullet(bullet);
 				}
 
-				attemptReload();
+				if (roundsFired >= maxClipSize && hasClip)
+					reloadGun();
 			}
 			else
 			{
@@ -186,23 +188,18 @@ public class Gun
 		}
 	}
 
-	public void clear()
+	/**
+	 * Makes this gun generic again
+	 */
+	public final void clear()
 	{
 		this.owner = null;
 	}
 
-	public boolean needsReload()
-	{
-		return ((roundsFired >= maxClipSize) && (hasClip));
-	}
-
-	public void attemptReload()
-	{
-		if (needsReload())
-			reloadGun();
-	}
-
-	public void tick()
+	/**
+	 * Handles bullet movement, cooldowns, etc
+	 */
+	public final void tick()
 	{
 		this.ticks++;
 		this.lastFired++;
@@ -251,6 +248,11 @@ public class Gun
 			this.firing = false;
 	}
 
+	/**
+	 * Returns an exact replica of this gun
+	 * 
+	 * @return An exact replica of this gun
+	 */
 	public Gun copy()
 	{
 		Gun g = new Gun(gunName, plugin);
@@ -283,7 +285,6 @@ public class Gun
 		g.armorPenetration = this.armorPenetration;
 		g.isThrowable = this.isThrowable;
 		g.ignoreItemData = this.ignoreItemData;
-//		g.outOfAmmoMessage = this.outOfAmmoMessage;
 		g.projType = this.projType;
 		g.needsPermission = this.needsPermission;
 		g.node = this.node;
@@ -300,7 +301,6 @@ public class Gun
 		g.reloadType = this.reloadType;
 		g.releaseTime = this.releaseTime;
 		g.canGoPastMaxDistance = this.canGoPastMaxDistance;
-//		g.permissionMessage = this.permissionMessage;
 		g.priority = this.priority;
 
 		if (releaseEffect != null)
@@ -311,12 +311,18 @@ public class Gun
 		return g;
 	}
 
+	/**
+	 * Reloads the gun
+	 */
 	public void reloadGun()
 	{
 		this.reloading = true;
 		this.gunReloadTimer = reloadTime;
 	}
 
+	/**
+	 * Plays various gun sounds
+	 */
 	private void gunSounds()
 	{
 		if (reloading)
@@ -386,6 +392,11 @@ public class Gun
 		}
 	}
 
+	/**
+	 * Handles recoil for a player
+	 * 
+	 * @param player - {@link Player} to handle recoil for
+	 */
 	private void doRecoil(Player player)
 	{
 		if (recoil != 0.0D)
@@ -404,6 +415,12 @@ public class Gun
 		}
 	}
 
+	/**
+	 * Does knockback for an entity
+	 * 
+	 * @param entity - {@link LivingEntity} to do knock back for
+	 * @param speed - Knockback speed
+	 */
 	public void doKnockback(LivingEntity entity, Vector speed)
 	{
 		if (knockback > 0.0D)
@@ -413,6 +430,9 @@ public class Gun
 		}
 	}
 
+	/**
+	 * Finishes reloading
+	 */
 	public void finishReloading()
 	{
 		this.bulletsShot = 0;
@@ -421,6 +441,9 @@ public class Gun
 		this.gunReloadTimer = 0;
 	}
 
+	/**
+	 * Finishes shooting
+	 */
 	private void finishShooting()
 	{
 		this.bulletsShot = 0;
@@ -428,21 +451,35 @@ public class Gun
 		this.firing = false;
 	}
 
+	/**
+	 * @return Name of the gun
+	 */
 	public String getName()
 	{
 		return gunName;
 	}
 
+	/**
+	 * @return Ammo material
+	 */
 	public Material getAmmoMaterial()
 	{
 		return ammoType;
 	}
 
+	/**
+	 * @return Gun material
+	 */
 	public Material getGunMaterial()
 	{
 		return gunType;
 	}
 
+	/**
+	 * Sets the name of the gun
+	 * 
+	 * @param val - Name of the gun
+	 */
 	public void setName(String val)
 	{
 		this.gunName = FormatUtil.format(val);
@@ -469,6 +506,11 @@ public class Gun
 		return -1;
 	}
 
+	/**
+	 * Sets the gun's type
+	 * 
+	 * @param val - The gun's type
+	 */
 	public void setGunType(String val)
 	{
 		this.gunType = MaterialUtil.getMaterial(getValueFromString(val));
@@ -482,6 +524,11 @@ public class Gun
 		}
 	}
 
+	/**
+	 * Sets the gun's ammo type
+	 * 
+	 * @param val - The gun's ammo type
+	 */
 	public void setAmmoType(String val)
 	{
 		this.ammoType = MaterialUtil.getMaterial(getValueFromString(val));
@@ -493,12 +540,16 @@ public class Gun
 		}
 	}
 
+	/**
+	 * Adds gun sounds from a composite string
+	 * 
+	 * @param val - Composite string of sounds
+	 */
 	public void addGunSounds(String val)
 	{
-		String[] sounds = val.split(",");
-		gunSound.addAll(Arrays.asList(sounds));
+		gunSound.addAll(Arrays.asList(val.split(",")));
 	}
-	
+
 	@Override
 	public String toString()
 	{
