@@ -35,3 +35,7 @@ block-crack: true
 
 debug: false
 # Debug
+
+updateGunsOnWorldChange: false
+# Updates guns when a player changes worlds
+# Useful for per-world permissions, etc.

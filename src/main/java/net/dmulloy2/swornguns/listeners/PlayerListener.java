@@ -10,12 +10,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * @author dmulloy2
@@ -105,6 +107,28 @@ public class PlayerListener implements Listener
 					gp.handleClick(clickType);
 				}
 			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onPlayerChangedWorld(PlayerChangedWorldEvent event)
+	{
+		// Updates a player's guns when they change worlds,
+		// Useful for per-world permissions and stuff
+		if (plugin.getConfig().getBoolean("updateGunsOnWorldChange", false))
+		{
+			final GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
+	
+			// This basically ensures that permissions have a chance to
+			// load and accounts for async world changed event
+			new BukkitRunnable()
+			{
+				@Override
+				public void run()
+				{
+					gp.calculateGuns();
+				}
+			}.runTaskLater(plugin, 20L);
 		}
 	}
 }

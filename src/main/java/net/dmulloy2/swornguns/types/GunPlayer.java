@@ -359,8 +359,10 @@ public class GunPlayer
 		return null;
 	}
 
-	private final void calculateGuns()
+	public final void calculateGuns()
 	{
+		guns.clear();
+
 		List<Gun> loadedGuns = new ArrayList<Gun>();
 
 		for (Gun gun : plugin.getLoadedGuns())
