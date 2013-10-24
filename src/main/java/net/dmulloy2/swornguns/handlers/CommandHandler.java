@@ -6,8 +6,8 @@ import java.util.List;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.commands.CmdHelp;
 import net.dmulloy2.swornguns.commands.SwornGunsCommand;
+import net.dmulloy2.swornguns.util.FormatUtil;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -25,7 +25,7 @@ public class CommandHandler implements CommandExecutor
 	public CommandHandler(final SwornGuns plugin)
 	{
 		this.plugin = plugin;
-		registeredCommands = new ArrayList<SwornGunsCommand>();
+		this.registeredCommands = new ArrayList<SwornGunsCommand>();
 	}
 
 	public void registerCommand(SwornGunsCommand command)
@@ -75,7 +75,8 @@ public class CommandHandler implements CommandExecutor
 				}
 			}
 
-			sender.sendMessage(plugin.getPrefix() + ChatColor.RED + "Unknown SwornGuns command \"" + args[0] + "\". Try /ua help!");
+			sender.sendMessage(plugin.getPrefix() +
+					FormatUtil.format("&cUnknown SwornGuns command \"{0}\". Try /swornguns help!"));
 		}
 		else
 		{

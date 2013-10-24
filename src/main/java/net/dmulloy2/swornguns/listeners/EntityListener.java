@@ -99,9 +99,12 @@ public class EntityListener implements Listener
 					if (mat == Material.STONE)
 						applicable = true;
 				}
-				
-				if (shatterBlocks.contains(mat))
-					applicable = true;
+
+				if (plugin.getConfig().getBoolean("block-shatter.enabled"))
+				{
+					if (shatterBlocks.contains(mat))
+						applicable = true;
+				}
 			}
 
 			// UltimateArena - check for inside arena
@@ -125,9 +128,12 @@ public class EntityListener implements Listener
 						}
 					}
 
-					if (shatterBlocks.contains(mat))
+					if (plugin.getConfig().getBoolean("block-shatter.enabled"))
 					{
-						b.breakNaturally();
+						if (shatterBlocks.contains(mat))
+						{
+							b.breakNaturally();
+						}
 					}
 				}
 			}
