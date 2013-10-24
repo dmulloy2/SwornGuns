@@ -361,7 +361,7 @@ public class GunPlayer
 
 	public final void calculateGuns()
 	{
-		guns.clear();
+//		guns.clear();
 
 		List<Gun> loadedGuns = new ArrayList<Gun>();
 
