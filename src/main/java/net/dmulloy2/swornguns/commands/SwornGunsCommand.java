@@ -58,7 +58,7 @@ public abstract class SwornGunsCommand implements CommandExecutor
 		if (sender instanceof Player)
 			player = (Player) sender;
 
-		if (mustBePlayer && ! isPlayer())
+		if (mustBePlayer && !isPlayer())
 		{
 			err("You must be a player to execute this command!");
 			return;
@@ -69,11 +69,11 @@ public abstract class SwornGunsCommand implements CommandExecutor
 			invalidArgs();
 			return;
 		}
-		
+
 		if (! hasPermission())
 		{
 			err("You do not have permission to perform this command!");
-			log(Level.WARNING, sender.getName() + " was denied access to a command!");
+			log(Level.WARNING, "{0} was denied access to a command!", sender.getName());
 			return;
 		}
 
@@ -82,12 +82,12 @@ public abstract class SwornGunsCommand implements CommandExecutor
 
 	protected final boolean isPlayer()
 	{
-		return (player != null);
+		return player != null;
 	}
 
 	private final boolean hasPermission()
 	{
-		return (plugin.getPermissionHandler().hasPermission(sender, permission));
+		return plugin.getPermissionHandler().hasPermission(sender, permission);
 	}
 
 	public String getDescription()
@@ -137,7 +137,7 @@ public abstract class SwornGunsCommand implements CommandExecutor
 	{
 		sender.sendMessage(FormatUtil.format(message, objects));
 	}
-	
+
 	protected final void err(String string, Object... objects)
 	{
 		sendpMessage("&c" + string, objects);
@@ -147,7 +147,7 @@ public abstract class SwornGunsCommand implements CommandExecutor
 	{
 		err("Invalid arguments! Try: " + getUsageTemplate(false));
 	}
-	
+
 	// Logging
 	protected final void log(Level level, String string, Object... objects)
 	{

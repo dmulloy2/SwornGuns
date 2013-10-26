@@ -53,6 +53,9 @@ public class GunPlayer
 
 	public final void handleClick(String clickType)
 	{
+		if (! enabled)
+			return;
+		
 		ItemStack inHand = controller.getItemInHand();
 		if (inHand == null || inHand.getType() == Material.AIR)
 			return;
