@@ -169,15 +169,18 @@ public class Bullet
 
 	public final void remove()
 	{
+		// (Final) hit
 		onHit();
-		destroy();
 
-		// Finalize
+		// Mark as dead
 		this.dead = true;
 
-		plugin.removeBullet(this);
-
+		// Destroy
 		projectile.remove();
+		destroy();
+
+		// Unregister
+		plugin.removeBullet(this);
 	}
 
 	public final void onHit()
