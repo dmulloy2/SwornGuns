@@ -9,7 +9,6 @@ import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.FormatUtil;
 import net.dmulloy2.swornguns.util.MaterialUtil;
-import net.dmulloy2.swornguns.util.Util;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -127,7 +126,7 @@ public class Gun
 
 				for (int i = 0; i < gunSound.size(); i++)
 				{
-					Sound sound = Util.getSound(gunSound.get(i));
+					Sound sound = Sound.valueOf(gunSound.get(i));
 					if (sound != null)
 					{
 						if (localGunSound)
