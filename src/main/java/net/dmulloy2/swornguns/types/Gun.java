@@ -126,7 +126,7 @@ public class Gun
 
 				for (int i = 0; i < gunSound.size(); i++)
 				{
-					Sound sound = Sound.valueOf(gunSound.get(i));
+					Sound sound = getSound(gunSound.get(i));
 					if (sound != null)
 					{
 						if (localGunSound)
@@ -547,6 +547,20 @@ public class Gun
 	public void addGunSounds(String val)
 	{
 		gunSound.addAll(Arrays.asList(val.split(",")));
+	}
+
+	public Sound getSound(String s)
+	{
+		try
+		{
+			s = s.replaceAll(" ", "_");
+			s = s.toUpperCase();
+			return Sound.valueOf(s);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
 	}
 
 	@Override
