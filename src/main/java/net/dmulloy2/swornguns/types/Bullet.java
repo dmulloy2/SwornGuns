@@ -11,11 +11,19 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Egg;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Fish;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LargeFireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.SmallFireball;
 import org.bukkit.entity.Snowball;
+import org.bukkit.entity.ThrownExpBottle;
+import org.bukkit.entity.ThrownPotion;
+import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
@@ -72,12 +80,34 @@ public class Bullet
 			Class<? extends Projectile> mclass = null;
 
 			String check = gun.getProjType().toLowerCase().replaceAll("_", "").replaceAll(" ", "");
-			if (check.equalsIgnoreCase("egg"))
-				mclass = Egg.class;
-			else if (check.equalsIgnoreCase("arrow"))
-				mclass = Arrow.class;
-			else
-				mclass = Snowball.class;
+			switch (check)
+			{
+				// All valid Entities that extend Projectile
+				case "arrow":
+					mclass = Arrow.class;
+				case "egg":
+					mclass = Egg.class;
+				case "enderpearl":
+					mclass = EnderPearl.class;
+				case "fireball":
+					mclass = Fireball.class;
+				case "fish":
+					mclass = Fish.class;
+				case "largefireball":
+					mclass = LargeFireball.class;
+				case "smallfireball":
+					mclass = SmallFireball.class;
+				case "snowball":
+					mclass = Snowball.class;
+				case "thrownexpbottle":
+					mclass = ThrownExpBottle.class;
+				case "thrownpotion":
+					mclass = ThrownPotion.class;
+				case "witherskull":
+					mclass = WitherSkull.class;
+				default:
+					mclass = Snowball.class;
+			}
 
 			this.projectile = owner.getPlayer().launchProjectile(mclass);
 
