@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Permission;
 import net.dmulloy2.swornguns.util.FormatUtil;
+import net.dmulloy2.ultimatearena.util.Util;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -39,9 +40,9 @@ public abstract class SwornGunsCommand implements CommandExecutor
 	public SwornGunsCommand(SwornGuns plugin)
 	{
 		this.plugin = plugin;
-		requiredArgs = new ArrayList<String>(2);
-		optionalArgs = new ArrayList<String>(2);
-		aliases = new ArrayList<String>(2);
+		this.requiredArgs = new ArrayList<String>(2);
+		this.optionalArgs = new ArrayList<String>(2);
+		this.aliases = new ArrayList<String>(2);
 	}
 
 	@Override
@@ -58,7 +59,7 @@ public abstract class SwornGunsCommand implements CommandExecutor
 		if (sender instanceof Player)
 			player = (Player) sender;
 
-		if (mustBePlayer && !isPlayer())
+		if (mustBePlayer && ! isPlayer())
 		{
 			err("You must be a player to execute this command!");
 			return;
@@ -73,11 +74,19 @@ public abstract class SwornGunsCommand implements CommandExecutor
 		if (! hasPermission())
 		{
 			err("You do not have permission to perform this command!");
-			log(Level.WARNING, "{0} was denied access to a command!", sender.getName());
+			log(Level.WARNING, sender.getName() + " was denied access to a command!");
 			return;
 		}
 
-		perform();
+		try
+		{
+			perform();
+		}
+		catch (Throwable e)
+		{
+			err("Error executing command: {0}", e.getMessage());
+			plugin.getLogHandler().debug(Util.getUsefulStack(e, "executing command " + name));
+		}
 	}
 
 	protected final boolean isPlayer()

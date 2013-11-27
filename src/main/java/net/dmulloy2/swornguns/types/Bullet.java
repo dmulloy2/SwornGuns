@@ -267,7 +267,6 @@ public class Bullet
 					new Explosion(lastLocation).explode();
 				}
 
-				// TODO: Fix double kills with this...
 				explode();
 				fireSpread();
 				flash();
@@ -301,12 +300,13 @@ public class Bullet
 							if (lentity.hasLineOfSight(projectile))
 							{
 								int dmg = shotFrom.getExplosionDamage();
-								if (dmg == -1)
-									dmg = shotFrom.getGunDamage();
+//								if (dmg == -1)
+//									dmg = shotFrom.getGunDamage();
 	
-								lentity.setLastDamage(0.0D);
-								lentity.damage(dmg, shooter.getPlayer());
-								lentity.setLastDamage(0.0D);
+//								lentity.setLastDamage(0.0D);
+								if (dmg > 0)
+									lentity.damage(dmg, shooter.getPlayer());
+//								lentity.setLastDamage(0.0D);
 							}
 						}
 					}
@@ -335,7 +335,7 @@ public class Bullet
 						if (! event.isCancelled())
 						{
 							lentity.setFireTicks(140);
-							lentity.setLastDamage(0.0D);
+//							lentity.setLastDamage(0.0D);
 							lentity.damage(1, shooter.getPlayer());
 						}
 					}

@@ -13,6 +13,7 @@ import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
+import net.dmulloy2.swornguns.types.Reloadable;
 
 /**
  * API Implementation for {@link SwornGuns}
@@ -20,25 +21,25 @@ import net.dmulloy2.swornguns.types.GunPlayer;
  * @author dmulloy2
  */
 
-public abstract interface SwornGunsAPI
+public abstract interface SwornGunsAPI extends Reloadable
 {
-	public abstract Permission getPermission(Gun gun);
+	Permission getPermission(Gun gun);
 	
-	public abstract GunPlayer getGunPlayer(Player player);
+	GunPlayer getGunPlayer(Player player);
 	
-	public abstract Gun getGun(Material material);
+	Gun getGun(Material material);
 	
-	public abstract Gun getGun(String gunName);
+	Gun getGun(String gunName);
 	
-	public abstract void removeBullet(Bullet bullet);
+	void removeBullet(Bullet bullet);
 	
-	public abstract void addBullet(Bullet bullet);
+	void addBullet(Bullet bullet);
 	
-	public abstract Bullet getBullet(Entity proj);
+	Bullet getBullet(Entity proj);
 	
-	public abstract List<Gun> getGunsByType(ItemStack item);
+	List<Gun> getGunsByType(ItemStack item);
 	
-	public abstract void removeEffect(EffectType effectType);
+	void removeEffect(EffectType effectType);
 	
-	public abstract void addEffect(EffectType effectType);
+	void addEffect(EffectType effectType);
 }

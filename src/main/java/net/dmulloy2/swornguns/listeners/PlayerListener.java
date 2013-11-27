@@ -101,10 +101,13 @@ public class PlayerListener implements Listener
 					clickType = "right";
 
 				Player player = event.getPlayer();
-				GunPlayer gp = plugin.getGunPlayer(player);
-				if (gp != null)
+				if (! plugin.getConfig().getStringList("disabledWorlds").contains(player.getWorld().getName()))
 				{
-					gp.handleClick(clickType);
+					GunPlayer gp = plugin.getGunPlayer(player);
+					if (gp != null)
+					{
+						gp.handleClick(clickType);
+					}
 				}
 			}
 		}

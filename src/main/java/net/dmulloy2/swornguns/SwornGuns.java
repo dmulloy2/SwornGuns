@@ -428,4 +428,26 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 			}
 		}
 	}
+
+	@Override
+	public void reload()
+	{
+		// Config
+		reloadConfig();
+
+		// Reload guns
+		loadedGuns.clear();
+		loadGuns();
+		loadProjectiles();
+
+		// Refresh players
+		for (int i = 0; i < players.size(); i++)
+		{
+			GunPlayer gp = players.get(i);
+			if (gp != null)
+			{
+				gp.reload();
+			}
+		}
+	}
 }

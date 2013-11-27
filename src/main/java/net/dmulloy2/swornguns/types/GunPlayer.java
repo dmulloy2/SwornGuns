@@ -29,7 +29,7 @@ import org.bukkit.potion.PotionEffectType;
  */
 
 @Data
-public class GunPlayer
+public class GunPlayer implements Reloadable
 {
 	private ItemStack lastHeldItem;
 	private Gun currentlyFiring;
@@ -460,5 +460,12 @@ public class GunPlayer
 	public String toString()
 	{
 		return "GunPlayer { name = " + controller.getName() + " }";
+	}
+
+	@Override
+	public void reload()
+	{
+		guns.clear();
+		calculateGuns();
 	}
 }

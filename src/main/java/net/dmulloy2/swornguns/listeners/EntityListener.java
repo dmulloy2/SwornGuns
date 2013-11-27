@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Bullet;
+import net.dmulloy2.swornguns.types.Reloadable;
 import net.dmulloy2.swornguns.util.MaterialUtil;
 
 import org.bukkit.Effect;
@@ -37,7 +38,7 @@ import com.massivecraft.factions.Faction;
  * @author dmulloy2
  */
 
-public class EntityListener implements Listener
+public class EntityListener implements Listener, Reloadable
 {
 	private final List<Material> shatterBlocks;
 	
@@ -45,20 +46,11 @@ public class EntityListener implements Listener
 	public EntityListener(SwornGuns plugin)
 	{
 		this.plugin = plugin;
-		
 		this.shatterBlocks = new ArrayList<Material>();
-		
-		List<String> configMaterials = plugin.getConfig().getStringList("block-shatter.blocks");
-		for (String configMaterial : configMaterials)
-		{
-			Material material = MaterialUtil.getMaterial(configMaterial);
-			if (material != null)
-			{
-				shatterBlocks.add(material);
-			}
-		}
+		this.reload(); // Load configuration
 	}
 
+	// TODO: Check for cancellation?
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onProjectileHit(ProjectileHitEvent event)
 	{
@@ -143,40 +135,9 @@ public class EntityListener implements Listener
 		event.getEntity().remove();
 	}
 
-//	@EventHandler(priority = EventPriority.HIGHEST)
-//	public void onEntityDeath(EntityDeathEvent event)
-//	{
-//		Entity dead = event.getEntity();
-//		if (dead.getLastDamageCause() != null)
-//		{
-//			EntityDamageEvent e = dead.getLastDamageCause();
-//			if (e instanceof EntityDamageByEntityEvent)
-//			{
-//				EntityDamageByEntityEvent ede = (EntityDamageByEntityEvent) e;
-//				Entity damager = ede.getDamager();
-//				if (damager instanceof Projectile)
-//				{
-//					Projectile proj = (Projectile) damager;
-//					Bullet bullet = plugin.getBullet(proj);
-//					if (bullet != null)
-//					{
-//						Gun used = bullet.getShotFrom();
-//						GunPlayer shooter = bullet.getShooter();
-//
-//						SwornGunsKillEntityEvent sworngunskill = new SwornGunsKillEntityEvent(shooter, used, dead);
-//						plugin.getServer().getPluginManager().callEvent(sworngunskill);
-//					}
-//				}
-//			}
-//		}
-//	}
-	
-	@EventHandler(priority = EventPriority.HIGH)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
 	{
-		if (event.isCancelled())
-			return;
-		
 		if (event.getEntity() instanceof LivingEntity)
 		{
 			LivingEntity hurt = (LivingEntity) event.getEntity();
@@ -313,4 +274,18 @@ public class EntityListener implements Listener
 		return false;
 	}
 	// Realism end
+
+	@Override
+	public void reload()
+	{
+		List<String> configMaterials = plugin.getConfig().getStringList("block-shatter.blocks");
+		for (String configMaterial : configMaterials)
+		{
+			Material material = MaterialUtil.getMaterial(configMaterial);
+			if (material != null)
+			{
+				shatterBlocks.add(material);
+			}
+		}
+	}
 }

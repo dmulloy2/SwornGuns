@@ -2,26 +2,26 @@
 # This is mostly for realism features
 # By dmulloy2
 
+# Block break effect when entities are hit
+# Defaults to redstone block
+# guns-only: Do blood effect for only guns
 blood-effect:
   enabled: true
   block-id: 152
-  # Block break effect when entities are hit
-  # Defaults to redstone block
   guns-only: false
-  # Do blood effect for only guns
 
-smoke-effect: true
 # Smoke effect when entities are hit by a bullet
+smoke-effect: true
 
+# Sound made when an entity is hit by a bullet
+# A list of valid sounds can be found here:
+# http://jd.bukkit.org/rb/apidocs/org/bukkit/Sound.html
 bullet-sound:
   enabled: true
   sound: MAGMACUBE_JUMP
-  # Sound made when an entity is hit by a bullet
-  # A list of valid sounds can be found here:
-  # http://jd.bukkit.org/rb/apidocs/org/bukkit/Sound.html
 
-block-shatter:
 # Blocks broken when shot
+block-shatter:
   enabled: true
   blocks:
     - leaves
@@ -29,13 +29,17 @@ block-shatter:
     - thin_glass
     - sand
     - gravel
-    
-block-crack: true
+
 # Crackable blocks crack when shot
+block-crack: true
 
+# Debug - only use this if you know what you're doing
 debug: false
-# Debug
 
+# Disabled Worlds
+# Worlds guns will not fire in
+disabledWorlds:
+
+# Whether or not to update guns when a player changes worlds
+# Useful for per-world permissions and stuff
 updateGunsOnWorldChange: false
-# Updates guns when a player changes worlds
-# Useful for per-world permissions, etc.
