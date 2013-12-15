@@ -84,7 +84,7 @@ public class Bullet
 			String check = gun.getProjType().toLowerCase().replaceAll("_", "").replaceAll(" ", "");
 			switch (check)
 			{
-			// All valid Entities that extend Projectile
+				// All valid Entities that extend Projectile
 				case "arrow":
 					mclass = Arrow.class;
 					break;
@@ -114,6 +114,8 @@ public class Bullet
 					break;
 				case "witherskull":
 					mclass = WitherSkull.class;
+					break;
+				default:
 					break;
 			}
 
