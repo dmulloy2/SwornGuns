@@ -84,27 +84,37 @@ public class Bullet
 			String check = gun.getProjType().toLowerCase().replaceAll("_", "").replaceAll(" ", "");
 			switch (check)
 			{
-				// All valid Entities that extend Projectile
+			// All valid Entities that extend Projectile
 				case "arrow":
 					mclass = Arrow.class;
+					break;
 				case "egg":
 					mclass = Egg.class;
+					break;
 				case "enderpearl":
 					mclass = EnderPearl.class;
+					break;
 				case "fireball":
 					mclass = Fireball.class;
+					break;
 				case "fish":
 					mclass = Fish.class;
+					break;
 				case "largefireball":
 					mclass = LargeFireball.class;
+					break;
 				case "smallfireball":
 					mclass = SmallFireball.class;
+					break;
 				case "thrownexpbottle":
 					mclass = ThrownExpBottle.class;
+					break;
 				case "thrownpotion":
 					mclass = ThrownPotion.class;
+					break;
 				case "witherskull":
 					mclass = WitherSkull.class;
+					break;
 			}
 
 			this.projectile = owner.getPlayer().launchProjectile(mclass);
