@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.FormatUtil;
 import net.dmulloy2.swornguns.util.MaterialUtil;
@@ -21,7 +22,8 @@ import org.bukkit.util.Vector;
  * @author dmulloy2
  */
 
-@Data
+@Getter
+@Setter
 public class Gun
 {
 	private boolean canHeadshot;

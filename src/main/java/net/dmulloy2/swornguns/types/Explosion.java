@@ -37,8 +37,9 @@ public class Explosion
 		meta.setPower(1);
 
 		firework.setFireworkMeta(meta);
+		firework.detonate();
 
-		playFirework(location, firework);
+//		playFirework(location, firework);
 	}
 
 	/**
