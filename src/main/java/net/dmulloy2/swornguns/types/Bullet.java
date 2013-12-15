@@ -77,7 +77,7 @@ public class Bullet
 		}
 		else
 		{
-			Class<? extends Projectile> mclass = null;
+			Class<? extends Projectile> mclass = Snowball.class;
 
 			String check = gun.getProjType().toLowerCase().replaceAll("_", "").replaceAll(" ", "");
 			switch (check)
@@ -97,16 +97,12 @@ public class Bullet
 					mclass = LargeFireball.class;
 				case "smallfireball":
 					mclass = SmallFireball.class;
-				case "snowball":
-					mclass = Snowball.class;
 				case "thrownexpbottle":
 					mclass = ThrownExpBottle.class;
 				case "thrownpotion":
 					mclass = ThrownPotion.class;
 				case "witherskull":
 					mclass = WitherSkull.class;
-				default:
-					mclass = Snowball.class;
 			}
 
 			this.projectile = owner.getPlayer().launchProjectile(mclass);
@@ -278,35 +274,40 @@ public class Bullet
 	{
 		if (shotFrom.getExplodeRadius() > 0.0D)
 		{
+			// Create the explosion
 			lastLocation.getWorld().createExplosion(lastLocation, 0.0F);
 
 			if (shotFrom.isThrowable())
 				projectile.teleport(projectile.getLocation().add(0.0D, 1.0D, 0.0D));
 
-			int c = (int) shotFrom.getExplodeRadius();
-			List<Entity> entities = projectile.getNearbyEntities(c, c, c);
-			for (Entity entity : entities)
+			// Calculate damage
+			double damage = shotFrom.getExplosionDamage();
+			if (damage <= 0.0D)
+				damage = shotFrom.getGunDamage();
+
+			if (damage > 0.0D)
 			{
-				if (entity instanceof LivingEntity)
+				int rad = (int) shotFrom.getExplodeRadius();
+				List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
+				for (Entity entity : entities)
 				{
-					LivingEntity lentity = (LivingEntity) entity;
-					if (lentity.getHealth() > 0.0D)
+					if (entity.isValid() && entity instanceof LivingEntity)
 					{
-						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM,
-								0.0D);
-						plugin.getServer().getPluginManager().callEvent(event);
-						if (! event.isCancelled())
+						LivingEntity lentity = (LivingEntity) entity;
+						if (lentity.getHealth() > 0.0D)
 						{
-							if (lentity.hasLineOfSight(projectile))
+							// Call event
+							EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity,
+									DamageCause.ENTITY_EXPLOSION, damage);
+							plugin.getServer().getPluginManager().callEvent(event);
+							if (! event.isCancelled())
 							{
-								int dmg = shotFrom.getExplosionDamage();
-//								if (dmg == -1)
-//									dmg = shotFrom.getGunDamage();
-	
-//								lentity.setLastDamage(0.0D);
-								if (dmg > 0)
-									lentity.damage(dmg, shooter.getPlayer());
-//								lentity.setLastDamage(0.0D);
+								if (lentity.hasLineOfSight(projectile))
+								{
+//									lentity.setLastDamage(0.0D);
+									lentity.damage(damage, shooter.getPlayer());
+//									lentity.setLastDamage(0.0D);
+								}
 							}
 						}
 					}
@@ -320,23 +321,23 @@ public class Bullet
 		if (shotFrom.getFireRadius() > 0.0D)
 		{
 			lastLocation.getWorld().playSound(lastLocation, Sound.GLASS, 20.0F, 20.0F);
-			int c = (int) shotFrom.getFireRadius();
-			List<Entity> entities = projectile.getNearbyEntities(c, c, c);
+			int rad = (int) shotFrom.getFireRadius();
+			List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 			for (Entity entity : entities)
 			{
-				if (entity instanceof LivingEntity)
+				if (entity.isValid() && entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
 					if (lentity.getHealth() > 0.0D)
 					{
-						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM,
-								0.0D);
+						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.FIRE_TICK,
+								1.0D);
 						plugin.getServer().getPluginManager().callEvent(event);
-						if (! event.isCancelled())
+						if (!event.isCancelled())
 						{
 							lentity.setFireTicks(140);
 //							lentity.setLastDamage(0.0D);
-							lentity.damage(1, shooter.getPlayer());
+							lentity.damage(1.0D, shooter.getPlayer());
 						}
 					}
 				}
@@ -353,7 +354,7 @@ public class Bullet
 			List<Entity> entities = projectile.getNearbyEntities(c, c, c);
 			for (Entity entity : entities)
 			{
-				if (entity instanceof LivingEntity)
+				if (entity.isValid() && entity instanceof LivingEntity)
 				{
 					LivingEntity lentity = (LivingEntity) entity;
 					if (lentity.getHealth() > 0.0D)
