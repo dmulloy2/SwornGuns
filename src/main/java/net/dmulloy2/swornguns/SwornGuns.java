@@ -1,6 +1,6 @@
 /**
  * SwornGuns - a bukkit plugin
- * Copyright (C) 2013 MineSworn and Affiliates
+ * Copyright (C) 2013 - 2014 MineSworn and Affiliates
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
