@@ -181,7 +181,7 @@ public class GunPlayer implements Reloadable
 		renameGuns();
 	}
 
-	private final void renameGuns()
+	public final void renameGuns()
 	{
 		PlayerInventory inv = controller.getInventory();
 		for (ItemStack item : inv.getContents())
@@ -212,49 +212,6 @@ public class GunPlayer implements Reloadable
 
 		return "";
 	}
-
-//	private final List<Gun> getGunsByType(ItemStack item)
-//	{
-//		List<Gun> ret = new ArrayList<Gun>();
-//		for (Gun gun : guns)
-//		{
-//			if (gun.getGunMaterial() == item.getType())
-//			{
-//				ret.add(gun);
-//			}
-//		}
-//
-//		return ret;
-//	}
-
-//	protected String getGunName(ItemStack item)
-//	{
-//		String ret = "";
-//		List<Gun> tempgun = getGunsByType(item);
-//		int amtGun = tempgun.size();
-//		if (amtGun > 0)
-//		{
-//			for (Gun current : tempgun)
-//			{
-//				if (plugin.getPermissionHandler().canFireGun(controller, current))
-//				{
-//					if (current.getGunMaterial() != null && current.getGunMaterial() == item.getType())
-//					{
-//						byte gunDat = current.getGunByte();
-//
-//						@SuppressWarnings("deprecation") // TODO
-//						byte itmDat = item.getData().getData();
-//
-//						if ((gunDat == itmDat) || (current.isIgnoreItemData()))
-//						{
-//							return getGunName(current);
-//						}
-//					}
-//				}
-//			}
-//		}
-//		return ret;
-//	}
 
 	private final String getGunName(Gun current)
 	{
