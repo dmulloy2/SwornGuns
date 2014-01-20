@@ -219,11 +219,11 @@ public class Gun
 
 		gunSounds();
 
-		if (reloading)
-		{
-			// Update reload status
-			owner.renameGuns();
-		}
+//		if (reloading)
+//		{
+//			// Update reload status
+//			owner.renameGuns();
+//		}
 
 		if (lastFired > 6)
 		{

@@ -189,7 +189,7 @@ public class GunPlayer implements Reloadable
 			if (item != null && item.getType() != Material.AIR)
 			{
 				String name = getGunName(item);
-				if (name != null && ! name.isEmpty())
+				if (! name.isEmpty())
 				{
 					ItemMeta meta = item.getItemMeta();
 					meta.setDisplayName(name);
@@ -213,52 +213,41 @@ public class GunPlayer implements Reloadable
 		return "";
 	}
 
-	private final String getGunName(Gun current)
+	private final String getGunName(Gun gun)
 	{
-		String add = "";
-		String refresh = "";
-		if (current.isHasClip())
+		StringBuilder add = new StringBuilder();
+		if (gun.isHasClip())
 		{
-			int leftInClip = 0;
-			int ammoLeft = 0;
-			int maxInClip = current.getMaxClipSize();
+			int maxClip = gun.getMaxClipSize();
+			int ammo = (int) Math.floor(InventoryHelper.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte())
+					/ gun.getAmmoAmtNeeded());
+			int ammoLeft = ammo - maxClip + gun.getRoundsFired();
+			int leftInClip = ammo - ammoLeft;
 
-			int currentAmmo = (int) Math.floor(InventoryHelper.amtItem(controller.getInventory(), current.getAmmoType(),
-					current.getAmmoByte()) / current.getAmmoAmtNeeded());
-			ammoLeft = currentAmmo - maxInClip + current.getRoundsFired();
-			if (ammoLeft < 0)
-				ammoLeft = 0;
-			leftInClip = currentAmmo - ammoLeft;
-			add = ChatColor.YELLOW + "    \u00AB" + Integer.toString(leftInClip) + " \uFFE8 " + Integer.toString(ammoLeft) + "\u00BB";
-			if (current.isReloading())
+			add.append(ChatColor.YELLOW + "    \u00AB" + leftInClip + " \uFFE8 " + ammoLeft + "\u00BB");
+
+			StringBuilder reload = new StringBuilder();
+			if (gun.isReloading())
 			{
-				int reloadSize = 4;
-				double reloadFrac = (current.getReloadTime() - current.getGunReloadTimer()) / current.getReloadTime();
-				int amt = (int) Math.round(reloadFrac * reloadSize);
-				for (int ii = 0; ii < amt; ii++)
+				int scale = 4;
+				int bars = Math.round(scale - ((gun.getGunReloadTimer()) * scale) / gun.getReloadTime());
+				for (int i = 0; i < bars; i++)
 				{
-					refresh = refresh + "\u25AA";
-				}
-				for (int ii = 0; ii < reloadSize - amt; ii++)
-				{
-					refresh = refresh + "\u25AB";
+					reload.append("\u25AA");
 				}
 
-				add = ChatColor.RED + "    " + new StringBuffer(refresh).reverse() + "RELOADING" + refresh;
+				int left = scale - bars;
+				for (int ii = 0; ii < left; ii++)
+				{
+					reload.append("\u25AB");
+				}
 			}
+
+			add.append(ChatColor.RED + "    " + reload.reverse().toString() + "RELOADING" + reload.toString());
 		}
 
-		return current.getName() + add;
+		return gun.getName() + add.toString();
 	}
-
-//	protected ItemStack setName(ItemStack item, String name)
-//	{
-//		ItemMeta im = item.getItemMeta();
-//		im.setDisplayName(name);
-//		item.setItemMeta(im);
-//
-//		return item;
-//	}
 
 	public final Player getPlayer()
 	{
