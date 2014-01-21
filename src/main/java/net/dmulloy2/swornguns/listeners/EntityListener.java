@@ -25,8 +25,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
@@ -40,8 +40,19 @@ import com.massivecraft.factions.Faction;
 
 public class EntityListener implements Listener, Reloadable
 {
+	private boolean blockCrack;
+	private boolean blockShatter;
+	private boolean bloodEffectEnabled;
+	private boolean bloodEffectGunsOnly;
+	private boolean smokeEffect;
+	private boolean bulletSoundEnabled;
+	private boolean factionsEnabled;
+	private boolean swornNationsEnabled;
+
+	private Sound bulletSound;
+	private Material bloodEffectType;
 	private final List<Material> shatterBlocks;
-	
+
 	private final SwornGuns plugin;
 	public EntityListener(SwornGuns plugin)
 	{
@@ -50,7 +61,6 @@ public class EntityListener implements Listener, Reloadable
 		this.reload(); // Load configuration
 	}
 
-	// TODO: Check for cancellation?
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onProjectileHit(ProjectileHitEvent event)
 	{
@@ -77,22 +87,19 @@ public class EntityListener implements Listener, Reloadable
 			{
 				p.getLocation().getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, mat);
 			}
-			
-//			SwornGunsBulletCollideEvent evv = new SwornGunsBulletCollideEvent(bullet.getShooter(), bullet.getShotFrom(), b);
-//			plugin.getServer().getPluginManager().callEvent(evv);
 
 			// Realism start - block cracking
 			boolean applicable = false;
 			
 			if (! checkFactions(b.getLocation(), true))
 			{
-				if (plugin.getConfig().getBoolean("block-crack"))
+				if (blockCrack)
 				{
 					if (mat == Material.STONE)
 						applicable = true;
 				}
 
-				if (plugin.getConfig().getBoolean("block-shatter.enabled"))
+				if (blockShatter)
 				{
 					if (shatterBlocks.contains(mat))
 						applicable = true;
@@ -112,7 +119,7 @@ public class EntityListener implements Listener, Reloadable
 				plugin.getServer().getPluginManager().callEvent(blockBreak);
 				if (! blockBreak.isCancelled())
 				{
-					if (plugin.getConfig().getBoolean("block-crack"))
+					if (blockCrack)
 					{
 						if (mat == Material.STONE)
 						{
@@ -120,7 +127,7 @@ public class EntityListener implements Listener, Reloadable
 						}
 					}
 
-					if (plugin.getConfig().getBoolean("block-shatter.enabled"))
+					if (blockShatter)
 					{
 						if (shatterBlocks.contains(mat))
 						{
@@ -150,25 +157,24 @@ public class EntityListener implements Listener, Reloadable
 					// Realism start - gun effects
 					World world = hurt.getWorld();
 
-					if (plugin.getConfig().getBoolean("blood-effect.enabled"))
+					if (bloodEffectEnabled && bloodEffectGunsOnly)
 					{
-						if (plugin.getConfig().getBoolean("blood-effect.guns-only"))
+						if (bloodEffectType != null)
 						{
-							Material mat = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
-							world.playEffect(hurt.getLocation(), Effect.STEP_SOUND, mat);
-							world.playEffect(hurt.getLocation().add(0, 1, 0), Effect.STEP_SOUND, mat);
+							world.playEffect(hurt.getLocation(), Effect.STEP_SOUND, bloodEffectType);
+							world.playEffect(hurt.getLocation().add(0, 1, 0), Effect.STEP_SOUND, bloodEffectType);
 						}
 					}
 
-					if (plugin.getConfig().getBoolean("smoke-effect"))
+					if (smokeEffect)
 					{
 						world.playEffect(bullet.getShooter().getPlayer().getLocation(), Effect.SMOKE, 5);
 					}
 
-					if (plugin.getConfig().getBoolean("bullet-sound.enabled"))
+					if (bulletSoundEnabled)
 					{
-						Sound sound = Sound.valueOf(plugin.getConfig().getString("bullet-sound.sound").toUpperCase());
-						world.playSound(hurt.getLocation(), sound, 10, 1);
+						if (bulletSound != null)
+							world.playSound(hurt.getLocation(), bulletSound, 10, 1);
 					}
 					// Realism end
 
@@ -199,7 +205,6 @@ public class EntityListener implements Listener, Reloadable
 						}
 
 						bullet.getShotFrom().doKnockback(hurt, bullet.getVelocity());
-
 						bullet.remove();
 					}
 					else
@@ -223,54 +228,64 @@ public class EntityListener implements Listener, Reloadable
 		if (event.isCancelled() || event.getDamage() <= 0.0D)
 			return;
 
-		Entity entity = event.getEntity();
-		if (! (entity instanceof LivingEntity))
-			return;
-		
-		if (entity instanceof Player)
-		{
-			if (((Player)entity).getGameMode() == GameMode.CREATIVE)
-				return;
-		}
-		
-		if (event.getCause() == DamageCause.DROWNING || event.getCause() == DamageCause.LAVA)
+		if (! bloodEffectEnabled || bloodEffectGunsOnly || bloodEffectType == null)
 			return;
 
-		World world = entity.getWorld();
-		
-		if (plugin.getConfig().getBoolean("blood-effect.enabled"))
+		Entity entity = event.getEntity();
+		if (event.getEntity() instanceof LivingEntity)
 		{
-			if (! plugin.getConfig().getBoolean("blood-effect.guns-only"))
+			if (entity instanceof Player)
 			{
-				Material mat = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
-				world.playEffect(entity.getLocation(), Effect.STEP_SOUND, mat);
-				world.playEffect(entity.getLocation().add(0, 1, 0), Effect.STEP_SOUND, mat);
+				if (((Player) entity).getGameMode() == GameMode.CREATIVE)
+					return;
+			}
+
+			if (event.getCause() != DamageCause.DROWNING && event.getCause() != DamageCause.LAVA)
+			{
+				World world = entity.getWorld();
+				world.playEffect(entity.getLocation(), Effect.STEP_SOUND, bloodEffectType);
+				world.playEffect(entity.getLocation().add(0, 1, 0), Effect.STEP_SOUND, bloodEffectType);
 			}
 		}
 	}
 	// Realism end
 
-	// Realism start - factions check
-	public boolean checkFactions(Location location, boolean safeZoneCheck)
+	// Realism start - factions checks
+	public final boolean checkFactions(Location location, boolean safeZoneCheck)
 	{
-		PluginManager pm = plugin.getServer().getPluginManager();
-		if (pm.isPluginEnabled("Factions"))
+		return safeZoneCheck ? isSafeZone(location) || isWarZone(location) : isWarZone(location);
+	}
+
+	public final boolean checkFactions(Player player, boolean safeZoneCheck)
+	{
+		return checkFactions(player.getLocation(), safeZoneCheck);
+	}
+
+	private final boolean isWarZone(Location location)
+	{
+		if (factionsEnabled)
 		{
-			Plugin pl = pm.getPlugin("Factions");
-			String version = pl.getDescription().getVersion();
-			if (version.startsWith("1.6."))
-			{
-				Faction otherFaction = Board.getFactionAt(new FLocation(location));
-				return safeZoneCheck ? (otherFaction.isWarZone() || otherFaction.isSafeZone()) : otherFaction.isWarZone();
-			}
+			Faction fac = Board.getFactionAt(new FLocation(location));
+			if (swornNationsEnabled)
+				fac = Board.getAbsoluteFactionAt(new FLocation(location));
+
+			return fac.isWarZone();
 		}
-		
-		if (pm.isPluginEnabled("SwornNations"))
+
+		return false;
+	}
+
+	private final boolean isSafeZone(Location location)
+	{
+		if (factionsEnabled)
 		{
-			Faction otherFaction = Board.getFactionAt(new FLocation(location));
-			return safeZoneCheck ? (otherFaction.isWarZone() || otherFaction.isSafeZone()) : otherFaction.isWarZone();
+			Faction fac = Board.getFactionAt(new FLocation(location));
+			if (swornNationsEnabled)
+				fac = Board.getAbsoluteFactionAt(new FLocation(location));
+
+			return fac.isSafeZone();
 		}
-		
+
 		return false;
 	}
 	// Realism end
@@ -278,6 +293,15 @@ public class EntityListener implements Listener, Reloadable
 	@Override
 	public void reload()
 	{
+		this.blockCrack = plugin.getConfig().getBoolean("block-crack");
+		this.blockShatter = plugin.getConfig().getBoolean("block-shatter.enabled");
+		this.bloodEffectEnabled = plugin.getConfig().getBoolean("blood-effect.enabled");
+		this.bloodEffectGunsOnly = plugin.getConfig().getBoolean("blood-effect.guns-only");
+		this.smokeEffect = plugin.getConfig().getBoolean("smoke-effect");
+		this.bulletSoundEnabled = plugin.getConfig().getBoolean("bullet-sound.enabled");
+		this.bulletSound = getSound(plugin.getConfig().getString("bullet-sound.sound"));
+		this.bloodEffectType = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
+
 		List<String> configMaterials = plugin.getConfig().getStringList("block-shatter.blocks");
 		for (String configMaterial : configMaterials)
 		{
@@ -286,6 +310,39 @@ public class EntityListener implements Listener, Reloadable
 			{
 				shatterBlocks.add(material);
 			}
+		}
+
+		this.setupFactionsIntegration();
+	}
+
+	private final Sound getSound(String sound)
+	{
+		try
+		{
+			sound = sound.replaceAll(" ", "_");
+			sound = sound.toUpperCase();
+			return Sound.valueOf(sound);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+
+	private final void setupFactionsIntegration()
+	{
+		PluginManager pm = plugin.getServer().getPluginManager();
+		if (pm.isPluginEnabled("Factions"))
+		{
+			Plugin pl = pm.getPlugin("Factions");
+			String version = pl.getDescription().getVersion();
+			factionsEnabled = version.startsWith("1.6");
+		}
+
+		if (pm.isPluginEnabled("SwornNations"))
+		{
+			factionsEnabled = true;
+			swornNationsEnabled = true;
 		}
 	}
 }

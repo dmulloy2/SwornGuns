@@ -87,28 +87,20 @@ public class PlayerListener implements Listener
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
-		if (event.hasItem())
+		String clickType = "";
+		Action action = event.getAction();
+		if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)
+			clickType = "left";
+		else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)
+			clickType = "right";
+
+		Player player = event.getPlayer();
+		if (! plugin.getConfig().getStringList("disabledWorlds").contains(player.getWorld().getName()))
 		{
-			ItemStack item = event.getItem();
-			if (item != null)
+			GunPlayer gp = plugin.getGunPlayer(player);
+			if (gp != null)
 			{
-				String clickType = "";
-				Action action = event.getAction();
-
-				if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK || action == Action.PHYSICAL)
-					clickType = "left";
-				else
-					clickType = "right";
-
-				Player player = event.getPlayer();
-				if (! plugin.getConfig().getStringList("disabledWorlds").contains(player.getWorld().getName()))
-				{
-					GunPlayer gp = plugin.getGunPlayer(player);
-					if (gp != null)
-					{
-						gp.handleClick(clickType);
-					}
-				}
+				gp.handleClick(clickType);
 			}
 		}
 	}

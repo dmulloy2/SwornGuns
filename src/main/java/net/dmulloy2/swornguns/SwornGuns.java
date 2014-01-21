@@ -289,6 +289,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		registeredPermissions.clear();
 	}
 
+	@Override
 	public Permission getPermission(Gun gun)
 	{
 		for (Permission registeredPermission : registeredPermissions)
@@ -309,6 +310,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		}
 	}
 
+	@Override
 	public GunPlayer getGunPlayer(Player player)
 	{
 		for (int i = 0; i < players.size(); i++)
@@ -321,6 +323,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		return null;
 	}
 
+	@Override
 	public Gun getGun(Material material)
 	{
 		for (int i = 0; i < loadedGuns.size(); i++)
@@ -336,6 +339,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		return null;
 	}
 
+	@Override
 	public Gun getGun(String gunName)
 	{
 		for (int i = 0; i < loadedGuns.size(); i++)
@@ -367,16 +371,19 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		}
 	}
 
+	@Override
 	public void removeBullet(Bullet bullet)
 	{
 		bullets.remove(bullet);
 	}
 
+	@Override
 	public void addBullet(Bullet bullet)
 	{
 		bullets.add(bullet);
 	}
 
+	@Override
 	public Bullet getBullet(Entity proj)
 	{
 		for (int i = 0; i < bullets.size(); i++)
@@ -389,6 +396,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		return null;
 	}
 
+	@Override
 	public List<Gun> getGunsByType(ItemStack item)
 	{
 		List<Gun> ret = new ArrayList<Gun>();
@@ -402,11 +410,13 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		return ret;
 	}
 
+	@Override
 	public void removeEffect(EffectType effectType)
 	{
 		this.effects.remove(effectType);
 	}
 
+	@Override
 	public void addEffect(EffectType effectType)
 	{
 		this.effects.add(effectType);
