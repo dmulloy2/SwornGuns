@@ -47,8 +47,7 @@ public class GunPlayer implements Reloadable
 		this.plugin = plugin;
 		this.controller = player;
 		this.enabled = true;
-
-		calculateGuns();
+		this.calculateGuns();
 	}
 
 	public final void handleClick(String clickType)
@@ -176,9 +175,9 @@ public class GunPlayer implements Reloadable
 						this.currentlyFiring = null;
 				}
 			}
-		}
 
-		renameGuns();
+			renameGuns();
+		}
 	}
 
 	public final void renameGuns()
@@ -222,6 +221,7 @@ public class GunPlayer implements Reloadable
 			int ammo = (int) Math.floor(InventoryHelper.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte())
 					/ gun.getAmmoAmtNeeded());
 			int ammoLeft = ammo - maxClip + gun.getRoundsFired();
+			if (ammoLeft < 0) ammoLeft = 0;
 			int leftInClip = ammo - ammoLeft;
 
 			add.append(ChatColor.YELLOW + "    \u00AB" + leftInClip + " \uFFE8 " + ammoLeft + "\u00BB");
