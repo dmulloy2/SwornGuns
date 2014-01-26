@@ -241,9 +241,9 @@ public class GunPlayer implements Reloadable
 				{
 					reload.append("\u25AB");
 				}
-			}
 
-			add.append(ChatColor.RED + "    " + reload.reverse().toString() + "RELOADING" + reload.toString());
+				add.append(ChatColor.RED + "    " + reload.reverse().toString() + "RELOADING" + reload.toString());
+			}
 		}
 
 		return gun.getName() + add.toString();
@@ -285,9 +285,7 @@ public class GunPlayer implements Reloadable
 	public final void removeAmmo(Gun gun, int amount)
 	{
 		if (amount == 0)
-		{
 			return;
-		}
 
 		InventoryHelper.removeItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte(), amount);
 	}
@@ -310,8 +308,6 @@ public class GunPlayer implements Reloadable
 
 	public final void calculateGuns()
 	{
-//		guns.clear();
-
 		List<Gun> loadedGuns = new ArrayList<Gun>();
 
 		for (Gun gun : plugin.getLoadedGuns())
@@ -387,7 +383,7 @@ public class GunPlayer implements Reloadable
 
 		return data != null && data.isUnlimitedAmmoEnabled();
 	}
-	
+
 	public final boolean isPlayerInArena()
 	{
 		if (plugin.getUltimateArena() != null)
@@ -401,11 +397,11 @@ public class GunPlayer implements Reloadable
 
 		return false;
 	}
-	
+
 	@Override
 	public String toString()
 	{
-		return "GunPlayer { name = " + controller.getName() + " }";
+		return controller.getName();
 	}
 
 	@Override

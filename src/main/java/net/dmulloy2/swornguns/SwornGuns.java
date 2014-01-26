@@ -189,13 +189,17 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	private void loadProjectiles()
 	{
 		int loaded = 0;
-		
+
 		File dir = new File(getDataFolder(), "projectile");
-		
+
 		File[] children = dir.listFiles();
 		if (children.length == 0)
 		{
-			String[] stock = new String[] { "flashbang", "grenade", "molotov", "smokegrenade" };
+			String[] stock = new String[]
+			{
+					"flashbang", "grenade", "molotov", "smokegrenade"
+			};
+
 			for (String s : stock)
 			{
 				saveResource("projectile" + File.separator + s, false);
@@ -209,10 +213,9 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 			WeaponReader reader = new WeaponReader(this, child);
 			if (reader.isLoaded())
 			{
-				loadedGuns.add(reader.getGun());
-				
-				reader.getGun().setThrowable(true);
-				
+				Gun gun = reader.getGun();
+				gun.setThrowable(true);
+				loadedGuns.add(gun);
 				loaded++;
 			}
 			else
@@ -220,21 +223,23 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 				logHandler.log(Level.WARNING, "Could not load projectile: {0}", child.getName());
 			}
 		}
-		
+
 		logHandler.log("Loaded {0} projectiles!", loaded);
 	}
-	
+
 	private void loadGuns()
 	{
 		int loaded = 0;
-		
+
 		File dir = new File(getDataFolder(), "guns");
-		
+
 		File[] children = dir.listFiles();
 		if (children.length == 0)
 		{
-			String[] stock = new String[] { "AutoShotgun", "DoubleBarrel", "Flamethrower", "Pistol", "Rifle", "RocketLauncher", "Shotgun",
-					"Sniper" };
+			String[] stock = new String[]
+			{
+					"AutoShotgun", "DoubleBarrel", "Flamethrower", "Pistol", "Rifle", "RocketLauncher", "Shotgun", "Sniper"
+			};
 
 			for (String s : stock)
 			{
@@ -250,7 +255,6 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 			if (reader.isLoaded())
 			{
 				loadedGuns.add(reader.getGun());
-
 				loaded++;
 			}
 			else
@@ -258,7 +262,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 				logHandler.log(Level.WARNING, "Could not load gun: {0}", child.getName());
 			}
 		}
-		
+
 		logHandler.log("Loaded {0} guns!", loaded);
 	}
 	
@@ -271,10 +275,8 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 			Gun g = loadedGuns.get(i);
 
 			PermissionDefault def = g.isNeedsPermission() ? PermissionDefault.FALSE : PermissionDefault.TRUE;
-
 			Permission perm = new Permission(g.getNode(), def);
 			getServer().getPluginManager().addPermission(perm);
-
 			registeredPermissions.add(perm);
 		}
 	}
