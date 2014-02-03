@@ -108,7 +108,7 @@
     <dependency>
       <groupId>com.minesworn</groupId>
       <artifactId>swornnations</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>net.dmulloy2</groupId>
