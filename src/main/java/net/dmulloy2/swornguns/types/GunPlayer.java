@@ -192,10 +192,28 @@ public class GunPlayer implements Reloadable
 				{
 					ItemMeta meta = item.getItemMeta();
 					meta.setDisplayName(name);
+					List<String> lore = getGunLore(item);
+					if (lore != null && ! lore.isEmpty())
+						meta.setLore(lore);
+					
 					item.setItemMeta(meta);
 				}
 			}
 		}
+	}
+
+	private final List<String> getGunLore(ItemStack item)
+	{
+		Gun gun = getGun(item.getType());
+		if (gun != null)
+		{
+			if (plugin.getPermissionHandler().canFireGun(controller, gun))
+			{
+				return gun.getLore();
+			}
+		}
+
+		return null;
 	}
 
 	private final String getGunName(ItemStack item)

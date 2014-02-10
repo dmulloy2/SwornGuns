@@ -95,6 +95,7 @@ public class Gun
 	private EffectType releaseEffect;
 
 	private List<String> gunSound = new ArrayList<String>();
+	private List<String> lore = new ArrayList<String>();
 
 	public Gun(String name, SwornGuns plugin)
 	{
@@ -544,6 +545,22 @@ public class Gun
 		if (ammoByte < 0)
 		{
 			this.ammoByte = 0;
+		}
+	}
+
+	/**
+	 * Sets this gun's lore
+	 * 
+	 * @param val - Composite lore string
+	 */
+	public void setLore(String val)
+	{
+		lore.clear();
+		
+		String[] split = val.split(";");
+		for (String s : split)
+		{
+			lore.add(FormatUtil.format(s));
 		}
 	}
 

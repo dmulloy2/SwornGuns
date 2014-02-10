@@ -137,6 +137,8 @@ public class WeaponReader
 					ret.setReloadType(val);
 				if (var.equals("priority"))
 					ret.setPriority(Integer.parseInt(val));
+				if (var.equals("lore"))
+					ret.setLore(val);
 				if (var.equals("play_effect_on_release"))
 				{
 					String[] effDat = val.split(",");
