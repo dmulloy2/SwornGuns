@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
+import net.dmulloy2.swornguns.util.FormatUtil;
 import net.dmulloy2.swornguns.util.InventoryHelper;
 import net.dmulloy2.swornrpg.io.PlayerDataCache;
 import net.dmulloy2.swornrpg.types.PlayerData;
@@ -103,6 +104,10 @@ public class GunPlayer implements Reloadable
 					}
 				}
 			}
+		}
+		else if (gun.isWarnIfNoPermission())
+		{
+			controller.sendMessage(FormatUtil.format("&cYou do not have permission to fire this gun!"));
 		}
 	}
 

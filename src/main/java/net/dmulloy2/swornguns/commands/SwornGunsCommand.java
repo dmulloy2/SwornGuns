@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Permission;
 import net.dmulloy2.swornguns.util.FormatUtil;
-import net.dmulloy2.ultimatearena.util.Util;
+import net.dmulloy2.swornguns.util.Util;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

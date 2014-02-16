@@ -88,7 +88,8 @@ public class Gun
 	private String fileName;
 	private String projType = "";
 
-	private SwornGuns plugin;
+	private String outOfAmmoMessage = "";
+	private boolean warnIfNoPermission = false;
 
 	private GunPlayer owner;
 
@@ -96,6 +97,8 @@ public class Gun
 
 	private List<String> gunSound = new ArrayList<String>();
 	private List<String> lore = new ArrayList<String>();
+
+	private final SwornGuns plugin;
 
 	public Gun(String name, SwornGuns plugin)
 	{
@@ -183,7 +186,10 @@ public class Gun
 			else
 			{
 				owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
-				owner.getPlayer().sendMessage(FormatUtil.format("&6This gun needs &c{0}", FormatUtil.getFriendlyName(ammoType)));
+				if (! outOfAmmoMessage.isEmpty())
+					owner.getPlayer().sendMessage(FormatUtil.format(outOfAmmoMessage, FormatUtil.getFriendlyName(ammoType)));
+				else
+					owner.getPlayer().sendMessage(FormatUtil.format("&6This gun needs &c{0}", FormatUtil.getFriendlyName(ammoType)));
 
 				finishShooting();
 			}
@@ -219,12 +225,6 @@ public class Gun
 		}
 
 		gunSounds();
-
-//		if (reloading)
-//		{
-//			// Update reload status
-//			owner.renameGuns();
-//		}
 
 		if (lastFired > 6)
 		{
@@ -310,6 +310,7 @@ public class Gun
 		g.releaseTime = this.releaseTime;
 		g.canGoPastMaxDistance = this.canGoPastMaxDistance;
 		g.priority = this.priority;
+		g.outOfAmmoMessage = this.outOfAmmoMessage;
 
 		if (releaseEffect != null)
 		{
