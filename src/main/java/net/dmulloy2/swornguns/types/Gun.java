@@ -22,8 +22,7 @@ import org.bukkit.util.Vector;
  * @author dmulloy2
  */
 
-@Getter
-@Setter
+@Getter @Setter
 public class Gun
 {
 	private boolean canHeadshot;
@@ -42,6 +41,7 @@ public class Gun
 	private boolean firing;
 	private boolean reloading;
 	private boolean changed;
+	private boolean unlimitedAmmo;
 
 	private byte gunByte;
 	private byte ammoByte;

@@ -385,7 +385,7 @@ public class GunPlayer implements Reloadable
 	public final int getAmmoAmountNeeded(Gun gun)
 	{
 		int ret = gun.getAmmoAmtNeeded();
-		if (isPlayerInArena() || unlimitedAmmoEnabled())
+		if (gun.isUnlimitedAmmo() || isPlayerInArena() || unlimitedAmmoEnabled())
 			ret = 0;
 		
 		return ret;

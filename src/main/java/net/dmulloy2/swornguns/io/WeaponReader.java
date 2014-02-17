@@ -139,10 +139,12 @@ public class WeaponReader
 					ret.setPriority(Integer.parseInt(val));
 				if (var.equals("lore"))
 					ret.setLore(val);
-				if (var.equals("outOfAmmoMessage"))
+				if (var.equals("outofammomessage"))
 					ret.setOutOfAmmoMessage(val);
-				if (var.equals("warnIfNoPermission"))
+				if (var.equals("warnifnopermission"))
 					ret.setWarnIfNoPermission(Boolean.parseBoolean(val));
+				if (var.equals("unlimitedammo"))
+					ret.setUnlimitedAmmo(Boolean.parseBoolean(val));
 				if (var.equals("play_effect_on_release"))
 				{
 					String[] effDat = val.split(",");
