@@ -382,13 +382,15 @@ public class GunPlayer implements Reloadable
 		this.guns = sortedGuns;
 	}
 
-	public final int getAmmoAmountNeeded(Gun gun)
+	public final int getAmmoNeeded(Gun gun)
 	{
-		int ret = gun.getAmmoAmtNeeded();
-		if (gun.isUnlimitedAmmo() || isPlayerInArena() || unlimitedAmmoEnabled())
-			ret = 0;
-		
-		return ret;
+		if (gun.isUnlimitedAmmo())
+			return 0;
+
+		if (isPlayerInArena() || unlimitedAmmoEnabled())
+			return 0;
+
+		return gun.getAmmoAmtNeeded();
 	}
 
 	private PlayerData data;

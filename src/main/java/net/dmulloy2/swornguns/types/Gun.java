@@ -114,7 +114,7 @@ public class Gun
 	{
 		if (owner != null && owner.getPlayer().isOnline() && owner.getPlayer().getHealth() > 0.0D && ! reloading)
 		{
-			int ammoAmtNeeded = owner.getAmmoAmountNeeded(this);
+			int ammoAmtNeeded = owner.getAmmoNeeded(this);
 			if ((owner.checkAmmo(this, ammoAmtNeeded) && ammoAmtNeeded > 0) || ammoAmtNeeded == 0)
 			{
 				owner.removeAmmo(this, ammoAmtNeeded);

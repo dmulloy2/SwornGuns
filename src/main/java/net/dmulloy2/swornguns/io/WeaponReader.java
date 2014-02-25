@@ -103,10 +103,6 @@ public class WeaponReader
 					ret.setCanAimLeft(Boolean.parseBoolean(val));
 				if (var.equals("canaimright"))
 					ret.setCanAimRight(Boolean.parseBoolean(val));
-//				if (var.equals("outofammomessage"))
-//					ret.setOutOfAmmoMessage(FormatUtil.format(val));
-//				if (var.equals("permissionmessage"))
-//					ret.setPermissionMessage(FormatUtil.format(val));
 				if (var.equals("bullettype"))
 					ret.setProjType(val);
 				if (var.equals("needspermission"))
