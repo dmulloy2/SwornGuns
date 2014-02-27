@@ -63,9 +63,6 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	private @Getter PermissionHandler permissionHandler;
 	private @Getter CommandHandler commandHandler;
 	private @Getter LogHandler logHandler;
-	
-	private @Getter UltimateArena ultimateArena;
-	private @Getter SwornRPG swornRPG;
 
 	private @Getter List<Bullet> bullets = new ArrayList<Bullet>();
 	private @Getter List<Gun> loadedGuns = new ArrayList<Gun>();
@@ -89,8 +86,8 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		reloadConfig();
 
 		// Integration
-		hookIntoSwornRPG();
-		hookIntoUltimateArena();
+		setupSwornRPGIntegration();
+		setupUltimateArenaIntegration();
 
 		// Register commands
 		commandHandler.setCommandPrefix("swornguns");
@@ -169,29 +166,52 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		logHandler.log("{0} has been disabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
 	}
 
-	private void hookIntoUltimateArena()
+	// ---- Integration ---- //
+	private @Getter boolean useUltimateArena;
+	private @Getter UltimateArena ultimateArena;
+
+	private void setupUltimateArenaIntegration()
 	{
-		PluginManager pm = getServer().getPluginManager();
-		if (pm.isPluginEnabled("UltimateArena"))
+		try
 		{
-			Plugin pl = pm.getPlugin("UltimateArena");
-			if (pl instanceof UltimateArena)
+			PluginManager pm = getServer().getPluginManager();
+			if (pm.isPluginEnabled("UltimateArena"))
 			{
-				ultimateArena = (UltimateArena) pl;
+				Plugin pl = pm.getPlugin("UltimateArena");
+				if (pl instanceof UltimateArena)
+				{
+					ultimateArena = (UltimateArena) pl;
+					useUltimateArena = true;
+				}
 			}
 		}
-	}
-	
-	private void hookIntoSwornRPG()
-	{
-		PluginManager pm = getServer().getPluginManager();
-		if (pm.isPluginEnabled("SwornRPG"))
+		catch (Throwable ex)
 		{
-			Plugin pl = pm.getPlugin("SwornRPG");
-			if (pl instanceof SwornRPG)
+			//
+		}
+	}
+
+	private @Getter boolean useSwornRPG;
+	private @Getter SwornRPG swornRPG;
+
+	private void setupSwornRPGIntegration()
+	{
+		try
+		{
+			PluginManager pm = getServer().getPluginManager();
+			if (pm.isPluginEnabled("SwornRPG"))
 			{
-				swornRPG = (SwornRPG) pl;
+				Plugin pl = pm.getPlugin("SwornRPG");
+				if (pl instanceof SwornRPG)
+				{
+					swornRPG = (SwornRPG) pl;
+					useSwornRPG = true;
+				}
 			}
+		}
+		catch (Throwable ex)
+		{
+			//
 		}
 	}
 

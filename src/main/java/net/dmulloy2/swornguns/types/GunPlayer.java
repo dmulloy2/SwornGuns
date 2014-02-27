@@ -397,27 +397,27 @@ public class GunPlayer implements Reloadable
 
 	public final boolean unlimitedAmmoEnabled()
 	{
+		if (! plugin.isUseSwornRPG())
+			return false;
+
 		if (data == null)
 		{
-			if (plugin.getSwornRPG() != null)
-			{
-				PlayerDataCache cache = plugin.getSwornRPG().getPlayerDataCache();
-				data = cache.getData(controller);
-			}
+			PlayerDataCache cache = plugin.getSwornRPG().getPlayerDataCache();
+			data = cache.getData(controller);
 		}
 
-		return data != null && data.isUnlimitedAmmoEnabled();
+		return data.isUnlimitedAmmoEnabled();
 	}
 
 	public final boolean isPlayerInArena()
 	{
-		if (plugin.getUltimateArena() != null)
+		if (! plugin.isUseUltimateArena())
+			return false;
+
+		if (plugin.getUltimateArena().isInArena(controller))
 		{
-			if (plugin.getUltimateArena().isInArena(controller))
-			{
-				Arena ar = plugin.getUltimateArena().getArenaPlayer(controller).getArena();
-				return ar.getType() != FieldType.HUNGER;
-			}
+			Arena ar = plugin.getUltimateArena().getArenaPlayer(controller).getArena();
+			return ar.getType() != FieldType.HUNGER;
 		}
 
 		return false;
