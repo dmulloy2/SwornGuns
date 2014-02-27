@@ -144,7 +144,7 @@ public class GunPlayer implements Reloadable
 
 	public final void tick()
 	{
-		ticks++;
+		this.ticks++;
 
 		if (controller == null)
 		{
@@ -153,7 +153,6 @@ public class GunPlayer implements Reloadable
 		}
 
 		ItemStack hand = controller.getItemInHand();
-
 		this.lastHeldItem = hand;
 
 		if (ticks % 10 == 0 && hand != null)
@@ -436,15 +435,27 @@ public class GunPlayer implements Reloadable
 	}
 
 	@Override
-	public String toString()
-	{
-		return controller.getName();
-	}
-
-	@Override
 	public void reload()
 	{
 		guns.clear();
 		calculateGuns();
+	}
+
+	@Override
+	public String toString()
+	{
+		return "GunPlayer { name = " + controller.getName() + " }";
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof GunPlayer)
+		{
+			GunPlayer that = (GunPlayer) obj;
+			return this.controller.getName().equals(that.controller.getName());
+		}
+
+		return false;
 	}
 }

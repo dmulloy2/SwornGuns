@@ -5,7 +5,6 @@ import lombok.Setter;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.Util;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -41,7 +40,7 @@ public class EffectType
 	{
 		this.location = location;
 		this.duration = maxDuration;
-		
+
 		plugin.addEffect(this);
 	}
 
@@ -65,8 +64,8 @@ public class EffectType
 		if (type.equals(Effect.MOBSPAWNER_FLAMES))
 		{
 			yRad = 0.75D;
-			
-			for (Player player : Bukkit.getOnlinePlayers())
+
+			for (Player player : plugin.getServer().getOnlinePlayers())
 			{
 				if (player.getWorld().getUID() == location.getWorld().getUID())
 				{
@@ -92,10 +91,10 @@ public class EffectType
 						if (newloc.distance(testLoc) <= radius)
 						{
 							byte dat = (byte) Util.random(8);
-							
+
 							if (specialDat > -1)
 								dat = specialDat;
-							
+
 							newloc.getWorld().playEffect(newloc, type, dat);
 						}
 					}
@@ -107,7 +106,6 @@ public class EffectType
 	public EffectType setSpecialDat(byte specialDat)
 	{
 		this.specialDat = specialDat;
-		
 		return this;
 	}
 }

@@ -217,9 +217,7 @@ public class Gun
 		if (gunReloadTimer < 0)
 		{
 			if (reloading)
-			{
 				finishReloading();
-			}
 
 			this.reloading = false;
 		}
@@ -593,5 +591,17 @@ public class Gun
 	public String toString()
 	{
 		return "Gun { name = " + gunName + ", type = " + gunType + ", priority = " + priority + " }";
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof Gun)
+		{
+			Gun that = (Gun) obj;
+			return this.gunName == that.gunName && this.gunType == that.gunType && this.priority == that.priority;
+		}
+
+		return false;
 	}
 }
