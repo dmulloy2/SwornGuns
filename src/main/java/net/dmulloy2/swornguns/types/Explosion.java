@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import lombok.AllArgsConstructor;
+
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
@@ -15,13 +17,10 @@ import org.bukkit.inventory.meta.FireworkMeta;
  * @author dmulloy2
  */
 
+@AllArgsConstructor
 public class Explosion
 {
 	private final Location location;
-	public Explosion(Location location)
-	{
-		this.location = location;
-	}
 
 	/**
 	 * Creates the explotion
@@ -37,9 +36,12 @@ public class Explosion
 
 		firework.setFireworkMeta(meta);
 
-		try {
+		try
+		{
 			firework.detonate();
-		} catch (NoSuchMethodError e) {
+		}
+		catch (NoSuchMethodError e)
+		{
 			// Out of date bukkit
 		}
 	}

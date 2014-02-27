@@ -1,6 +1,3 @@
-/**
- * (c) 2013 dmulloy2
- */
 package net.dmulloy2.swornguns.types;
 
 /**

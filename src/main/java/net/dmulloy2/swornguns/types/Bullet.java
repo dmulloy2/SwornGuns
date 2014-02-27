@@ -36,8 +36,7 @@ import org.bukkit.util.Vector;
  * @author dmulloy2
  */
 
-@Getter
-@Setter
+@Getter @Setter
 public class Bullet
 {
 	private int ticks;

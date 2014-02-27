@@ -1,6 +1,7 @@
 package net.dmulloy2.swornguns.types;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.Util;
 
@@ -13,7 +14,7 @@ import org.bukkit.entity.Player;
  * @author dmulloy2
  */
 
-@Data
+@Getter @Setter
 public class EffectType
 {
 	private int maxDuration;

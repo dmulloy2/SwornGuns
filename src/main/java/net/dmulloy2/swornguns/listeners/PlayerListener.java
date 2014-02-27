@@ -1,5 +1,6 @@
 package net.dmulloy2.swornguns.listeners;
 
+import lombok.AllArgsConstructor;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
@@ -23,13 +24,10 @@ import org.bukkit.scheduler.BukkitRunnable;
  * @author dmulloy2
  */
 
+@AllArgsConstructor
 public class PlayerListener implements Listener
 {
 	private final SwornGuns plugin;
-	public PlayerListener(SwornGuns plugin)
-	{
-		this.plugin = plugin;
-	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent event)

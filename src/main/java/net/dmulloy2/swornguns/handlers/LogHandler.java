@@ -2,6 +2,7 @@ package net.dmulloy2.swornguns.handlers;
 
 import java.util.logging.Level;
 
+import lombok.AllArgsConstructor;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.FormatUtil;
 
@@ -9,13 +10,10 @@ import net.dmulloy2.swornguns.util.FormatUtil;
  * @author dmulloy2
  */
 
+@AllArgsConstructor
 public class LogHandler
 {
-	private SwornGuns plugin;
-	public LogHandler(SwornGuns plugin)
-	{
-		this.plugin = plugin;
-	}
+	private final SwornGuns plugin;
 
 	public final void log(Level level, String msg, Object... objects)
 	{
