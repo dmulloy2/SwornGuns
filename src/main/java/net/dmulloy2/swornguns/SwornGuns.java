@@ -104,9 +104,6 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		pm.registerEvents(new PlayerListener(this), this);
 		pm.registerEvents(new EntityListener(this), this);
 
-		// Update timer :I
-		new UpdateTimer().runTaskTimer(this, 20L, 1L);
-
 		// Files
 		File guns = new File(getDataFolder(), "guns");
 		if (! guns.exists())
@@ -127,6 +124,17 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		getOnlinePlayers();
 		
 		setupPermissions();
+
+		// Update timer
+		if (getConfig().getBoolean("runUpdateTimerAsync", false))
+		{
+			logHandler.log("Running Update Timer asynchronously! This may cause crashes, you have been warned!");
+			new UpdateTimer().runTaskTimerAsynchronously(this, 20L, 1L);
+		}
+		else
+		{
+			new UpdateTimer().runTaskTimer(this, 20L, 1L);
+		}
 
 		logHandler.log("{0} has been enabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
 	}

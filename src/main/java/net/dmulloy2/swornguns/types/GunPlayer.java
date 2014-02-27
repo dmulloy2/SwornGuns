@@ -148,7 +148,7 @@ public class GunPlayer implements Reloadable
 		{
 			ItemStack hand = controller.getItemInHand();
 
-			this.lastHeldItem = hand;
+			this.lastHeldItem = controller.getItemInHand();
 
 			if (ticks % 10 == 0 && hand != null)
 			{
