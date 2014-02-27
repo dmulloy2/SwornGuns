@@ -508,13 +508,15 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		loadProjectiles();
 
 		// Refresh players
-		for (int i = 0; i < players.size(); i++)
+		for (GunPlayer player : Util.newList(players))
 		{
-			GunPlayer gp = players.get(i);
-			if (gp != null)
+			if (player == null)
 			{
-				gp.reload();
+				players.remove(player);
+				continue;
 			}
+
+			player.reload();
 		}
 	}
 }

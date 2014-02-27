@@ -12,6 +12,7 @@ import lombok.Setter;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.FormatUtil;
 import net.dmulloy2.swornguns.util.InventoryHelper;
+import net.dmulloy2.swornguns.util.Util;
 import net.dmulloy2.swornrpg.io.PlayerDataCache;
 import net.dmulloy2.swornrpg.types.PlayerData;
 import net.dmulloy2.ultimatearena.arenas.Arena;
@@ -143,47 +144,54 @@ public class GunPlayer implements Reloadable
 
 	public final void tick()
 	{
-		this.ticks++;
+		ticks++;
 
-		if (controller != null)
+		if (controller == null)
 		{
-			ItemStack hand = controller.getItemInHand();
-
-			this.lastHeldItem = controller.getItemInHand();
-
-			if (ticks % 10 == 0 && hand != null)
-			{
-				if (plugin.getGun(hand.getType()) == null)
-				{
-					controller.removePotionEffect(PotionEffectType.SLOW);
-					this.aimedIn = false;
-				}
-			}
-
-			for (Gun g : guns)
-			{
-				if (g != null)
-				{
-					g.tick();
-
-					if (controller.isDead())
-					{
-						g.finishReloading();
-					}
-
-					if (hand != null && g.getGunMaterial() == hand.getType() && isAimedIn() && ! g.isCanAimLeft() && ! g.isCanAimRight())
-					{
-						controller.removePotionEffect(PotionEffectType.SLOW);
-						this.aimedIn = false;
-					}
-
-					if (currentlyFiring != null && g.getTimer() <= 0 && currentlyFiring.equals(g))
-						this.currentlyFiring = null;
-				}
-			}
-
-			renameGuns();
+			plugin.getPlayers().remove(this);
+			return;
 		}
+
+		ItemStack hand = controller.getItemInHand();
+
+		this.lastHeldItem = hand;
+
+		if (ticks % 10 == 0 && hand != null)
+		{
+			if (plugin.getGun(hand.getType()) == null)
+			{
+				controller.removePotionEffect(PotionEffectType.SLOW);
+				this.aimedIn = false;
+			}
+		}
+
+		for (Gun gun : Util.newList(guns))
+		{
+			// Don't tick null guns
+			if (gun == null)
+			{
+				guns.remove(gun);
+				continue;
+			}
+
+			gun.tick();
+
+			if (controller.isDead())
+			{
+				gun.finishReloading();
+			}
+
+			if (hand != null && gun.getGunMaterial() == hand.getType() && isAimedIn() && ! gun.isCanAimLeft() && ! gun.isCanAimRight())
+			{
+				controller.removePotionEffect(PotionEffectType.SLOW);
+				this.aimedIn = false;
+			}
+
+			if (currentlyFiring != null && gun.getTimer() <= 0 && currentlyFiring.equals(gun))
+				this.currentlyFiring = null;
+		}
+
+		renameGuns();
 	}
 
 	public final void renameGuns()
@@ -197,6 +205,9 @@ public class GunPlayer implements Reloadable
 				if (! name.isEmpty())
 				{
 					ItemMeta meta = item.getItemMeta();
+					if (meta.hasDisplayName() && meta.getDisplayName().equals(name))
+						continue;
+
 					meta.setDisplayName(name);
 					List<String> lore = getGunLore(item);
 					if (lore != null && ! lore.isEmpty())
