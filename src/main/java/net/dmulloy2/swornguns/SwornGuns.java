@@ -39,6 +39,7 @@ import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
 import net.dmulloy2.swornguns.util.FormatUtil;
+import net.dmulloy2.swornguns.util.Util;
 import net.dmulloy2.swornrpg.SwornRPG;
 import net.dmulloy2.ultimatearena.UltimateArena;
 
@@ -429,31 +430,40 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		@Override
 		public void run()
 		{
-			for (int i = 0; i < players.size(); i++)
+			for (GunPlayer player : Util.newList(players))
 			{
-				GunPlayer gp = players.get(i);
-				if (gp != null)
+				// Don't tick null players
+				if (player == null)
 				{
-					gp.tick();
+					players.remove(player);
+					continue;
 				}
+
+				player.tick();
 			}
 
-			for (int i = 0; i < bullets.size(); i++)
+			for (Bullet bullet : Util.newList(bullets))
 			{
-				Bullet b = bullets.get(i);
-				if (b != null)
+				// Don't tick null bullets
+				if (bullet == null)
 				{
-					b.tick();
+					bullets.remove(bullet);
+					continue;
 				}
+
+				bullet.tick();
 			}
 
-			for (int i = 0; i < effects.size(); i++)
+			for (EffectType effect : Util.newList(effects))
 			{
-				EffectType e = effects.get(i);
-				if (e != null)
+				// Don't tick null effects
+				if (effect == null)
 				{
-					e.tick();
+					effects.remove(effect);
+					continue;
 				}
+
+				effect.tick();
 			}
 		}
 	}
