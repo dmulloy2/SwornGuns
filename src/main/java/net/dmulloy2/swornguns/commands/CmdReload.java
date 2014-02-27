@@ -30,12 +30,12 @@ public class CmdReload extends SwornGunsCommand implements Reloadable
 	@Override
 	public void reload()
 	{
-		sendpMessage("&aReloading SwornGuns...");
+		sendpMessage("&eReloading SwornGuns...");
 
 		long start = System.currentTimeMillis();
 
 		plugin.reload();
 
-		sendpMessage("&aReload Complete! Took {0} ms!", System.currentTimeMillis() - start);
+		sendpMessage("&eReload Complete! Took &b{0} &ems!", System.currentTimeMillis() - start);
 	}
 }
