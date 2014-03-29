@@ -7,9 +7,12 @@ import java.util.Random;
 import net.dmulloy2.swornguns.SwornGuns;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.material.MaterialData;
 
 /**
  * Base Util class
@@ -19,16 +22,19 @@ import org.bukkit.entity.Player;
 
 public class Util
 {
+	private Util() { }
+
 	/**
-	 * Gets the OfflinePlayer from a given string
+	 * Gets the Player from a given name
 	 * 
-	 * @param pl
-	 *        - String to match with a player
-	 * @return Player from the given string, null if none exists
+	 * @param name
+	 *        - Player name or partial name
+	 * @return Player from the given name, null if none exists
+	 * @see {@link org.bukkit.Server#matchPlayer(String)}
 	 */
-	public static Player matchPlayer(String pl)
+	public static Player matchPlayer(String name)
 	{
-		List<Player> players = Bukkit.matchPlayer(pl);
+		List<Player> players = Bukkit.matchPlayer(name);
 
 		if (players.size() >= 1)
 			return players.get(0);
@@ -37,20 +43,21 @@ public class Util
 	}
 
 	/**
-	 * Gets the OfflinePlayer from a given string
+	 * Gets the OfflinePlayer from a given name
 	 * 
-	 * @param pl
-	 *        - String to match with a player
-	 * @return Player from the given string, null if none exists
+	 * @param name
+	 *        - Player name or partial name
+	 * @return OfflinePlayer from the given name, null if none exists
 	 */
-	public static OfflinePlayer matchOfflinePlayer(String pl)
+	public static OfflinePlayer matchOfflinePlayer(String name)
 	{
-		if (matchPlayer(pl) != null)
-			return matchPlayer(pl);
+		Player player = matchPlayer(name);
+		if (player != null)
+			return player;
 
 		for (OfflinePlayer o : Bukkit.getOfflinePlayers())
 		{
-			if (o.getName().equalsIgnoreCase(pl))
+			if (o.getName().equalsIgnoreCase(name))
 				return o;
 		}
 
@@ -80,7 +87,7 @@ public class Util
 	{
 		for (OfflinePlayer banned : Bukkit.getBannedPlayers())
 		{
-			if (p.equalsIgnoreCase(banned.getName()))
+			if (banned.getName().equalsIgnoreCase(p))
 				return true;
 		}
 
@@ -101,33 +108,22 @@ public class Util
 	}
 
 	/**
-	 * Returns how far two locations are from each other
+	 * Plays an effect to all online players
 	 * 
-	 * @param loc1
-	 *        - First location to compare
-	 * @param loc2
-	 *        - Second location to compare
-	 * @return Integer value of how far away they are
+	 * @param effect
+	 *        - Effect type to play
+	 * @param loc
+	 *        - Location where the effect should be played
+	 * @param data
+	 *        - Data
+	 * @see {@link Player#playEffect(Location, Effect, Object)}
 	 */
-	public static int pointDistance(Location loc1, Location loc2)
+	public static <T> void playEffect(Effect effect, Location loc, T data)
 	{
-		int p1x = (int) loc1.getX();
-		int p1y = (int) loc1.getY();
-		int p1z = (int) loc1.getZ();
-
-		int p2x = (int) loc2.getX();
-		int p2y = (int) loc2.getY();
-		int p2z = (int) loc2.getZ();
-
-		return (int) magnitude(p1x, p1y, p1z, p2x, p2y, p2z);
-	}
-
-	public static double magnitude(int x1, int y1, int z1, int x2, int y2, int z2)
-	{
-		int xdist = x1 - x2;
-		int ydist = y1 - y2;
-		int zdist = z1 - z2;
-		return Math.sqrt(xdist * xdist + ydist * ydist + zdist * zdist);
+		for (Player player : Bukkit.getOnlinePlayers())
+		{
+			player.playEffect(loc, effect, data);
+		}
 	}
 
 	/**
@@ -141,8 +137,10 @@ public class Util
 	 */
 	public static boolean checkLocation(Location loc, Location loc2)
 	{
-		return (loc.getBlockX() == loc2.getBlockX() && loc.getBlockY() == loc2.getBlockY() && loc.getBlockZ() == loc2.getBlockZ() && loc
-				.getWorld().getUID() == loc2.getWorld().getUID());
+		return loc.getBlockX() == loc2.getBlockX() 
+				&& loc.getBlockY() == loc2.getBlockY() 
+				&& loc.getBlockZ() == loc2.getBlockZ()
+				&& loc.getWorld().equals(loc2.getWorld());
 	}
 
 	/**
@@ -204,14 +202,7 @@ public class Util
 	 */
 	public static <T> List<T> newList(List<T> list)
 	{
-		List<T> ret = new ArrayList<T>();
-
-		for (int i = 0; i < list.size(); i++)
-		{
-			ret.add(list.get(i));
-		}
-
-		return ret;
+		return new ArrayList<T>(list);
 	}
 
 	/**
@@ -234,39 +225,10 @@ public class Util
 		return ret;
 	}
 
-	/**
-	 * Basically just a wrapper for {@link Integer#parseInt(String)}
-	 * <p>
-	 * Catches the {@link NumberFormatException} and returns -1
-	 * 
-	 * @param s
-	 *        - String to attempt to parse into an Integer
-	 */
-	public static int parseInt(String s)
+	@SuppressWarnings("deprecation")
+	public static void setData(Block block, MaterialData data)
 	{
-		int ret = -1;
-
-		try
-		{
-			ret = Integer.parseInt(s);
-		}
-		catch (Exception e)
-		{
-			// Return -1, move on
-		}
-
-		return ret;
-	}
-
-	/**
-	 * Returns whether or not a String can be parsed as an Integer
-	 * 
-	 * @param string
-	 *        - String to check
-	 * @return Whether or not a String can be parsed as an Integer
-	 */
-	public static boolean isInteger(String s)
-	{
-		return parseInt(s) != -1;
+		block.setData(data.getData());
+		block.getState().update(true);
 	}
 }

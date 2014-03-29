@@ -3,7 +3,6 @@ package net.dmulloy2.swornguns.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -11,184 +10,59 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 /**
- * Helper for Inventories
+ * Util dealing with Inventories
  * 
  * @author dmulloy2
  */
 
-public class InventoryHelper
+public class InventoryUtil
 {
-	public static boolean isEmpty(PlayerInventory inventory)
+	private InventoryUtil() { }
+
+	/**
+	 * Returns whether or not a given inventory is empty
+	 * 
+	 * @param inventory
+	 *        - {@link Inventory} to check
+	 */
+	public static boolean isEmpty(Inventory inventory)
 	{
-		if (inventory != null)
+		for (ItemStack stack : inventory.getContents())
 		{
-			for (ItemStack stack : inventory.getContents())
-			{
-				if (stack != null && stack.getType() != Material.AIR)
-				{
-					return false;
-				}
-			}
+			if (stack != null && stack.getType() != Material.AIR)
+				return false;
+		}
 
-			if (inventory.getHelmet() != null)
+		if (inventory instanceof PlayerInventory)
+		{
+			PlayerInventory pInventory = (PlayerInventory) inventory;
+			if (pInventory.getHelmet() != null)
 				return false;
 
-			if (inventory.getChestplate() != null)
+			if (pInventory.getChestplate() != null)
 				return false;
 
-			if (inventory.getLeggings() != null)
+			if (pInventory.getLeggings() != null)
 				return false;
 
-			if (inventory.getBoots() != null)
+			if (pInventory.getBoots() != null)
 				return false;
 		}
 
 		return true;
 	}
 
-	public static int firstPartial(final Inventory inventory, final ItemStack item, final int maxAmount)
-	{
-		if (item == null)
-		{
-			return -1;
-		}
-		final ItemStack[] stacks = inventory.getContents();
-		for (int i = 0; i < stacks.length; i++)
-		{
-			final ItemStack cItem = stacks[i];
-			if (cItem != null && cItem.getAmount() < maxAmount && cItem.isSimilar(item))
-			{
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	public static boolean addAllItems(final Inventory inventory, final ItemStack... items)
-	{
-		final Inventory fakeInventory = Bukkit.getServer().createInventory(null, inventory.getType());
-		fakeInventory.setContents(inventory.getContents());
-		if (addItems(fakeInventory, items).isEmpty())
-		{
-			addItems(inventory, items);
-			return true;
-		}
-		return false;
-	}
-
-	public static Map<Integer, ItemStack> addItem(final Player player, final ItemStack item)
-	{
-		if (hasRoom(item, player))
-			return addItems(player.getInventory(), item);
-
-		return null;
-	}
-
-	public static Map<Integer, ItemStack> addItems(final Inventory inventory, final ItemStack... items)
-	{
-		return addOversizedItems(inventory, 0, items);
-	}
-
-	public static Map<Integer, ItemStack> addOversizedItems(final Inventory inventory, final int oversizedStacks, final ItemStack... items)
-	{
-		final Map<Integer, ItemStack> leftover = new HashMap<Integer, ItemStack>();
-
-		ItemStack[] combined = new ItemStack[items.length];
-		for (int i = 0; i < items.length; i++)
-		{
-			if (items[i] == null || items[i].getAmount() < 1)
-			{
-				continue;
-			}
-			for (int j = 0; j < combined.length; j++)
-			{
-				if (combined[j] == null)
-				{
-					combined[j] = items[i].clone();
-					combined[j].setData(items[i].getData());
-					break;
-				}
-				if (combined[j].isSimilar(items[i]))
-				{
-					combined[j].setAmount(combined[j].getAmount() + items[i].getAmount());
-					break;
-				}
-			}
-		}
-
-		for (int i = 0; i < combined.length; i++)
-		{
-			final ItemStack item = combined[i];
-			if (item == null)
-			{
-				continue;
-			}
-
-			while (true)
-			{
-				// Do we already have a stack of it?
-				final int maxAmount = oversizedStacks > item.getType().getMaxStackSize() ? oversizedStacks : item.getType().getMaxStackSize();
-				final int firstPartial = firstPartial(inventory, item, maxAmount);
-
-				// Drat! no partial stack
-				if (firstPartial == -1)
-				{
-					// Find a free spot!
-					final int firstFree = inventory.firstEmpty();
-
-					if (firstFree == -1)
-					{
-						// No space at all!
-						leftover.put(i, item);
-						break;
-					}
-					else
-					{
-						// More than a single stack!
-						if (item.getAmount() > maxAmount)
-						{
-							final ItemStack stack = item.clone();
-							stack.setData(item.getData());
-							stack.setAmount(maxAmount);
-							inventory.setItem(firstFree, stack);
-							item.setAmount(item.getAmount() - maxAmount);
-						}
-						else
-						{
-							// Just store it
-							inventory.setItem(firstFree, item);
-							break;
-						}
-					}
-				}
-				else
-				{
-					// So, apparently it might only partially fit, well lets do
-					// just that
-					final ItemStack partialItem = inventory.getItem(firstPartial);
-
-					final int amount = item.getAmount();
-					final int partialAmount = partialItem.getAmount();
-
-					// Check if it fully fits
-					if (amount + partialAmount <= maxAmount)
-					{
-						partialItem.setAmount(amount + partialAmount);
-						break;
-					}
-
-					// It fits partially
-					partialItem.setAmount(maxAmount);
-					item.setAmount(amount + partialAmount - maxAmount);
-				}
-			}
-		}
-		return leftover;
-	}
-
+	/**
+	 * Whether or not a Player's inventory has room for a given item
+	 * 
+	 * @param item
+	 *        - {@link ItemStack} to attempt to add
+	 * @param player
+	 *        - Player whose inventory is being checked
+	 */
 	public static boolean hasRoom(ItemStack item, Player player)
 	{
-		final int maxStackSize = (item.getMaxStackSize() == -1) ? player.getInventory().getMaxStackSize() : item.getMaxStackSize();
+		int maxStackSize = (item.getMaxStackSize() == -1) ? player.getInventory().getMaxStackSize() : item.getMaxStackSize();
 		int amount = item.getAmount();
 
 		for (ItemStack stack : player.getInventory().getContents())
@@ -207,6 +81,158 @@ public class InventoryHelper
 
 		return false;
 	}
+
+	/**
+	 * Gives a player an item
+	 * 
+	 * @param player
+	 *        - {@link Player} to give them item to
+	 * @param item
+	 *        - {@link ItemStack} to give the player
+	 * @return Leftovers, if any
+	 */
+	public static Map<Integer, ItemStack> giveItem(Player player, ItemStack item)
+	{
+		if (hasRoom(item, player))
+			return addItems(player.getInventory(), item);
+
+		return null;
+	}
+
+	/**
+	 * Gives a player items
+	 * 
+	 * @param player
+	 *        - {@link Player} to give them item to
+	 * @param items
+	 *        - Items to give the player
+	 * @return Leftovers, if any
+	 */
+	public static Map<Integer, ItemStack> giveItems(Player player, ItemStack... items)
+	{
+		return addItems(player.getInventory(), items);
+	}
+
+	// ---- Internal Methods ---- //
+
+	private static Map<Integer, ItemStack> addItems(Inventory inventory, ItemStack... items)
+	{
+		return addOversizedItems(inventory, 0, items);
+	}
+
+	private static Map<Integer, ItemStack> addOversizedItems(Inventory inventory, int oversizedStacks, ItemStack... items)
+	{
+		Map<Integer, ItemStack> leftover = new HashMap<Integer, ItemStack>();
+
+		ItemStack[] combined = new ItemStack[items.length];
+		for (int i = 0; i < items.length; i++)
+		{
+			if (items[i] == null || items[i].getAmount() < 1)
+				continue;
+
+			for (int j = 0; j < combined.length; j++)
+			{
+				if (combined[j] == null)
+				{
+					combined[j] = items[i].clone();
+					combined[j].setData(items[i].getData());
+					break;
+				}
+
+				if (combined[j].isSimilar(items[i]))
+				{
+					combined[j].setAmount(combined[j].getAmount() + items[i].getAmount());
+					break;
+				}
+			}
+		}
+
+		for (int i = 0; i < combined.length; i++)
+		{
+			ItemStack item = combined[i];
+			if (item == null)
+				continue;
+
+			while (true)
+			{
+				// Do we already have a stack of it?
+				int maxAmount = oversizedStacks > item.getType().getMaxStackSize() ? oversizedStacks : item.getType().getMaxStackSize();
+				int firstPartial = firstPartial(inventory, item, maxAmount);
+
+				// Drat! no partial stack
+				if (firstPartial == -1)
+				{
+					// Find a free spot!
+					int firstFree = inventory.firstEmpty();
+
+					if (firstFree == -1)
+					{
+						// No space at all!
+						leftover.put(i, item);
+						break;
+					}
+					else
+					{
+						// More than a single stack!
+						if (item.getAmount() > maxAmount)
+						{
+							ItemStack stack = item.clone();
+							stack.setData(item.getData());
+							stack.setAmount(maxAmount);
+							inventory.setItem(firstFree, stack);
+							item.setAmount(item.getAmount() - maxAmount);
+						}
+						else
+						{
+							// Just store it
+							inventory.setItem(firstFree, item);
+							break;
+						}
+					}
+				}
+				else
+				{
+					// So, apparently it might only partially fit, well lets do
+					// just that
+					ItemStack partialItem = inventory.getItem(firstPartial);
+
+					int amount = item.getAmount();
+					int partialAmount = partialItem.getAmount();
+
+					// Check if it fully fits
+					if (amount + partialAmount <= maxAmount)
+					{
+						partialItem.setAmount(amount + partialAmount);
+						break;
+					}
+
+					// It fits partially
+					partialItem.setAmount(maxAmount);
+					item.setAmount(amount + partialAmount - maxAmount);
+				}
+			}
+		}
+
+		return leftover;
+	}
+
+	private static int firstPartial(Inventory inventory, ItemStack item, int maxAmount)
+	{
+		if (item == null)
+			return -1;
+
+		ItemStack[] stacks = inventory.getContents();
+		for (int i = 0; i < stacks.length; i++)
+		{
+			ItemStack cItem = stacks[i];
+			if (cItem != null && cItem.getAmount() < maxAmount && cItem.isSimilar(item))
+				return i;
+		}
+
+		return -1;
+	}
+
+	// ---- SwornGuns Methods
 
 	public static int amtItem(Inventory inventory, Material type, short dat)
 	{

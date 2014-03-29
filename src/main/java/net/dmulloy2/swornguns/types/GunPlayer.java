@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.FormatUtil;
-import net.dmulloy2.swornguns.util.InventoryHelper;
+import net.dmulloy2.swornguns.util.InventoryUtil;
 import net.dmulloy2.swornguns.util.Util;
 import net.dmulloy2.swornrpg.io.PlayerDataCache;
 import net.dmulloy2.swornrpg.types.PlayerData;
@@ -252,7 +252,7 @@ public class GunPlayer implements Reloadable
 		if (gun.isHasClip())
 		{
 			int maxClip = gun.getMaxClipSize();
-			int ammo = (int) Math.floor(InventoryHelper.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte())
+			int ammo = (int) Math.floor(InventoryUtil.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte())
 					/ gun.getAmmoAmtNeeded());
 			int ammoLeft = ammo - maxClip + gun.getRoundsFired();
 			if (ammoLeft < 0) ammoLeft = 0;
@@ -313,7 +313,7 @@ public class GunPlayer implements Reloadable
 
 	public final boolean checkAmmo(Gun gun, int amount)
 	{
-		return InventoryHelper.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte()) >= amount;
+		return InventoryUtil.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte()) >= amount;
 	}
 
 	public final void removeAmmo(Gun gun, int amount)
@@ -321,7 +321,7 @@ public class GunPlayer implements Reloadable
 		if (amount == 0)
 			return;
 
-		InventoryHelper.removeItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte(), amount);
+		InventoryUtil.removeItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte(), amount);
 	}
 
 	public final ItemStack getLastItemHeld()
