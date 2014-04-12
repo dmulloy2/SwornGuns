@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.dmulloy2.ultimatearena.types.EnchantmentType;
+import net.dmulloy2.swornguns.types.EnchantmentType;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;

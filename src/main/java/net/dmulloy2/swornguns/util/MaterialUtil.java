@@ -1,6 +1,6 @@
 package net.dmulloy2.swornguns.util;
 
-import net.dmulloy2.ultimatearena.types.Material;
+import net.dmulloy2.swornguns.types.Material;
 
 import org.bukkit.Bukkit;
 
