@@ -417,7 +417,7 @@ public class GunPlayer implements Reloadable
 			data = cache.getData(controller);
 		}
 
-		return data.isUnlimitedAmmoEnabled();
+		return data != null && data.isUnlimitedAmmoEnabled();
 	}
 
 	public final boolean isPlayerInArena()
