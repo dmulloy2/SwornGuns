@@ -28,7 +28,6 @@ public class WeaponReader
 	private Gun ret;
 
 	private final SwornGuns plugin;
-
 	public WeaponReader(SwornGuns plugin, File file)
 	{
 		this.plugin = plugin;

@@ -95,7 +95,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		commandHandler.registerCommand(new CmdList(this));
 		commandHandler.registerCommand(new CmdReload(this));
 		commandHandler.registerCommand(new CmdToggle(this));
-		
+
 		// Register events
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new PlayerListener(this), this);
@@ -117,9 +117,9 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		// Load guns
 		loadGuns();
 		loadProjectiles();
-			
+
 		getOnlinePlayers();
-		
+
 		setupPermissions();
 
 		// Update timer
@@ -140,7 +140,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	public void onDisable()
 	{
 		long start = System.currentTimeMillis();
-		
+
 		getServer().getScheduler().cancelTasks(this);
 		getServer().getServicesManager().unregisterAll(this);
 
@@ -160,7 +160,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		effects.clear();
 		bullets.clear();
 		players.clear();
-		
+
 		clearPermissions();
 
 		logHandler.log("{0} has been disabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
@@ -294,7 +294,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 
 		logHandler.log("Loaded {0} guns!", loaded);
 	}
-	
+
 	private List<Permission> registeredPermissions = new ArrayList<Permission>();
 
 	private void setupPermissions()

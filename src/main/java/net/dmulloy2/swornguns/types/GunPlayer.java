@@ -57,7 +57,7 @@ public class GunPlayer implements Reloadable
 	{
 		if (! enabled)
 			return;
-		
+
 		ItemStack inHand = controller.getItemInHand();
 		if (inHand == null || inHand.getType() == Material.AIR)
 			return;
@@ -211,7 +211,7 @@ public class GunPlayer implements Reloadable
 					List<String> lore = getGunLore(item);
 					if (lore != null && ! lore.isEmpty())
 						meta.setLore(lore);
-					
+
 					item.setItemMeta(meta);
 				}
 			}
@@ -255,7 +255,8 @@ public class GunPlayer implements Reloadable
 			int ammo = (int) Math.floor(InventoryUtil.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte())
 					/ gun.getAmmoAmtNeeded());
 			int ammoLeft = ammo - maxClip + gun.getRoundsFired();
-			if (ammoLeft < 0) ammoLeft = 0;
+			if (ammoLeft < 0)
+				ammoLeft = 0;
 			int leftInClip = ammo - ammoLeft;
 
 			add.append(ChatColor.YELLOW + "    \u00AB" + leftInClip + " \uFFE8 " + ammoLeft + "\u00BB");
@@ -264,7 +265,7 @@ public class GunPlayer implements Reloadable
 			if (gun.isReloading())
 			{
 				int scale = 4;
-				int bars = Math.round(scale - ((gun.getGunReloadTimer()) * scale) / gun.getReloadTime());
+				int bars = Math.round(scale - ((gun.getGunReloadTimer() * scale) / gun.getReloadTime()));
 				for (int i = 0; i < bars; i++)
 				{
 					reload.append("\u25AA");
@@ -382,7 +383,7 @@ public class GunPlayer implements Reloadable
 				@Override
 				public int compare(final Entry<Gun, Integer> entry1, final Entry<Gun, Integer> entry2)
 				{
-					return -entry1.getValue().compareTo(entry2.getValue());
+					return - entry1.getValue().compareTo(entry2.getValue());
 				}
 			});
 

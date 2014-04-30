@@ -88,7 +88,6 @@ public class Bullet
 			String check = gun.getProjType().toLowerCase().replaceAll("_", "").replaceAll(" ", "");
 			switch (check)
 			{
-				// All valid Entities that extend Projectile
 				case "arrow":
 					mclass = Arrow.class;
 					break;
@@ -128,7 +127,7 @@ public class Bullet
 			this.startLocation = projectile.getLocation();
 		}
 
-		if (shotFrom.getReleaseTime() == -1)
+		if (shotFrom.getReleaseTime() == - 1)
 		{
 			this.releaseTime = (80 + (! gun.isThrowable() ? 1 : 0) * 400);
 		}
@@ -310,10 +309,7 @@ public class Bullet
 			try
 			{
 				firework.detonate();
-			}
-			catch (NoSuchMethodError e)
-			{
-			}
+			} catch (Throwable ex) { }
 		}
 	}
 
@@ -405,7 +401,7 @@ public class Bullet
 						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.FIRE_TICK,
 								1.0D);
 						plugin.getServer().getPluginManager().callEvent(event);
-						if (!event.isCancelled())
+						if (! event.isCancelled())
 						{
 							lentity.setFireTicks(140);
 							lentity.damage(1.0D, shooter.getPlayer());

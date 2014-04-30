@@ -402,18 +402,19 @@ public class Gun
 	/**
 	 * Handles recoil for a player
 	 * 
-	 * @param player - {@link Player} to handle recoil for
+	 * @param player
+	 *        - {@link Player} to handle recoil for
 	 */
 	private void doRecoil(Player player)
 	{
 		if (recoil != 0.0D)
 		{
 			Location ploc = player.getLocation();
-			double dir = -ploc.getYaw() - 90.0F;
-			double pitch = -ploc.getPitch() - 180.0F;
+			double dir = - ploc.getYaw() - 90.0F;
+			double pitch = - ploc.getPitch() - 180.0F;
 			double xd = Math.cos(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
 			double yd = Math.sin(Math.toRadians(pitch));
-			double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
+			double zd = - Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
 
 			Vector vec = new Vector(xd, yd, zd);
 			vec.multiply(recoil / 2.0D).setY(0);
@@ -425,8 +426,10 @@ public class Gun
 	/**
 	 * Does knockback for an entity
 	 * 
-	 * @param entity - {@link LivingEntity} to do knock back for
-	 * @param speed - Knockback speed
+	 * @param entity
+	 *        - {@link LivingEntity} to do knock back for
+	 * @param speed
+	 *        - Knockback speed
 	 */
 	public void doKnockback(LivingEntity entity, Vector speed)
 	{
@@ -485,7 +488,8 @@ public class Gun
 	/**
 	 * Sets the name of the gun
 	 * 
-	 * @param val - Name of the gun
+	 * @param val
+	 *        - Name of the gun
 	 */
 	public void setName(String val)
 	{
@@ -510,13 +514,14 @@ public class Gun
 			return Byte.parseByte(news);
 		}
 
-		return -1;
+		return - 1;
 	}
 
 	/**
 	 * Sets the gun's type
 	 * 
-	 * @param val - The gun's type
+	 * @param val
+	 *        - The gun's type
 	 */
 	public void setGunType(String val)
 	{
@@ -534,7 +539,8 @@ public class Gun
 	/**
 	 * Sets the gun's ammo type
 	 * 
-	 * @param val - The gun's ammo type
+	 * @param val
+	 *        - The gun's ammo type
 	 */
 	public void setAmmoType(String val)
 	{
@@ -550,12 +556,13 @@ public class Gun
 	/**
 	 * Sets this gun's lore
 	 * 
-	 * @param val - Composite lore string
+	 * @param val
+	 *        - Composite lore string
 	 */
 	public void setLore(String val)
 	{
 		lore.clear();
-		
+
 		String[] split = val.split(";");
 		for (String s : split)
 		{
@@ -566,7 +573,8 @@ public class Gun
 	/**
 	 * Adds gun sounds from a composite string
 	 * 
-	 * @param val - Composite string of sounds
+	 * @param val
+	 *        - Composite string of sounds
 	 */
 	public void addGunSounds(String val)
 	{
@@ -580,11 +588,8 @@ public class Gun
 			s = s.replaceAll(" ", "_");
 			s = s.toUpperCase();
 			return Sound.valueOf(s);
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
+		} catch (Exception e) { }
+		return null;
 	}
 
 	@Override

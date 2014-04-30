@@ -24,22 +24,22 @@ import org.bukkit.permissions.Permission;
 public abstract interface SwornGunsAPI extends Reloadable
 {
 	Permission getPermission(Gun gun);
-	
+
 	GunPlayer getGunPlayer(Player player);
-	
+
 	Gun getGun(Material material);
-	
+
 	Gun getGun(String gunName);
-	
+
 	void removeBullet(Bullet bullet);
-	
+
 	void addBullet(Bullet bullet);
-	
+
 	Bullet getBullet(Entity proj);
-	
+
 	List<Gun> getGunsByType(ItemStack item);
-	
+
 	void removeEffect(EffectType effectType);
-	
+
 	void addEffect(EffectType effectType);
 }
