@@ -127,9 +127,9 @@ public class Bullet
 			this.startLocation = projectile.getLocation();
 		}
 
-		if (shotFrom.getReleaseTime() == - 1)
+		if (shotFrom.getReleaseTime() == -1)
 		{
-			this.releaseTime = (80 + (! gun.isThrowable() ? 1 : 0) * 400);
+			this.releaseTime = 80 + (gun.isThrowable() ? 0 : 1) * 400;
 		}
 		else
 		{

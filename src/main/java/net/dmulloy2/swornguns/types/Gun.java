@@ -410,11 +410,11 @@ public class Gun
 		if (recoil != 0.0D)
 		{
 			Location ploc = player.getLocation();
-			double dir = - ploc.getYaw() - 90.0F;
-			double pitch = - ploc.getPitch() - 180.0F;
+			double dir = -ploc.getYaw() - 90.0F;
+			double pitch = -ploc.getPitch() - 180.0F;
 			double xd = Math.cos(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
 			double yd = Math.sin(Math.toRadians(pitch));
-			double zd = - Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
+			double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
 
 			Vector vec = new Vector(xd, yd, zd);
 			vec.multiply(recoil / 2.0D).setY(0);
@@ -514,7 +514,7 @@ public class Gun
 			return Byte.parseByte(news);
 		}
 
-		return - 1;
+		return -1;
 	}
 
 	/**

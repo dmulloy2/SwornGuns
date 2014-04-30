@@ -381,9 +381,9 @@ public class GunPlayer implements Reloadable
 			Collections.sort(sortedEntries, new Comparator<Entry<Gun, Integer>>()
 			{
 				@Override
-				public int compare(final Entry<Gun, Integer> entry1, final Entry<Gun, Integer> entry2)
+				public int compare(Entry<Gun, Integer> entry1, Entry<Gun, Integer> entry2)
 				{
-					return - entry1.getValue().compareTo(entry2.getValue());
+					return -entry1.getValue().compareTo(entry2.getValue());
 				}
 			});
 
