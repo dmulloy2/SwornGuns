@@ -170,6 +170,8 @@ public class WeaponReader
 				ret.setWarnIfNoPermission(Boolean.parseBoolean(val));
 			if (var.equals("unlimitedammo"))
 				ret.setUnlimitedAmmo(Boolean.parseBoolean(val));
+			if (var.equals("explosiontype"))
+				ret.setExplosionType(val.toUpperCase());
 			if (var.equals("play_effect_on_release"))
 			{
 				String[] effDat = val.split(",");

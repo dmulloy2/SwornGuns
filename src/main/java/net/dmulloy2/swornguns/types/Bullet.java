@@ -1,20 +1,26 @@
 package net.dmulloy2.swornguns.types;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.Util;
 
+import org.bukkit.Color;
 import org.bukkit.Effect;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Fish;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LargeFireball;
@@ -28,6 +34,7 @@ import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -71,9 +78,7 @@ public class Bullet
 			ItemStack thrown = new ItemStack(gun.getGunMaterial(), 1, gun.getGunByte());
 
 			this.projectile = owner.getPlayer().getWorld().dropItem(owner.getPlayer().getEyeLocation(), thrown);
-
 			((Item) projectile).setPickupDelay(9999999);
-
 			this.startLocation = projectile.getLocation();
 		}
 		else
@@ -119,9 +124,7 @@ public class Bullet
 			}
 
 			this.projectile = owner.getPlayer().launchProjectile(mclass);
-
 			((Projectile) projectile).setShooter(owner.getPlayer());
-
 			this.startLocation = projectile.getLocation();
 		}
 
@@ -267,23 +270,81 @@ public class Bullet
 								Location nloc = lastLocation.clone().add(i, ii, iii);
 								if (nloc.distance(lastLocation) <= rad && Util.random(10) == 1)
 								{
-									new Explosion(nloc).explode();
+									explosion(nloc);
 								}
 							}
 						}
 					}
 
-					new Explosion(lastLocation).explode();
+					explosion(lastLocation);
+					explosionDamage();
 				}
 
-				explode();
 				fireSpread();
 				flash();
 			}
 		}
 	}
 
-	private final void explode()
+	private final void explosion(Location location)
+	{
+		if (shotFrom.getExplosionType().equals("TNT"))
+		{
+			double x = location.getX();
+			double y = location.getY();
+			double z = location.getZ();
+
+			location.getWorld().createExplosion(x, y, z, (float) shotFrom.getExplodeRadius(), false, false);
+		}
+		else
+		{
+			World world = location.getWorld();
+			Firework firework = world.spawn(location, Firework.class);
+
+			FireworkMeta meta = firework.getFireworkMeta();
+			meta.addEffect(getFireworkEffect());
+			meta.setPower(1);
+
+			firework.setFireworkMeta(meta);
+
+			try
+			{
+				firework.detonate();
+			}
+			catch (NoSuchMethodError e)
+			{
+			}
+		}
+	}
+
+	private final FireworkEffect getFireworkEffect()
+	{
+		// Colors
+		List<Color> c = new ArrayList<Color>();
+		c.add(Color.RED);
+		c.add(Color.RED);
+		c.add(Color.RED);
+		c.add(Color.ORANGE);
+		c.add(Color.ORANGE);
+		c.add(Color.ORANGE);
+		c.add(Color.BLACK);
+		c.add(Color.GRAY);
+
+		// Type
+		Random rand = new Random();
+		FireworkEffect.Type type = FireworkEffect.Type.BALL_LARGE;
+		if (rand.nextInt(2) == 0)
+		{
+			type = FireworkEffect.Type.BURST;
+		}
+
+		// Build the effect
+		FireworkEffect e = FireworkEffect.builder().flicker(true).withColor(c).withFade(c).with(type).trail(true).build();
+
+		return e;
+	}
+
+	private final void explosionDamage()
 	{
 		if (shotFrom.getExplodeRadius() > 0.0D)
 		{
@@ -317,9 +378,7 @@ public class Bullet
 							{
 								if (lentity.hasLineOfSight(projectile))
 								{
-//									lentity.setLastDamage(0.0D);
 									lentity.damage(damage, shooter.getPlayer());
-//									lentity.setLastDamage(0.0D);
 								}
 							}
 						}
@@ -349,7 +408,6 @@ public class Bullet
 						if (!event.isCancelled())
 						{
 							lentity.setFireTicks(140);
-//							lentity.setLastDamage(0.0D);
 							lentity.damage(1.0D, shooter.getPlayer());
 						}
 					}

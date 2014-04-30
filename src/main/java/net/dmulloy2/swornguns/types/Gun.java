@@ -42,6 +42,7 @@ public class Gun
 	private boolean reloading;
 	private boolean changed;
 	private boolean unlimitedAmmo;
+	private boolean warnIfNoPermission;
 
 	private byte gunByte;
 	private byte ammoByte;
@@ -81,15 +82,14 @@ public class Gun
 	private double recoil;
 	private double gunVolume = 1.0D;
 
-	private String node;
+	private String projType = "";
 	private String reloadType = "NORMAL";
+	private String explosionType = "FIREWORK";
+	private String outOfAmmoMessage = "";
 
+	private String node;
 	private String gunName;
 	private String fileName;
-	private String projType = "";
-
-	private String outOfAmmoMessage = "";
-	private boolean warnIfNoPermission = false;
 
 	private GunPlayer owner;
 
