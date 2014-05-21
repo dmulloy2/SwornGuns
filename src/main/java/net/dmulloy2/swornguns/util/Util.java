@@ -1,10 +1,16 @@
 package net.dmulloy2.swornguns.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.UUID;
 
+import lombok.NonNull;
 import net.dmulloy2.swornguns.SwornGuns;
+import net.dmulloy2.swornguns.types.StringJoiner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -25,69 +31,71 @@ public class Util
 	private Util() { }
 
 	/**
-	 * Gets the Player from a given name
+	 * Gets the Player from a given name or {@link UUID}
 	 * 
-	 * @param name
-	 *        - Player name or partial name
-	 * @return Player from the given name, null if none exists
-	 * @see {@link org.bukkit.Server#matchPlayer(String)}
+	 * @param identifier
+	 *        - Player name or UUID
+	 * @return Player from the given name or UUID, null if none exists
+	 * @see {@link Bukkit#getPlayer(UUID)}
+	 * @see {@link Bukkit#matchPlayer(String)}
 	 */
-	public static Player matchPlayer(String name)
+	public static Player matchPlayer(@NonNull String identifier)
 	{
-		List<Player> players = Bukkit.matchPlayer(name);
+		// Get by UUID first
+		if (identifier.length() == 36)
+			return Bukkit.getPlayer(UUID.fromString(identifier));
 
-		if (players.size() >= 1)
+		// Then attempt to match
+		List<Player> players = Bukkit.matchPlayer(identifier);
+		if (! players.isEmpty())
 			return players.get(0);
 
 		return null;
 	}
 
 	/**
-	 * Gets the OfflinePlayer from a given name
+	 * Gets the OfflinePlayer from a given name or {@link UUID}
+	 * <p>
+	 * Use of this method is discouraged as it is potentially blocking
 	 * 
-	 * @param name
-	 *        - Player name or partial name
-	 * @return OfflinePlayer from the given name, null if none exists
+	 * @param identifier
+	 *        - Player name or UUID
+	 * @return OfflinePlayer from the given name or UUID, null if none exists
+	 * @see {@link Util#matchPlayer(String)}
+	 * @see {@link Bukkit#getOfflinePlayer(UUID)}
+	 * @see {@link Bukkit#getOfflinePlayer(String)}
 	 */
-	public static OfflinePlayer matchOfflinePlayer(String name)
+	@SuppressWarnings("deprecation") // Bukkit#getOfflinePlayer(String)
+	public static OfflinePlayer matchOfflinePlayer(@NonNull String identifier)
 	{
-		Player player = matchPlayer(name);
+		// Check online players first
+		Player player = matchPlayer(identifier);
 		if (player != null)
 			return player;
 
-		for (OfflinePlayer o : Bukkit.getOfflinePlayers())
-		{
-			if (o.getName().equalsIgnoreCase(name))
-				return o;
-		}
+		// Then check UUID
+		if (identifier.length() == 36)
+			return Bukkit.getOfflinePlayer(UUID.fromString(identifier));
+
+		OfflinePlayer op = Bukkit.getOfflinePlayer(identifier);
+		if (op.hasPlayedBefore())
+			return op;
 
 		return null;
 	}
 
 	/**
-	 * Returns whether or not a player is banned
+	 * Whether or not a player is banned
 	 * 
-	 * @param p
-	 *        - OfflinePlayer to check for banned status
+	 * @param identifier
+	 *        - Player name or UUID
 	 * @return Whether or not the player is banned
 	 */
-	public static boolean isBanned(OfflinePlayer p)
-	{
-		return isBanned(p.getName());
-	}
-
-	/**
-	 * Returns whether or not a player is banned
-	 * 
-	 * @param p
-	 *        - Player name to check for banned status
-	 * @return Whether or not the player is banned
-	 */
-	public static boolean isBanned(String p)
+	public static boolean isBanned(String identifier)
 	{
 		for (OfflinePlayer banned : Bukkit.getBannedPlayers())
 		{
-			if (banned.getName().equalsIgnoreCase(p))
+			if (banned.getUniqueId().toString().equals(identifier) || banned.getName().equalsIgnoreCase(identifier))
 				return true;
 		}
 
@@ -170,23 +178,29 @@ public class Util
 	 */
 	public static String getUsefulStack(Throwable e, String circumstance)
 	{
-		StringBuilder ret = new StringBuilder();
-		ret.append("Encountered an exception while " + circumstance + ":" + '\n');
-		ret.append(e.getClass().getName() + ": " + e.getMessage() + '\n');
-		ret.append("Affected classes: " + '\n');
+		StringJoiner joiner = new StringJoiner("\n");
+		joiner.append("Encountered an exception while " + circumstance + ": " + e.getClass().getName() + ": " + e.getMessage());
+		joiner.append("Affected classes:");
 
 		for (StackTraceElement ste : e.getStackTrace())
 		{
 			if (ste.getClassName().contains(SwornGuns.class.getPackage().getName()))
-				ret.append('\t' + ste.toString() + '\n');
+				joiner.append("\t" + ste.toString());
 		}
 
-		if (ret.lastIndexOf("\n") >= 0)
+		while (e.getCause() != null)
 		{
-			ret.replace(ret.lastIndexOf("\n"), ret.length(), "");
+			e = e.getCause();
+			joiner.append("Caused by: " + e.getClass().getName() + ": " + e.getMessage());
+			joiner.append("Affected classes:");
+			for (StackTraceElement ste : e.getStackTrace())
+			{
+				if (ste.getClassName().contains(SwornGuns.class.getPackage().getName()))
+					joiner.append("\t" + ste.toString());
+			}
 		}
 
-		return ret.toString();
+		return joiner.toString();
 	}
 
 	/**
@@ -225,7 +239,95 @@ public class Util
 		return ret;
 	}
 
-	@SuppressWarnings("deprecation")
+	/**
+	 * Filters duplicate entries from a {@link Map} according to the original
+	 * map.
+
+	 * @param map
+	 *        - {@link Map} to filter
+	 * @param original
+	 *        - Original map
+	 * @return Filtered map
+	 */
+	public static <K, V> Map<K, V> filterDuplicateEntries(Map<K,V> map, Map<K, V> original)
+	{
+		for (Entry<K, V> entry : new HashMap<K, V>(map).entrySet())
+		{
+			K key = entry.getKey();
+			if (original.containsKey(key))
+			{
+				V val = entry.getValue();
+				V def = original.get(key);
+				if (val.equals(def))
+				{
+					map.remove(key);
+				}
+			}
+		}
+
+		return map;
+	}
+
+	/**
+	 * Checks if a field is declared in a given {@link Class}
+	 * 
+	 * @param clazz
+	 *        - Class object
+	 * @param name
+	 *        - Name of variable
+	 * @return Whether or not the field is declared
+	 */
+	public static boolean isDeclaredField(Class<?> clazz, String name)
+	{
+		try
+		{
+			clazz.getDeclaredField(name);
+			return true;
+		} catch (Throwable ex) { }
+		return false;
+	}
+
+	/**
+	 * Parses a given {@link Object} (preferably a {@link String}) and returns a
+	 * boolean value.
+	 * 
+	 * @param object
+	 *        - Object to parse
+	 * @return Boolean value from the given object. Defaults to
+	 *         <code>false</code>
+	 */
+	public static boolean toBoolean(Object object)
+	{
+		if (object instanceof Boolean)
+		{
+			return ((Boolean) object).booleanValue();
+		}
+
+		if (object instanceof String)
+		{
+			String str = (String) object;
+			return str.startsWith("y") || str.startsWith("t") || str.startsWith("on") || str.startsWith("+") || str.startsWith("1");
+		}
+
+		try
+		{
+			return Boolean.parseBoolean(object.toString());
+		} catch (Exception e) { }
+		return false;
+	}
+
+	/**
+	 * Sets a {@link Block}'s {@link MaterialData}. Exists because Bukkit's
+	 * BlockState API sucks.
+	 * <p>
+	 * This method is deprecated and is not guaranteed to work.
+	 * 
+	 * @param block
+	 *        - Block to set data of
+	 * @param data
+	 *        - Data to set
+	 * @deprecated {@link Block#setData(byte)} is deprecated
+	 */
 	public static void setData(Block block, MaterialData data)
 	{
 		block.setData(data.getData());
