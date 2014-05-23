@@ -19,7 +19,9 @@ package net.dmulloy2.swornguns;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import lombok.Getter;
@@ -120,7 +122,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 
 		getOnlinePlayers();
 
-		setupPermissions();
+		registerPermissions();
 
 		// Update timer
 		if (getConfig().getBoolean("runUpdateTimerAsync", false))
@@ -160,8 +162,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		effects.clear();
 		bullets.clear();
 		players.clear();
-
-		clearPermissions();
+		permissions.clear();
 
 		logHandler.log("{0} has been disabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
 	}
@@ -295,41 +296,25 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		logHandler.log("Loaded {0} guns!", loaded);
 	}
 
-	private List<Permission> registeredPermissions = new ArrayList<Permission>();
+	private Map<String, Permission> permissions;
 
-	private void setupPermissions()
+	private void registerPermissions()
 	{
-		for (int i = 0; i < loadedGuns.size(); i++)
-		{
-			Gun g = loadedGuns.get(i);
+		permissions = new HashMap<String, Permission>();
 
-			PermissionDefault def = g.isNeedsPermission() ? PermissionDefault.FALSE : PermissionDefault.TRUE;
-			Permission perm = new Permission(g.getNode(), def);
+		for (Gun gun : Util.newList(loadedGuns))
+		{
+			PermissionDefault def = gun.isNeedsPermission() ? PermissionDefault.FALSE : PermissionDefault.TRUE;
+			Permission perm = new Permission("swornguns.fire." + gun.getFileName(), def);
 			getServer().getPluginManager().addPermission(perm);
-			registeredPermissions.add(perm);
+			permissions.put(gun.getName(), perm);
 		}
-	}
-
-	private void clearPermissions()
-	{
-		for (Permission registeredPermission : registeredPermissions)
-		{
-			getServer().getPluginManager().removePermission(registeredPermission);
-		}
-
-		registeredPermissions.clear();
 	}
 
 	@Override
 	public Permission getPermission(Gun gun)
 	{
-		for (Permission registeredPermission : registeredPermissions)
-		{
-			if (registeredPermission.getName().equalsIgnoreCase(gun.getNode()))
-				return registeredPermission;
-		}
-
-		return null;
+		return permissions.get(gun.getName());
 	}
 
 	private void getOnlinePlayers()

@@ -24,22 +24,16 @@ public class PermissionHandler
 
 	public final boolean hasPermission(CommandSender sender, String permission)
 	{
-		if (sender instanceof Player)
-		{
-			Player p = (Player) sender;
-			return (p.hasPermission(permission) || p.isOp());
-		}
-
-		return true;
+		return sender.hasPermission(permission) || sender.isOp();
 	}
-	
+
 	public final boolean canFireGun(Player player, Gun gun)
 	{
 		if (gun.isNeedsPermission())
 		{
-			return hasPermission(player, gun.getNode()) || player.hasPermission("swornguns.*");
+			return hasPermission(player, "swornguns.fire." + gun.getFileName()) || player.hasPermission("swornguns.fire.*");
 		}
-		
+
 		return true;
 	}
 

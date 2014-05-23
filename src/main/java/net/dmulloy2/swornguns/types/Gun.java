@@ -87,7 +87,6 @@ public class Gun
 	private String explosionType = "FIREWORK";
 	private String outOfAmmoMessage = "";
 
-	private String node;
 	private String gunName;
 	private String fileName;
 
@@ -293,7 +292,6 @@ public class Gun
 		g.ignoreItemData = this.ignoreItemData;
 		g.projType = this.projType;
 		g.needsPermission = this.needsPermission;
-		g.node = this.node;
 		g.gunSound = this.gunSound;
 		g.bulletDelayTime = this.bulletDelayTime;
 		g.hasClip = this.hasClip;

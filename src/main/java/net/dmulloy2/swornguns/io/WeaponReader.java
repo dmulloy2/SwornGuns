@@ -35,7 +35,6 @@ public class WeaponReader
 
 		this.ret = new Gun(file.getName(), plugin);
 		this.ret.setFileName(file.getName().toLowerCase());
-		this.ret.setNode("swornguns.fire." + file.getName().toLowerCase());
 		this.load();
 	}
 
