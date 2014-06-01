@@ -164,15 +164,14 @@ public class GunPlayer implements Reloadable
 
 	// ---- Getters
 
-	public final Gun getGun(Material material)
+	public final Player getPlayer()
 	{
-		for (Gun check : guns)
-		{
-			if (check.getGunMaterial() == material)
-				return check;
-		}
+		return controller;
+	}
 
-		return null;
+	public final String getName()
+	{
+		return controller.getName();
 	}
 
 	public final ItemStack getLastItemHeld()
@@ -180,11 +179,16 @@ public class GunPlayer implements Reloadable
 		return lastHeldItem;
 	}
 
-	public final Player getPlayer()
+	public final Gun getGun(Material material)
 	{
-		return controller;
-	}
+		for (Gun gun : guns)
+		{
+			if (gun.getGunMaterial() == material)
+				return gun;
+		}
 
+		return null;
+	}
 
 	// ---- Aim
 
@@ -259,7 +263,7 @@ public class GunPlayer implements Reloadable
 					{
 						ItemMeta meta = item.getItemMeta();
 
-						String name = getGunName(gun);						
+						String name = getGunName(gun);
 						if (! name.isEmpty())
 							meta.setDisplayName(name);
 
@@ -390,13 +394,13 @@ public class GunPlayer implements Reloadable
 		{
 			if (! plugin.isUseSwornRPG())
 				return false;
-	
+
 			if (data == null)
 			{
 				PlayerDataCache cache = plugin.getSwornRPG().getPlayerDataCache();
 				data = cache.getData(controller);
 			}
-	
+
 			return data != null && data.isUnlimitedAmmoEnabled();
 		} catch (Throwable ex) { }
 		return false;
@@ -408,7 +412,7 @@ public class GunPlayer implements Reloadable
 		{
 			if (! plugin.isUseUltimateArena())
 				return false;
-	
+
 			if (plugin.getUltimateArena().isInArena(controller))
 			{
 				Arena ar = plugin.getUltimateArena().getArenaPlayer(controller).getArena();
@@ -433,7 +437,7 @@ public class GunPlayer implements Reloadable
 	@Override
 	public String toString()
 	{
-		return "GunPlayer { name = " + controller.getName() + " }";
+		return "GunPlayer { name = " + getName() + " }";
 	}
 
 	@Override
@@ -442,7 +446,7 @@ public class GunPlayer implements Reloadable
 		if (obj instanceof GunPlayer)
 		{
 			GunPlayer that = (GunPlayer) obj;
-			return this.controller.getName().equals(that.controller.getName());
+			return this.getName().equals(that.getName());
 		}
 
 		return false;
@@ -452,7 +456,7 @@ public class GunPlayer implements Reloadable
 	public int hashCode()
 	{
 		int hash = 97;
-		hash *= controller.hashCode();
+		hash *= getName().hashCode();
 		return hash;
 	}
 }
