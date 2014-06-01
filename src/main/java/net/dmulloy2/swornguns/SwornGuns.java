@@ -69,6 +69,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	private @Getter List<Bullet> bullets = new ArrayList<Bullet>();
 	private @Getter List<Gun> loadedGuns = new ArrayList<Gun>();
 	private @Getter List<GunPlayer> players = new ArrayList<GunPlayer>();
+	private @Getter List<String> disabledWorlds = new ArrayList<String>();
 	private @Getter List<EffectType> effects = new ArrayList<EffectType>();
 
 	private @Getter String prefix = FormatUtil.format("&6[&4&lSwornGuns&6] ");
@@ -115,6 +116,9 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		{
 			projectile.mkdir();
 		}
+
+		// Disabled worlds
+		disabledWorlds = getConfig().getStringList("disabledWorlds");
 
 		// Load guns
 		loadGuns();

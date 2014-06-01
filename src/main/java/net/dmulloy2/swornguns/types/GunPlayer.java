@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.util.FormatUtil;
 import net.dmulloy2.swornguns.util.InventoryUtil;
 import net.dmulloy2.swornguns.util.Util;
 import net.dmulloy2.swornrpg.io.PlayerDataCache;
@@ -52,6 +52,8 @@ public class GunPlayer implements Reloadable
 		this.enabled = true;
 		this.calculateGuns();
 	}
+
+	// ---- Firing and Tick
 
 	public final void handleClick(String clickType)
 	{
@@ -107,39 +109,6 @@ public class GunPlayer implements Reloadable
 				}
 			}
 		}
-		else if (gun.isWarnIfNoPermission())
-		{
-			controller.sendMessage(FormatUtil.format("&cYou do not have permission to fire this gun!"));
-		}
-	}
-
-	public final boolean isAimedIn()
-	{
-		return aimedIn;
-	}
-
-	private final void checkAim()
-	{
-		if (aimedIn)
-		{
-			controller.removePotionEffect(PotionEffectType.SLOW);
-			this.aimedIn = false;
-		}
-		else
-		{
-			controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
-			this.aimedIn = true;
-		}
-	}
-
-	private final void fireGun(Gun gun)
-	{
-		if (gun.getTimer() <= 0)
-		{
-			this.currentlyFiring = gun;
-
-			gun.setFiring(true);
-		}
 	}
 
 	public final void tick()
@@ -193,6 +162,89 @@ public class GunPlayer implements Reloadable
 		renameGuns();
 	}
 
+	// ---- Getters
+
+	public final Gun getGun(Material material)
+	{
+		for (Gun check : guns)
+		{
+			if (check.getGunMaterial() == material)
+				return check;
+		}
+
+		return null;
+	}
+
+	public final ItemStack getLastItemHeld()
+	{
+		return lastHeldItem;
+	}
+
+	public final Player getPlayer()
+	{
+		return controller;
+	}
+
+
+	// ---- Aim
+
+	public final boolean isAimedIn()
+	{
+		return aimedIn;
+	}
+
+	private final void checkAim()
+	{
+		if (aimedIn)
+		{
+			controller.removePotionEffect(PotionEffectType.SLOW);
+			this.aimedIn = false;
+		}
+		else
+		{
+			controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
+			this.aimedIn = true;
+		}
+	}
+
+	private final void fireGun(Gun gun)
+	{
+		if (gun.getTimer() <= 0)
+		{
+			this.currentlyFiring = gun;
+
+			gun.setFiring(true);
+		}
+	}
+
+	// ---- Ammo
+
+	public final int getAmmoNeeded(Gun gun)
+	{
+		if (gun.isUnlimitedAmmo())
+			return 0;
+
+		if (isPlayerInArena() || unlimitedAmmoEnabled())
+			return 0;
+
+		return gun.getAmmoAmtNeeded();
+	}
+
+	public final boolean checkAmmo(Gun gun, int amount)
+	{
+		return InventoryUtil.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte()) >= amount;
+	}
+
+	public final void removeAmmo(Gun gun, int amount)
+	{
+		if (amount <= 0)
+			return;
+
+		InventoryUtil.removeItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte(), amount);
+	}
+
+	// ---- Naming
+
 	public final void renameGuns()
 	{
 		PlayerInventory inv = controller.getInventory();
@@ -200,50 +252,36 @@ public class GunPlayer implements Reloadable
 		{
 			if (item != null && item.getType() != Material.AIR)
 			{
-				String name = getGunName(item);
-				if (! name.isEmpty())
+				Gun gun = getGun(item.getType());
+				if (gun != null)
 				{
-					ItemMeta meta = item.getItemMeta();
-					if (meta.hasDisplayName() && meta.getDisplayName().equals(name))
-						continue;
+					if (plugin.getPermissionHandler().canFireGun(controller, gun))
+					{
+						ItemMeta meta = item.getItemMeta();
 
-					meta.setDisplayName(name);
-					List<String> lore = getGunLore(item);
-					if (lore != null && ! lore.isEmpty())
-						meta.setLore(lore);
+						String name = getGunName(gun);						
+						if (! name.isEmpty())
+							meta.setDisplayName(name);
 
-					item.setItemMeta(meta);
+						List<String> lore = gun.getLore();
+						if (lore != null && ! lore.isEmpty())
+							meta.setLore(lore);
+
+						item.setItemMeta(meta);
+					}
+					else
+					{
+						ItemMeta meta = item.getItemMeta();
+						if (meta.hasDisplayName() && meta.getDisplayName().contains("\u00AB"))
+						{
+							meta.setDisplayName(null);
+							meta.setLore(null);
+							item.setItemMeta(meta);
+						}
+					}
 				}
 			}
 		}
-	}
-
-	private final List<String> getGunLore(ItemStack item)
-	{
-		Gun gun = getGun(item.getType());
-		if (gun != null)
-		{
-			if (plugin.getPermissionHandler().canFireGun(controller, gun))
-			{
-				return gun.getLore();
-			}
-		}
-
-		return null;
-	}
-
-	private final String getGunName(ItemStack item)
-	{
-		Gun gun = getGun(item.getType());
-		if (gun != null)
-		{
-			if (plugin.getPermissionHandler().canFireGun(controller, gun))
-			{
-				return getGunName(gun);
-			}
-		}
-
-		return "";
 	}
 
 	private final String getGunName(Gun gun)
@@ -284,94 +322,31 @@ public class GunPlayer implements Reloadable
 		return gun.getName() + add.toString();
 	}
 
-	public final Player getPlayer()
-	{
-		return controller;
-	}
-
-	public final void unload()
-	{
-		this.controller = null;
-		this.currentlyFiring = null;
-
-		for (Gun gun : guns)
-		{
-			gun.clear();
-		}
-	}
-
-	public final void reloadAllGuns()
-	{
-		for (Gun gun : guns)
-		{
-			if (gun != null)
-			{
-				gun.reloadGun();
-				gun.finishReloading();
-			}
-		}
-	}
-
-	public final boolean checkAmmo(Gun gun, int amount)
-	{
-		return InventoryUtil.amtItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte()) >= amount;
-	}
-
-	public final void removeAmmo(Gun gun, int amount)
-	{
-		if (amount == 0)
-			return;
-
-		InventoryUtil.removeItem(controller.getInventory(), gun.getAmmoType(), gun.getAmmoByte(), amount);
-	}
-
-	public final ItemStack getLastItemHeld()
-	{
-		return lastHeldItem;
-	}
-
-	public final Gun getGun(Material material)
-	{
-		for (Gun check : guns)
-		{
-			if (check.getGunMaterial() == material)
-				return check;
-		}
-
-		return null;
-	}
+	// ---- Util
 
 	public final void calculateGuns()
 	{
-		List<Gun> loadedGuns = new ArrayList<Gun>();
+		Map<Material, List<Gun>> byMaterial = new HashMap<Material, List<Gun>>();
 
 		for (Gun gun : plugin.getLoadedGuns())
 		{
 			if (plugin.getPermissionHandler().canFireGun(controller, gun))
 			{
-				Gun g = gun.copy();
-				g.setOwner(this);
-				loadedGuns.add(g);
+				Gun copy = gun.copy();
+				copy.setOwner(this);
+
+				if (! byMaterial.containsKey(copy.getGunMaterial()))
+					byMaterial.put(copy.getGunMaterial(), new ArrayList<Gun>());
+
+				byMaterial.get(copy.getGunMaterial()).add(gun);
 			}
-		}
-
-		HashMap<Material, List<Gun>> map1 = new HashMap<Material, List<Gun>>();
-
-		for (Gun gun : loadedGuns)
-		{
-			if (! map1.containsKey(gun.getGunMaterial()))
-			{
-				map1.put(gun.getGunMaterial(), new ArrayList<Gun>());
-			}
-
-			map1.get(gun.getGunMaterial()).add(gun);
 		}
 
 		List<Gun> sortedGuns = new ArrayList<Gun>();
 
-		for (Entry<Material, List<Gun>> entry : map1.entrySet())
+		for (Entry<Material, List<Gun>> entry : byMaterial.entrySet())
 		{
-			HashMap<Gun, Integer> priorityMap = new HashMap<Gun, Integer>();
+			Map<Gun, Integer> priorityMap = new HashMap<Gun, Integer>();
 			for (Gun gun : entry.getValue())
 			{
 				priorityMap.put(gun, gun.getPriority());
@@ -394,16 +369,18 @@ public class GunPlayer implements Reloadable
 		this.guns = sortedGuns;
 	}
 
-	public final int getAmmoNeeded(Gun gun)
+	public final void unload()
 	{
-		if (gun.isUnlimitedAmmo())
-			return 0;
+		this.controller = null;
+		this.currentlyFiring = null;
 
-		if (isPlayerInArena() || unlimitedAmmoEnabled())
-			return 0;
-
-		return gun.getAmmoAmtNeeded();
+		for (Gun gun : guns)
+		{
+			gun.clear();
+		}
 	}
+
+	// ---- Integration
 
 	private PlayerData data;
 
@@ -441,10 +418,15 @@ public class GunPlayer implements Reloadable
 		return false;
 	}
 
+	// ---- Generic Methods
+
 	@Override
 	public void reload()
 	{
-		guns.clear();
+		// Clear the list
+		guns = new ArrayList<Gun>();
+
+		// Recalculate
 		calculateGuns();
 	}
 
@@ -464,5 +446,13 @@ public class GunPlayer implements Reloadable
 		}
 
 		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 97;
+		hash *= controller.hashCode();
+		return hash;
 	}
 }

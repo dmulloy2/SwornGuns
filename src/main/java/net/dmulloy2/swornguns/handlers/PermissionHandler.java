@@ -29,10 +29,11 @@ public class PermissionHandler
 
 	public final boolean canFireGun(Player player, Gun gun)
 	{
+		if (plugin.getDisabledWorlds().contains(player.getWorld().getName()))
+			return false;
+
 		if (gun.isNeedsPermission())
-		{
 			return hasPermission(player, "swornguns.fire." + gun.getFileName()) || player.hasPermission("swornguns.fire.*");
-		}
 
 		return true;
 	}
