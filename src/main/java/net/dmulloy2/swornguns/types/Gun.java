@@ -98,7 +98,6 @@ public class Gun
 	private List<String> lore = new ArrayList<String>();
 
 	private final SwornGuns plugin;
-
 	public Gun(String name, SwornGuns plugin)
 	{
 		this.gunName = name;
@@ -586,7 +585,7 @@ public class Gun
 			s = s.replaceAll(" ", "_");
 			s = s.toUpperCase();
 			return Sound.valueOf(s);
-		} catch (Exception e) { }
+		} catch (Throwable ex) { }
 		return null;
 	}
 
@@ -602,9 +601,19 @@ public class Gun
 		if (obj instanceof Gun)
 		{
 			Gun that = (Gun) obj;
-			return this.gunName == that.gunName && this.gunType == that.gunType && this.priority == that.priority;
+			return this.gunName.equals(that.gunName) && this.gunType == that.gunType && this.priority == that.priority;
 		}
 
 		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 98;
+		hash *= gunName.hashCode();
+		hash *= gunType.hashCode();
+		hash *= priority;
+		return hash;
 	}
 }

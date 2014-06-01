@@ -26,7 +26,6 @@ public class EffectType
 	private byte specialDat = -1;
 
 	private final SwornGuns plugin;
-
 	public EffectType(SwornGuns plugin, int duration, double radius, Effect type)
 	{
 		this.plugin = plugin;
@@ -107,5 +106,33 @@ public class EffectType
 	{
 		this.specialDat = specialDat;
 		return this;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "EffectType { type = " + type + ", radius = " + radius + ", duration = " + duration + " }";
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof EffectType)
+		{
+			EffectType that = (EffectType) obj;
+			return this.type.equals(that.type) && this.radius == that.radius && this.duration == that.duration;
+		}
+
+		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 100;
+		hash *= type.hashCode();
+		hash *= radius;
+		hash *= duration;
+		return hash;
 	}
 }

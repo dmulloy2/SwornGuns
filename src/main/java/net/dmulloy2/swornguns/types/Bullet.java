@@ -64,7 +64,6 @@ public class Bullet
 	private Gun shotFrom;
 
 	private final SwornGuns plugin;
-
 	public Bullet(SwornGuns plugin, GunPlayer owner, Vector vec, Gun gun)
 	{
 		this.plugin = plugin;
@@ -448,5 +447,32 @@ public class Bullet
 		this.velocity = null;
 		this.shotFrom = null;
 		this.shooter = null;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Bullet { projectile = " + projectile.getType() + ", shotFrom = " + shotFrom + " }";
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof Bullet)
+		{
+			Bullet that = (Bullet) obj;
+			return this.projectile.equals(this.projectile) && this.shotFrom.equals(that.shotFrom);
+		}
+
+		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 99;
+		hash *= projectile.hashCode();
+		hash *= shotFrom.hashCode();
+		return hash;
 	}
 }
