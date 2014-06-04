@@ -6,6 +6,7 @@ import java.util.List;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.util.FormatUtil;
+import net.dmulloy2.swornguns.util.Util;
 
 /**
  * @author dmulloy2
@@ -38,9 +39,10 @@ public class CmdList extends PaginatedCommand
 	public List<String> getLines(int startIndex, int endIndex)
 	{
 		List<String> lines = new ArrayList<String>();
+		List<Gun> guns = Util.newList(plugin.getLoadedGuns().values());
 		for (int i = startIndex; i < endIndex && i < getListSize(); i++)
 		{
-			Gun gun = plugin.getLoadedGuns().get(i);
+			Gun gun = guns.get(i);
 			lines.add(FormatUtil.format(" &b- &e{0}  &bType: &e{1}  &bAmmo: &e{2} x {3}", gun.getName(), gun.getMaterial().getName(),
 					gun.getAmmo().getName(), gun.getAmmoAmtNeeded()));
 		}

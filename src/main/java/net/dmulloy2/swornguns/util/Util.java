@@ -1,6 +1,7 @@
 package net.dmulloy2.swornguns.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -214,7 +215,7 @@ public class Util
 	 *        - Base {@link List}
 	 * @return a new list from the given list
 	 */
-	public static <T> List<T> newList(List<T> list)
+	public static <T> List<T> newList(Collection<T> list)
 	{
 		return new ArrayList<T>(list);
 	}
