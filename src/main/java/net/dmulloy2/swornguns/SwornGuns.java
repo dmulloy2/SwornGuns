@@ -444,16 +444,24 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		{
 			for (Entry<String, GunPlayer> entry : players.entrySet())
 			{
+				String name = entry.getKey();
 				GunPlayer player = entry.getValue();
 
 				// Don't tick null players
 				if (player == null)
 				{
-					players.remove(entry.getKey());
+					players.remove(name);
 					continue;
 				}
 
-				player.tick();
+				try
+				{
+					player.tick();
+				}
+				catch (Throwable ex)
+				{
+					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + name));
+				}
 			}
 
 			for (Bullet bullet : Util.newList(bullets))
@@ -465,7 +473,14 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 					continue;
 				}
 
-				bullet.tick();
+				try
+				{
+					bullet.tick();
+				}
+				catch (Throwable ex)
+				{
+					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking bullet " + bullet));
+				}
 			}
 
 			for (EffectType effect : Util.newList(effects))
@@ -477,7 +492,14 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 					continue;
 				}
 
-				effect.tick();
+				try
+				{
+					effect.tick();
+				}
+				catch (Throwable ex)
+				{
+					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking effect " + effect));
+				}
 			}
 		}
 	}
