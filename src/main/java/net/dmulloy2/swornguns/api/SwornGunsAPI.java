@@ -7,6 +7,7 @@ import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
+import net.dmulloy2.swornguns.types.MyMaterial;
 import net.dmulloy2.swornguns.types.Reloadable;
 
 import org.bukkit.Material;
@@ -27,7 +28,10 @@ public abstract interface SwornGunsAPI extends Reloadable
 
 	GunPlayer getGunPlayer(Player player);
 
+	@Deprecated
 	Gun getGun(Material material);
+
+	Gun getGun(MyMaterial material);
 
 	Gun getGun(String gunName);
 
@@ -37,7 +41,10 @@ public abstract interface SwornGunsAPI extends Reloadable
 
 	Bullet getBullet(Entity proj);
 
+	@Deprecated
 	List<Gun> getGunsByType(ItemStack item);
+
+	List<Gun> getGunsByType(MyMaterial material);
 
 	void removeEffect(EffectType effectType);
 

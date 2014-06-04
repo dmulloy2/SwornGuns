@@ -3,6 +3,8 @@ package net.dmulloy2.swornguns.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.dmulloy2.swornguns.types.MyMaterial;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -234,8 +236,11 @@ public class InventoryUtil
 
 	// ---- SwornGuns Methods
 
-	public static int amtItem(Inventory inventory, Material type, short dat)
+	public static int amtItem(Inventory inventory, MyMaterial material)
 	{
+		Material type = material.getMaterial();
+		short dat = material.getData();
+		
 		int ret = 0;
 		if (inventory != null)
 		{
@@ -258,8 +263,11 @@ public class InventoryUtil
 		return ret;
 	}
 
-	public static void removeItem(Inventory inventory, Material type, short dat, int amt)
+	public static void removeItem(Inventory inventory, MyMaterial material, int amt)
 	{
+		Material type = material.getMaterial();
+		short dat = material.getData();
+
 		int start = amt;
 		if (inventory != null)
 		{

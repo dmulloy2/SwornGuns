@@ -41,9 +41,8 @@ public class CmdList extends PaginatedCommand
 		for (int i = startIndex; i < endIndex && i < getListSize(); i++)
 		{
 			Gun gun = plugin.getLoadedGuns().get(i);
-			lines.add(FormatUtil.format(" &b- &e{0}  &bType: &e{1}  &bAmmo: &e{2} x {3}", gun.getName(),
-					FormatUtil.getFriendlyName(gun.getGunMaterial()), FormatUtil.getFriendlyName(gun.getAmmoMaterial()),
-					gun.getAmmoAmtNeeded()));
+			lines.add(FormatUtil.format(" &b- &e{0}  &bType: &e{1}  &bAmmo: &e{2} x {3}", gun.getName(), gun.getMaterial().getName(),
+					gun.getAmmo().getName(), gun.getAmmoAmtNeeded()));
 		}
 
 		return lines;

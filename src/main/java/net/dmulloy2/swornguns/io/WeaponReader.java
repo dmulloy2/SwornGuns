@@ -148,8 +148,6 @@ public class WeaponReader
 				ret.setLocalGunSound(Boolean.parseBoolean(val));
 			if (var.equalsIgnoreCase("canGoPastMaxDistance"))
 				ret.setCanGoPastMaxDistance(Boolean.parseBoolean(val));
-			if (var.equalsIgnoreCase("ignoreitemdata"))
-				ret.setIgnoreItemData(Boolean.parseBoolean(val));
 			if (var.equals("bulletdelaytime"))
 				ret.setBulletDelayTime(Integer.parseInt(val));
 			if (var.equals("explosiondamage"))

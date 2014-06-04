@@ -66,7 +66,7 @@ public class PlayerListener implements Listener
 			ItemStack lastHold = gp.getLastItemHeld();
 			if (lastHold != null)
 			{
-				Gun gun = gp.getGun(dropped.getItemStack().getType());
+				Gun gun = gp.getGun(dropped.getItemStack());
 				if (gun != null)
 				{
 					if (lastHold.getType() == dropped.getItemStack().getType())

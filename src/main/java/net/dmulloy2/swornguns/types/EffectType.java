@@ -1,7 +1,6 @@
 package net.dmulloy2.swornguns.types;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.Util;
 
@@ -13,7 +12,7 @@ import org.bukkit.entity.Player;
  * @author dmulloy2
  */
 
-@Getter @Setter
+@Data
 public class EffectType
 {
 	private int maxDuration;
@@ -130,9 +129,9 @@ public class EffectType
 	public int hashCode()
 	{
 		int hash = 100;
-		hash *= type.hashCode();
-		hash *= radius;
-		hash *= duration;
+		hash *= 1 + type.hashCode();
+		hash *= 1 + radius;
+		hash *= 1 + duration;
 		return hash;
 	}
 }

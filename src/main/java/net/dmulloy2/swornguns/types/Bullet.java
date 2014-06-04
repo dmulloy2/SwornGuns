@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.Util;
 
@@ -43,7 +42,7 @@ import org.bukkit.util.Vector;
  * @author dmulloy2
  */
 
-@Getter @Setter
+@Data
 public class Bullet
 {
 	private int ticks;
@@ -74,7 +73,7 @@ public class Bullet
 
 		if (gun.isThrowable())
 		{
-			ItemStack thrown = new ItemStack(gun.getGunMaterial(), 1, gun.getGunByte());
+			ItemStack thrown = gun.getMaterial().newItemStack(1);
 
 			this.projectile = owner.getPlayer().getWorld().dropItem(owner.getPlayer().getEyeLocation(), thrown);
 			((Item) projectile).setPickupDelay(9999999);
@@ -471,8 +470,8 @@ public class Bullet
 	public int hashCode()
 	{
 		int hash = 99;
-		hash *= projectile.hashCode();
-		hash *= shotFrom.hashCode();
+		hash *= 1 + projectile.hashCode();
+		hash *= 1 + shotFrom.hashCode();
 		return hash;
 	}
 }

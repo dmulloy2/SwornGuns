@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.FormatUtil;
 import net.dmulloy2.swornguns.util.MaterialUtil;
+import net.dmulloy2.swornguns.util.NumberUtil;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,7 +22,7 @@ import org.bukkit.util.Vector;
  * @author dmulloy2
  */
 
-@Getter @Setter
+@Data
 public class Gun
 {
 	private boolean canHeadshot;
@@ -36,7 +36,6 @@ public class Gun
 	private boolean canClickRight;
 	private boolean canClickLeft;
 	private boolean hasClip = true;
-	private boolean ignoreItemData;
 	private boolean reloadGunOnDrop = true;
 	private boolean firing;
 	private boolean reloading;
@@ -44,11 +43,8 @@ public class Gun
 	private boolean unlimitedAmmo;
 	private boolean warnIfNoPermission;
 
-	private byte gunByte;
-	private byte ammoByte;
-
-	private Material gunType;
-	private Material ammoType;
+	private MyMaterial material;
+	private MyMaterial ammo;
 
 	private int ammoAmtNeeded;
 	private int gunDamage;
@@ -185,9 +181,9 @@ public class Gun
 			{
 				owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
 				if (! outOfAmmoMessage.isEmpty())
-					owner.getPlayer().sendMessage(FormatUtil.format(outOfAmmoMessage, FormatUtil.getFriendlyName(ammoType)));
+					owner.getPlayer().sendMessage(FormatUtil.format(outOfAmmoMessage, ammo.getName()));
 				else
-					owner.getPlayer().sendMessage(FormatUtil.format("&6This gun needs &c{0}", FormatUtil.getFriendlyName(ammoType)));
+					owner.getPlayer().sendMessage(FormatUtil.format("&6This gun needs &c{0}", ammo.getName()));
 
 				finishShooting();
 			}
@@ -262,11 +258,9 @@ public class Gun
 		Gun g = new Gun(gunName, plugin);
 
 		g.gunName = this.gunName;
-		g.gunType = this.gunType;
-		g.gunByte = this.gunByte;
-		g.ammoByte = this.ammoByte;
+		g.material = this.material;
+		g.ammo = this.ammo;
 		g.ammoAmtNeeded = this.ammoAmtNeeded;
-		g.ammoType = this.ammoType;
 		g.roundsPerBurst = this.roundsPerBurst;
 		g.bulletsPerClick = this.bulletsPerClick;
 		g.bulletSpeed = this.bulletSpeed;
@@ -288,7 +282,6 @@ public class Gun
 		g.hasSmokeTrail = this.hasSmokeTrail;
 		g.armorPenetration = this.armorPenetration;
 		g.isThrowable = this.isThrowable;
-		g.ignoreItemData = this.ignoreItemData;
 		g.projType = this.projType;
 		g.needsPermission = this.needsPermission;
 		g.gunSound = this.gunSound;
@@ -469,17 +462,19 @@ public class Gun
 	/**
 	 * @return Ammo material
 	 */
+	@Deprecated
 	public Material getAmmoMaterial()
 	{
-		return ammoType;
+		return ammo.getMaterial();
 	}
 
 	/**
 	 * @return Gun material
 	 */
+	@Deprecated
 	public Material getGunMaterial()
 	{
-		return gunType;
+		return material.getMaterial();
 	}
 
 	/**
@@ -503,12 +498,12 @@ public class Gun
 		return str;
 	}
 
-	public byte getByteDataFromString(String str)
+	public short getDataFromString(String str)
 	{
 		if (str.contains(":"))
 		{
 			String news = str.substring(str.indexOf(":") + 1, str.length());
-			return Byte.parseByte(news);
+			return NumberUtil.toShort(news);
 		}
 
 		return -1;
@@ -522,15 +517,18 @@ public class Gun
 	 */
 	public void setGunType(String val)
 	{
-		this.gunType = MaterialUtil.getMaterial(getValueFromString(val));
+		Material material = MaterialUtil.getMaterial(getValueFromString(val));
+		short data = getDataFromString(val);
 
-		this.gunByte = getByteDataFromString(val);
+		boolean ignoreData = false;
 
-		if (gunByte < 0)
+		if (data < 0)
 		{
-			this.ignoreItemData = true;
-			this.gunByte = 0;
+			ignoreData = true;
+			data = 0;
 		}
+
+		this.material = new MyMaterial(material, data, ignoreData);
 	}
 
 	/**
@@ -541,13 +539,18 @@ public class Gun
 	 */
 	public void setAmmoType(String val)
 	{
-		this.ammoType = MaterialUtil.getMaterial(getValueFromString(val));
-		this.ammoByte = getByteDataFromString(val);
+		Material material = MaterialUtil.getMaterial(getValueFromString(val));
+		short data = getDataFromString(val);
 
-		if (ammoByte < 0)
+		boolean ignoreData = false;
+
+		if (data < 0)
 		{
-			this.ammoByte = 0;
+			ignoreData = true;
+			data = 0;
 		}
+
+		this.ammo = new MyMaterial(material, data, ignoreData);
 	}
 
 	/**
@@ -592,7 +595,7 @@ public class Gun
 	@Override
 	public String toString()
 	{
-		return "Gun { name = " + gunName + ", type = " + gunType + ", priority = " + priority + " }";
+		return "Gun { name = " + gunName + ", material = " + material + ", priority = " + priority + " }";
 	}
 
 	@Override
@@ -601,7 +604,7 @@ public class Gun
 		if (obj instanceof Gun)
 		{
 			Gun that = (Gun) obj;
-			return this.gunName.equals(that.gunName) && this.gunType == that.gunType && this.priority == that.priority;
+			return this.gunName.equals(that.gunName) && this.material.equals(that.material) && this.priority == that.priority;
 		}
 
 		return false;
@@ -611,9 +614,9 @@ public class Gun
 	public int hashCode()
 	{
 		int hash = 98;
-		hash *= gunName.hashCode();
-		hash *= gunType.hashCode();
-		hash *= priority;
+		hash *= 1 + gunName.hashCode();
+		hash *= 1 + material.hashCode();
+		hash *= 1 + priority;
 		return hash;
 	}
 }
