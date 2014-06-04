@@ -31,7 +31,7 @@ public class CmdList extends PaginatedCommand
 	@Override
 	public String getHeader(int index)
 	{
-		return FormatUtil.format("&3====[ &eAvailable Guns &3(&e{0}&3/&e{1}&3)", index, getListSize());
+		return FormatUtil.format("&3====[ &eAvailable Guns &3(&e{0}&3/&e{1}&3)", index, getPageCount());
 	}
 
 	@Override
