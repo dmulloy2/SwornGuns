@@ -67,7 +67,7 @@ public class MyMaterial
 		if (obj instanceof MyMaterial)
 		{
 			MyMaterial that = (MyMaterial) obj;
-			return this.material == that.material && ignoreData ? true : this.data == that.data;
+			return this.material == that.material && (ignoreData ? true : this.data == that.data);
 		}
 
 		return false;

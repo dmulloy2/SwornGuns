@@ -15,7 +15,6 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,23 +35,9 @@ public class PlayerListener implements Listener
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerKick(PlayerKickEvent event)
-	{
-		if (! event.isCancelled())
-		{
-			onDisconnect(event.getPlayer());
-		}
-	}
-
-	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(PlayerQuitEvent event)
 	{
-		onDisconnect(event.getPlayer());
-	}
-
-	public void onDisconnect(Player player)
-	{
-		plugin.onQuit(player);
+		plugin.onQuit(event.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -92,15 +77,11 @@ public class PlayerListener implements Listener
 		else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)
 			clickType = "right";
 
-		Player player = event.getPlayer();
-		if (! plugin.getConfig().getStringList("disabledWorlds").contains(player.getWorld().getName()))
-		{
-			GunPlayer gp = plugin.getGunPlayer(player);
-			if (gp != null)
-			{
-				gp.handleClick(clickType);
-			}
-		}
+		GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
+		if (gp == null)
+			plugin.onJoin(event.getPlayer());
+
+		gp.handleClick(clickType);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)

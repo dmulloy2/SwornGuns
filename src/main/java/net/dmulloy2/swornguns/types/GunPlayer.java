@@ -341,7 +341,7 @@ public class GunPlayer implements Reloadable
 				if (! byMaterial.containsKey(copy.getMaterial()))
 					byMaterial.put(copy.getMaterial(), new ArrayList<Gun>());
 
-				byMaterial.get(copy.getMaterial()).add(gun);
+				byMaterial.get(copy.getMaterial()).add(copy);
 			}
 		}
 

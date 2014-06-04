@@ -215,7 +215,8 @@ public class Bullet
 		this.dead = true;
 
 		// Destroy
-		projectile.remove();
+		if (projectile != null)
+			projectile.remove();
 		destroy();
 
 		// Unregister
@@ -451,12 +452,18 @@ public class Bullet
 	@Override
 	public String toString()
 	{
+		if (dead)
+			return "Bullet { dead = true }";
+
 		return "Bullet { projectile = " + projectile.getType() + ", shotFrom = " + shotFrom + " }";
 	}
 
 	@Override
 	public boolean equals(Object obj)
 	{
+		if (dead)
+			return this == obj;
+
 		if (obj instanceof Bullet)
 		{
 			Bullet that = (Bullet) obj;
