@@ -158,16 +158,15 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		getServer().getScheduler().cancelTasks(this);
 		getServer().getServicesManager().unregisterAll(this);
 
-		for (int i = 0; i < bullets.size(); i++)
+		for (Bullet bullet : Util.newList(bullets))
 		{
-			Bullet bullet = bullets.get(i);
 			bullet.destroy();
 		}
 
-		for (int i = 0; i < players.size(); i++)
+		for (GunPlayer gp : players.values())
 		{
-			GunPlayer gp = players.get(i);
-			gp.unload();
+			if (gp != null)
+				gp.unload();
 		}
 
 		loadedGuns.clear();
