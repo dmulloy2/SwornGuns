@@ -595,7 +595,7 @@ public class Gun
 	@Override
 	public String toString()
 	{
-		return "Gun { name = " + gunName + ", material = " + material + ", priority = " + priority + " }";
+		return "Gun { name = " + fileName + ", material = " + material + ", priority = " + priority + " }";
 	}
 
 	@Override
@@ -604,7 +604,7 @@ public class Gun
 		if (obj instanceof Gun)
 		{
 			Gun that = (Gun) obj;
-			return this.gunName.equals(that.gunName) && this.material.equals(that.material) && this.priority == that.priority;
+			return this.fileName.equals(that.fileName) && this.material.equals(that.material) && this.priority == that.priority;
 		}
 
 		return false;
@@ -614,7 +614,7 @@ public class Gun
 	public int hashCode()
 	{
 		int hash = 98;
-		hash *= 1 + gunName.hashCode();
+		hash *= 1 + fileName.hashCode();
 		hash *= 1 + material.hashCode();
 		hash *= 1 + priority;
 		return hash;

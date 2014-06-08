@@ -75,7 +75,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	private @Getter List<EffectType> effects;
 	private @Getter List<String> disabledWorlds;
 
-	private @Getter String prefix = FormatUtil.format("&6[&4&lSwornGuns&6] ");
+	private @Getter String prefix = FormatUtil.format("&3[&eSwornGuns&3]&e ");
 
 	@Override
 	public void onEnable()
