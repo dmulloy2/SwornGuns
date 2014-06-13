@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
+import net.dmulloy2.swornguns.util.NumberUtil;
 import net.dmulloy2.swornguns.util.Util;
 
 import org.bukkit.Effect;
@@ -79,37 +80,37 @@ public class WeaponReader
 			if (var.equals("guntype"))
 				ret.setGunType(val);
 			if (var.equals("ammoamtneeded"))
-				ret.setAmmoAmtNeeded(Integer.parseInt(val));
+				ret.setAmmoAmtNeeded(NumberUtil.toInt(val));
 			if (var.equals("reloadtime"))
-				ret.setReloadTime(Integer.parseInt(val));
+				ret.setReloadTime(NumberUtil.toInt(val));
 			if (var.equals("gundamage"))
-				ret.setGunDamage(Integer.parseInt(val));
+				ret.setGunDamage(NumberUtil.toDouble(val));
 			if (var.equals("armorpenetration"))
-				ret.setArmorPenetration(Integer.parseInt(val));
+				ret.setArmorPenetration(NumberUtil.toDouble(val));
 			if (var.equals("ammotype"))
 				ret.setAmmoType(val);
 			if (var.equals("roundsperburst"))
-				ret.setRoundsPerBurst(Integer.parseInt(val));
+				ret.setRoundsPerBurst(NumberUtil.toInt(val));
 			if (var.equals("maxdistance"))
-				ret.setMaxDistance(Integer.parseInt(val));
+				ret.setMaxDistance(NumberUtil.toInt(val));
 			if (var.equals("bulletsperclick"))
-				ret.setBulletsPerClick(Integer.parseInt(val));
+				ret.setBulletsPerClick(NumberUtil.toInt(val));
 			if (var.equals("bulletspeed"))
-				ret.setBulletSpeed(Double.parseDouble(val));
+				ret.setBulletSpeed(NumberUtil.toDouble(val));
 			if (var.equals("accuracy"))
-				ret.setAccuracy(Double.parseDouble(val));
+				ret.setAccuracy(NumberUtil.toDouble(val));
 			if (var.equals("accuracy_aimed"))
-				ret.setAccuracy_aimed(Double.parseDouble(val));
+				ret.setAccuracy_aimed(NumberUtil.toDouble(val));
 			if (var.equals("accuracy_crouched"))
-				ret.setAccuracy_crouched(Double.parseDouble(val));
+				ret.setAccuracy_crouched(NumberUtil.toDouble(val));
 			if (var.equals("exploderadius"))
-				ret.setExplodeRadius(Double.parseDouble(val));
+				ret.setExplodeRadius(NumberUtil.toDouble(val));
 			if (var.equals("gunvolume"))
-				ret.setGunVolume(Double.parseDouble(val));
+				ret.setGunVolume(NumberUtil.toDouble(val));
 			if (var.equals("fireradius"))
-				ret.setFireRadius(Double.parseDouble(val));
+				ret.setFireRadius(NumberUtil.toDouble(val));
 			if (var.equals("flashradius"))
-				ret.setFlashRadius(Double.parseDouble(val));
+				ret.setFlashRadius(NumberUtil.toDouble(val));
 			if (var.equals("canheadshot"))
 				ret.setCanHeadshot(Boolean.parseBoolean(val));
 			if (var.equals("canshootleft"))
@@ -121,9 +122,9 @@ public class WeaponReader
 			if (var.equals("canclickright"))
 				ret.setCanClickRight(Boolean.parseBoolean(val));
 			if (var.equals("knockback"))
-				ret.setKnockback(Double.parseDouble(val));
+				ret.setKnockback(NumberUtil.toDouble(val));
 			if (var.equals("recoil"))
-				ret.setRecoil(Double.parseDouble(val));
+				ret.setRecoil(NumberUtil.toDouble(val));
 			if (var.equals("canaim"))
 				ret.setCanAimLeft(Boolean.parseBoolean(val));
 			if (var.equals("canaimleft"))
@@ -139,7 +140,7 @@ public class WeaponReader
 			if (var.equals("gunsound"))
 				ret.addGunSounds(val);
 			if (var.equals("maxclipsize"))
-				ret.setMaxClipSize(Integer.parseInt(val));
+				ret.setMaxClipSize(NumberUtil.toInt(val));
 			if (var.equals("hasclip"))
 				ret.setHasClip(Boolean.parseBoolean(val));
 			if (var.equals("reloadgunondrop"))
@@ -149,15 +150,15 @@ public class WeaponReader
 			if (var.equalsIgnoreCase("canGoPastMaxDistance"))
 				ret.setCanGoPastMaxDistance(Boolean.parseBoolean(val));
 			if (var.equals("bulletdelaytime"))
-				ret.setBulletDelayTime(Integer.parseInt(val));
+				ret.setBulletDelayTime(NumberUtil.toInt(val));
 			if (var.equals("explosiondamage"))
-				ret.setExplosionDamage(Integer.parseInt(val));
+				ret.setExplosionDamage(NumberUtil.toDouble(val));
 			if (var.equals("timeuntilrelease"))
-				ret.setReleaseTime(Integer.parseInt(val));
+				ret.setReleaseTime(NumberUtil.toInt(val));
 			if (var.equals("reloadtype"))
 				ret.setReloadType(val);
 			if (var.equals("priority"))
-				ret.setPriority(Integer.parseInt(val));
+				ret.setPriority(NumberUtil.toInt(val));
 			if (var.equals("lore"))
 				ret.setLore(val);
 			if (var.equals("outofammomessage"))
@@ -173,16 +174,16 @@ public class WeaponReader
 				String[] effDat = val.split(",");
 				if (effDat.length == 3)
 				{
-					double radius = Double.parseDouble(effDat[0]);
-					int duration = Integer.parseInt(effDat[1]);
+					double radius = NumberUtil.toDouble(effDat[0]);
+					int duration = NumberUtil.toInt(effDat[1]);
 					Effect eff = Effect.valueOf(effDat[2].toUpperCase());
 					EffectType effect = new EffectType(plugin, duration, radius, eff);
 					ret.setReleaseEffect(effect);
 				}
 				else if (effDat.length == 4)
 				{
-					double radius = Double.parseDouble(effDat[0]);
-					int duration = Integer.parseInt(effDat[1]);
+					double radius = NumberUtil.toDouble(effDat[0]);
+					int duration = NumberUtil.toInt(effDat[1]);
 					Effect eff = Effect.valueOf(effDat[2].toUpperCase());
 					byte specialDat = Byte.parseByte(effDat[3]);
 					EffectType effect = new EffectType(plugin, duration, radius, eff);

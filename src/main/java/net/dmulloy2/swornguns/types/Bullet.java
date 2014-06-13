@@ -50,8 +50,9 @@ public class Bullet
 
 	private boolean dead;
 	private boolean active;
-	private boolean destroyNextTick;
 	private boolean released;
+	private boolean destroyed;
+	private boolean destroyNextTick;
 
 	private Entity projectile;
 	private Vector velocity;
@@ -137,87 +138,91 @@ public class Bullet
 
 	public final void tick()
 	{
-		if (! dead && shooter.getPlayer().getHealth() > 0.0D)
-		{
-			this.ticks++;
-			if (projectile != null)
-			{
-				this.lastLocation = projectile.getLocation();
-				if (projectile.getLocation().getY() <= 3.0D)
-				{
-					this.dead = true;
-					return;
-				}
-
-				if (ticks > releaseTime)
-				{
-					EffectType eff = shotFrom.getReleaseEffect();
-					if (eff != null)
-					{
-						eff.start(lastLocation);
-					}
-
-					this.dead = true;
-					return;
-				}
-
-				if (shotFrom.isHasSmokeTrail())
-				{
-					lastLocation.getWorld().playEffect(lastLocation, Effect.SMOKE, 0);
-				}
-
-				if (shotFrom.isThrowable() && ticks == 90)
-				{
-					remove();
-					return;
-				}
-
-				if (active)
-				{
-					if (lastLocation.getWorld().getUID() == startLocation.getWorld().getUID())
-					{
-						double dis = lastLocation.distance(startLocation);
-						if (dis > shotFrom.getMaxDistance())
-						{
-							this.active = false;
-							if (! shotFrom.isThrowable() && ! shotFrom.isCanGoPastMaxDistance())
-							{
-								velocity.multiply(0.25D);
-							}
-						}
-					}
-
-					projectile.setVelocity(velocity);
-				}
-			}
-			else
-			{
-				this.dead = true;
-			}
-
-			if (ticks > 200)
-			{
-				this.dead = true;
-			}
-		}
-		else
+		if (dead || destroyNextTick)
 		{
 			remove();
+			return;
 		}
 
-		if (destroyNextTick)
+		if (projectile == null)
 		{
-			this.dead = true;
+			remove();
+			return;
+		}
+
+		if (shooter.getPlayer().getHealth() <= 0.0D)
+		{
+			remove();
+			return;
+		}
+
+		if (projectile.getLocation().getY() <= 3.0D)
+		{
+			remove();
+			return;
+		}
+
+		this.ticks++;
+		this.lastLocation = projectile.getLocation();
+
+		if (ticks > releaseTime)
+		{
+			EffectType eff = shotFrom.getReleaseEffect();
+			if (eff != null)
+			{
+				eff.start(lastLocation);
+			}
+
+			remove();
+			return;
+		}
+
+		if (shotFrom.isHasSmokeTrail())
+		{
+			lastLocation.getWorld().playEffect(lastLocation, Effect.SMOKE, 0);
+		}
+
+		if (shotFrom.isThrowable() && ticks == 90)
+		{
+			remove();
+			return;
+		}
+
+		if (active)
+		{
+			if (lastLocation.getWorld().getUID() == startLocation.getWorld().getUID())
+			{
+				double dis = lastLocation.distance(startLocation);
+				if (dis > shotFrom.getMaxDistance())
+				{
+					this.active = false;
+					if (! shotFrom.isThrowable() && ! shotFrom.isCanGoPastMaxDistance())
+					{
+						velocity.multiply(0.25D);
+					}
+				}
+			}
+
+			projectile.setVelocity(velocity);
+		}
+
+		if (ticks > 200)
+		{
+			remove();
+			return;
 		}
 	}
 
 	public final void remove()
 	{
+		if (destroyed)
+			return;
+
+		this.destroyed = true;
+		this.dead = true;
+
 		// (Final) hit
 		onHit();
-
-		// Mark as dead
-		this.dead = true;
 
 		// Destroy
 		if (projectile != null)

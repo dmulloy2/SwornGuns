@@ -10,6 +10,7 @@ import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.util.FormatUtil;
 import net.dmulloy2.swornguns.util.MaterialUtil;
 import net.dmulloy2.swornguns.util.NumberUtil;
+import net.dmulloy2.swornguns.util.Util;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,7 +24,7 @@ import org.bukkit.util.Vector;
  */
 
 @Data
-public class Gun
+public class Gun implements Cloneable
 {
 	private boolean canHeadshot;
 	private boolean isThrowable;
@@ -47,15 +48,12 @@ public class Gun
 	private MyMaterial ammo;
 
 	private int ammoAmtNeeded;
-	private int gunDamage;
-	private int explosionDamage = -1;
 	private int roundsPerBurst;
 	private int reloadTime;
 	private int maxDistance;
 	private int bulletsPerClick;
 	private int bulletsShot;
 	private int bulletDelay = 2;
-	private int armorPenetration;
 	private int releaseTime = -1;
 	private int maxClipSize = 30;
 	private int bulletDelayTime = 10;
@@ -67,6 +65,9 @@ public class Gun
 	private int heldDownTicks;
 	private int priority;
 
+	private double gunDamage;
+	private double armorPenetration;
+	private double explosionDamage = -1.0D;
 	private double bulletSpeed;
 	private double accuracy;
 	private double accuracy_aimed = -1.0D;
@@ -90,7 +91,7 @@ public class Gun
 
 	private EffectType releaseEffect;
 
-	private List<String> gunSound = new ArrayList<String>();
+	private List<Sound> gunSound = new ArrayList<Sound>();
 	private List<String> lore = new ArrayList<String>();
 
 	private final SwornGuns plugin;
@@ -124,9 +125,8 @@ public class Gun
 				this.changed = true;
 				this.roundsFired++;
 
-				for (int i = 0; i < gunSound.size(); i++)
+				for (Sound sound : Util.newList(gunSound))
 				{
-					Sound sound = getSound(gunSound.get(i));
 					if (sound != null)
 					{
 						if (localGunSound)
@@ -253,7 +253,7 @@ public class Gun
 	 * 
 	 * @return An exact replica of this gun
 	 */
-	public Gun copy()
+	private final Gun copy()
 	{
 		Gun g = new Gun(gunName, plugin);
 
@@ -578,18 +578,12 @@ public class Gun
 	 */
 	public void addGunSounds(String val)
 	{
-		gunSound.addAll(Arrays.asList(val.split(",")));
-	}
-
-	public Sound getSound(String s)
-	{
-		try
+		for (String name : Arrays.asList(val.split(",")))
 		{
-			s = s.replaceAll(" ", "_");
-			s = s.toUpperCase();
-			return Sound.valueOf(s);
-		} catch (Throwable ex) { }
-		return null;
+			Sound sound = SwornGuns.getSound(name);
+			if (sound != null)
+				gunSound.add(sound);
+		}
 	}
 
 	@Override
@@ -618,5 +612,17 @@ public class Gun
 		hash *= 1 + material.hashCode();
 		hash *= 1 + priority;
 		return hash;
+	}
+
+	@Override
+	public Gun clone()
+	{
+		try
+		{
+			Gun clone = (Gun) super.clone();
+			clone.clear();
+			return clone;
+		} catch (Throwable ex) { }
+		return copy();
 	}
 }

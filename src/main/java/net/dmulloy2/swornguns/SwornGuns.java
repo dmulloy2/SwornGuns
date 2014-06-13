@@ -48,6 +48,7 @@ import net.dmulloy2.swornrpg.SwornRPG;
 import net.dmulloy2.ultimatearena.UltimateArena;
 
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -434,6 +435,17 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	public void addEffect(EffectType effectType)
 	{
 		effects.add(effectType);
+	}
+
+	public static final Sound getSound(String sound)
+	{
+		try
+		{
+			sound = sound.replaceAll(" ", "_");
+			sound = sound.toUpperCase();
+			return Sound.valueOf(sound);
+		} catch (Throwable ex) { }
+		return null;
 	}
 
 	public class UpdateTimer extends BukkitRunnable

@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Bullet;
+import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.Reloadable;
 import net.dmulloy2.swornguns.util.MaterialUtil;
 
@@ -178,39 +179,41 @@ public class EntityListener implements Listener, Reloadable
 					}
 					// Realism end
 
-					double damage = bullet.getShotFrom().getGunDamage();
+					Gun shotFrom = bullet.getShotFrom();
+					double damage = shotFrom.getGunDamage();
+
+					// Headshot
 					double mult = 1.0D;
 					if (isNear(proj.getLocation(), hurt.getEyeLocation(), 0.26D) && bullet.getShotFrom().isCanHeadshot())
 						mult = 2.0D;
 
-					if (hurt.getHealth() > 0.0D)
-					{
-						hurt.setLastDamage(0.0D);
-						event.setDamage(Math.ceil(damage * mult));
-						int armorPenetration = bullet.getShotFrom().getArmorPenetration();
-						if (armorPenetration > 0 && hurt.getHealth() - event.getDamage() > 0.0D)
-						{
-							int health = (int) hurt.getHealth();
-							int newHealth = health - armorPenetration;
-							if (newHealth < 0)
-							{
-								newHealth = 0;
-							}
-							if (newHealth > 20)
-							{
-								newHealth = 20;
-							}
-
-							hurt.setHealth(newHealth);
-						}
-
-						bullet.getShotFrom().doKnockback(hurt, bullet.getVelocity());
-						bullet.remove();
-					}
-					else
+					// Prevent multiple deaths
+					if (hurt.getHealth() <= 0.0D)
 					{
 						event.setCancelled(true);
+						return;
 					}
+
+					// hurt.setLastDamage(0.0D);
+					event.setDamage(damage * mult);
+
+					// Armor penetration
+					double armorPenetration = shotFrom.getArmorPenetration();
+					if (armorPenetration > 0.0D && (hurt.getHealth() - event.getDamage()) > 0.0D)
+					{
+						double health = hurt.getHealth();
+						double newHealth = health - armorPenetration;
+
+						if (newHealth < 0)
+							newHealth = 0;
+						if (newHealth > 20)
+							newHealth = 20;
+
+						hurt.setHealth(newHealth);
+					}
+
+					bullet.getShotFrom().doKnockback(hurt, bullet.getVelocity());
+					bullet.remove();
 				}
 			}
 		}
@@ -299,7 +302,7 @@ public class EntityListener implements Listener, Reloadable
 		this.bloodEffectGunsOnly = plugin.getConfig().getBoolean("blood-effect.guns-only");
 		this.smokeEffect = plugin.getConfig().getBoolean("smoke-effect");
 		this.bulletSoundEnabled = plugin.getConfig().getBoolean("bullet-sound.enabled");
-		this.bulletSound = getSound(plugin.getConfig().getString("bullet-sound.sound"));
+		this.bulletSound = SwornGuns.getSound(plugin.getConfig().getString("bullet-sound.sound"));
 		this.bloodEffectType = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
 
 		List<String> configMaterials = plugin.getConfig().getStringList("block-shatter.blocks");
@@ -313,20 +316,6 @@ public class EntityListener implements Listener, Reloadable
 		}
 
 		this.setupFactionsIntegration();
-	}
-
-	private final Sound getSound(String sound)
-	{
-		try
-		{
-			sound = sound.replaceAll(" ", "_");
-			sound = sound.toUpperCase();
-			return Sound.valueOf(sound);
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
 	}
 
 	private final void setupFactionsIntegration()

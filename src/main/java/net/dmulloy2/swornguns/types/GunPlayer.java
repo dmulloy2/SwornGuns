@@ -124,9 +124,10 @@ public class GunPlayer implements Reloadable
 	{
 		this.ticks++;
 
-		if (controller == null)
+		if (controller == null || ! controller.isOnline())
 		{
 			plugin.getPlayers().remove(name);
+			unload();
 			return;
 		}
 
@@ -335,7 +336,7 @@ public class GunPlayer implements Reloadable
 		{
 			if (plugin.getPermissionHandler().canFireGun(controller, gun))
 			{
-				Gun copy = gun.copy();
+				Gun copy = gun.clone();
 				copy.setOwner(this);
 
 				if (! byMaterial.containsKey(copy.getMaterial()))
