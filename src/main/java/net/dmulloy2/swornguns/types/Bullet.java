@@ -143,6 +143,11 @@ public class Bullet
 			if (projectile != null)
 			{
 				this.lastLocation = projectile.getLocation();
+				if (projectile.getLocation().getY() <= 3.0D)
+				{
+					this.dead = true;
+					return;
+				}
 
 				if (ticks > releaseTime)
 				{
