@@ -437,7 +437,7 @@ public class GunPlayer implements Reloadable
 	@Override
 	public String toString()
 	{
-		return "GunPlayer { name = " + name + " }";
+		return name;
 	}
 
 	@Override

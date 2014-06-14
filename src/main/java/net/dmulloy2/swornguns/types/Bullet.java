@@ -24,6 +24,7 @@ import org.bukkit.entity.Fish;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LargeFireball;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.SmallFireball;
 import org.bukkit.entity.Snowball;
@@ -45,6 +46,8 @@ import org.bukkit.util.Vector;
 @Data
 public class Bullet
 {
+	public static int nextID = 1;
+
 	private int ticks;
 	private int releaseTime;
 
@@ -62,21 +65,23 @@ public class Bullet
 
 	private GunPlayer shooter;
 	private Gun shotFrom;
+	private int id;
 
 	private final SwornGuns plugin;
-	public Bullet(SwornGuns plugin, GunPlayer owner, Vector vec, Gun gun)
+	public Bullet(SwornGuns plugin, GunPlayer shooter, Gun shotFrom, Vector velocity)
 	{
 		this.plugin = plugin;
-		this.shotFrom = gun;
-		this.shooter = owner;
-		this.velocity = vec;
+		this.shotFrom = shotFrom;
+		this.shooter = shooter;
+		this.velocity = velocity;
 		this.active = true;
+		this.id = nextID++;
 
-		if (gun.isThrowable())
+		if (shotFrom.isThrowable())
 		{
-			ItemStack thrown = gun.getMaterial().newItemStack(1);
+			ItemStack thrown = shotFrom.getMaterial().newItemStack(1);
 
-			this.projectile = owner.getPlayer().getWorld().dropItem(owner.getPlayer().getEyeLocation(), thrown);
+			this.projectile = shooter.getPlayer().getWorld().dropItem(shooter.getPlayer().getEyeLocation(), thrown);
 			((Item) projectile).setPickupDelay(9999999);
 			this.startLocation = projectile.getLocation();
 		}
@@ -84,7 +89,7 @@ public class Bullet
 		{
 			Class<? extends Projectile> mclass = Snowball.class;
 
-			String check = gun.getProjType().toLowerCase().replaceAll("_", "").replaceAll(" ", "");
+			String check = shotFrom.getProjType().toLowerCase().replaceAll("_", "").replaceAll(" ", "");
 			switch (check)
 			{
 				case "arrow":
@@ -121,14 +126,14 @@ public class Bullet
 					break;
 			}
 
-			this.projectile = owner.getPlayer().launchProjectile(mclass);
-			((Projectile) projectile).setShooter(owner.getPlayer());
+			this.projectile = shooter.getPlayer().launchProjectile(mclass);
+			((Projectile) projectile).setShooter(shooter.getPlayer());
 			this.startLocation = projectile.getLocation();
 		}
 
 		if (shotFrom.getReleaseTime() == -1)
 		{
-			this.releaseTime = 80 + (gun.isThrowable() ? 0 : 1) * 400;
+			this.releaseTime = 80 + (shotFrom.isThrowable() ? 0 : 1) * 400;
 		}
 		else
 		{
@@ -144,18 +149,29 @@ public class Bullet
 			return;
 		}
 
+		// Projectile Check
 		if (projectile == null)
 		{
 			remove();
 			return;
 		}
 
-		if (shooter.getPlayer().getHealth() <= 0.0D)
+		// Shooter check
+		if (shooter == null)
 		{
 			remove();
 			return;
 		}
 
+		// Player check
+		Player player = shooter.getPlayer();
+		if (player == null || ! player.isOnline() || player.getHealth() <= 0.0D)
+		{
+			remove();
+			return;
+		}
+
+		// Location check
 		if (projectile.getLocation().getY() <= 3.0D)
 		{
 			remove();
@@ -215,10 +231,12 @@ public class Bullet
 
 	public final void remove()
 	{
+		// Unregister
+		plugin.removeBullet(this);
+
 		if (destroyed)
 			return;
 
-		this.destroyed = true;
 		this.dead = true;
 
 		// (Final) hit
@@ -228,9 +246,6 @@ public class Bullet
 		if (projectile != null)
 			projectile.remove();
 		destroy();
-
-		// Unregister
-		plugin.removeBullet(this);
 	}
 
 	public final void onHit()
@@ -366,7 +381,7 @@ public class Bullet
 
 			if (damage > 0.0D)
 			{
-				int rad = (int) shotFrom.getExplodeRadius();
+				double rad = shotFrom.getExplodeRadius();
 				List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 				for (Entity entity : entities)
 				{
@@ -398,7 +413,7 @@ public class Bullet
 		if (shotFrom.getFireRadius() > 0.0D)
 		{
 			lastLocation.getWorld().playSound(lastLocation, Sound.GLASS, 20.0F, 20.0F);
-			int rad = (int) shotFrom.getFireRadius();
+			double rad = shotFrom.getFireRadius();
 			List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 			for (Entity entity : entities)
 			{
@@ -407,12 +422,12 @@ public class Bullet
 					LivingEntity lentity = (LivingEntity) entity;
 					if (lentity.getHealth() > 0.0D)
 					{
-						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.FIRE_TICK,
-								1.0D);
+						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity,
+								DamageCause.FIRE_TICK, 1.0D);
 						plugin.getServer().getPluginManager().callEvent(event);
 						if (! event.isCancelled())
 						{
-							lentity.setFireTicks(140);
+							lentity.setFireTicks(7 * 20);
 							lentity.damage(1.0D, shooter.getPlayer());
 						}
 					}
@@ -426,8 +441,8 @@ public class Bullet
 		if (shotFrom.getFlashRadius() > 0.0D)
 		{
 			lastLocation.getWorld().playSound(lastLocation, Sound.SPLASH, 20.0F, 20.0F);
-			int c = (int) shotFrom.getFlashRadius();
-			List<Entity> entities = projectile.getNearbyEntities(c, c, c);
+			double rad = shotFrom.getFlashRadius();
+			List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 			for (Entity entity : entities)
 			{
 				if (entity.isValid() && entity instanceof LivingEntity)
@@ -435,14 +450,14 @@ public class Bullet
 					LivingEntity lentity = (LivingEntity) entity;
 					if (lentity.getHealth() > 0.0D)
 					{
-						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM,
-								0.0D);
+						EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(shooter.getPlayer(), lentity,
+								DamageCause.CUSTOM, 0.0D);
 						plugin.getServer().getPluginManager().callEvent(event);
 						if (! event.isCancelled())
 						{
 							if (lentity.hasLineOfSight(projectile))
 							{
-								lentity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 1));
+								lentity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 7 * 20, 1));
 							}
 						}
 					}
@@ -453,6 +468,7 @@ public class Bullet
 
 	public final void destroy()
 	{
+		this.destroyed = true;
 		this.projectile = null;
 		this.velocity = null;
 		this.shotFrom = null;
@@ -465,7 +481,7 @@ public class Bullet
 		if (dead)
 			return "Bullet { dead = true }";
 
-		return "Bullet { projectile = " + projectile.getType() + ", shotFrom = " + shotFrom + " }";
+		return "Bullet { shooter = " + shooter + ", shotFrom = " + shotFrom.getFileName() + ", id = " + id + " }";
 	}
 
 	@Override
@@ -477,7 +493,7 @@ public class Bullet
 		if (obj instanceof Bullet)
 		{
 			Bullet that = (Bullet) obj;
-			return this.projectile.equals(this.projectile) && this.shotFrom.equals(that.shotFrom);
+			return this.shooter.equals(that.shooter) && this.shotFrom.equals(that.shotFrom) && this.id == that.id;
 		}
 
 		return false;
@@ -487,8 +503,9 @@ public class Bullet
 	public int hashCode()
 	{
 		int hash = 99;
-		hash *= 1 + projectile.hashCode();
+		hash *= 1 + shooter.hashCode();
 		hash *= 1 + shotFrom.hashCode();
+		hash *= 1 + id;
 		return hash;
 	}
 }

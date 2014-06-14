@@ -15,8 +15,11 @@ import org.bukkit.entity.Player;
 @Data
 public class EffectType
 {
+	private static int nextID = 1;
+	
 	private int maxDuration;
 	private int duration;
+	private int id;
 
 	private Effect type;
 	private double radius;
@@ -32,6 +35,7 @@ public class EffectType
 		this.maxDuration = duration;
 		this.type = type;
 		this.radius = radius;
+		this.id = nextID++;
 	}
 
 	public void start(Location location)

@@ -54,11 +54,10 @@ public class MyMaterial
 	@Override
 	public String toString()
 	{
-		StringJoiner joiner = new StringJoiner(", ");
-		joiner.append("material = " + material);
-		joiner.append(data > 0 ? "data = " + data : "");
-		joiner.append(ignoreData ? "ignoreData = true" : "");
-		return "MyMaterial { " + joiner.toString() + " }";
+		if (ignoreData)
+			return material.toString();
+
+		return "MyMaterial { material = " + material + ", data = " + data + " }";
 	}
 
 	@Override

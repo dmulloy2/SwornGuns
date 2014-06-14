@@ -10,10 +10,8 @@ import net.dmulloy2.swornguns.types.GunPlayer;
 import net.dmulloy2.swornguns.types.MyMaterial;
 import net.dmulloy2.swornguns.types.Reloadable;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 
 /**
@@ -28,9 +26,6 @@ public abstract interface SwornGunsAPI extends Reloadable
 
 	GunPlayer getGunPlayer(Player player);
 
-	@Deprecated
-	Gun getGun(Material material);
-
 	Gun getGun(MyMaterial material);
 
 	Gun getGun(String gunName);
@@ -40,9 +35,6 @@ public abstract interface SwornGunsAPI extends Reloadable
 	void addBullet(Bullet bullet);
 
 	Bullet getBullet(Entity proj);
-
-	@Deprecated
-	List<Gun> getGunsByType(ItemStack item);
 
 	List<Gun> getGunsByType(MyMaterial material);
 

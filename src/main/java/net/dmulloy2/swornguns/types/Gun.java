@@ -170,7 +170,7 @@ public class Gun implements Cloneable
 					Vector vec = new Vector(xd, yd, zd);
 					vec.multiply(bulletSpeed);
 
-					Bullet bullet = new Bullet(plugin, owner, vec, this);
+					Bullet bullet = new Bullet(plugin, owner, this, vec);
 					plugin.addBullet(bullet);
 				}
 

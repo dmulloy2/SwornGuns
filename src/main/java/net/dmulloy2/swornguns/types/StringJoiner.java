@@ -36,7 +36,8 @@ public class StringJoiner
 	 */
 	public final StringJoiner append(final String string)
 	{
-		builder.append(string + glue);
+		if (! string.isEmpty())
+			builder.append(string + glue);
 		return this;
 	}
 

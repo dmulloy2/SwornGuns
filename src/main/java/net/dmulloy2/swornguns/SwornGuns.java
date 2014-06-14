@@ -47,11 +47,9 @@ import net.dmulloy2.swornguns.util.Util;
 import net.dmulloy2.swornrpg.SwornRPG;
 import net.dmulloy2.ultimatearena.UltimateArena;
 
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
@@ -70,12 +68,11 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	private @Getter LogHandler logHandler;
 
 	private @Getter Map<String, Gun> loadedGuns;
+	private @Getter Map<Integer, Bullet> bullets;
 	private @Getter Map<String, GunPlayer> players;
+	private @Getter Map<Integer, EffectType> effects;
 
-	private @Getter List<Bullet> bullets;
-	private @Getter List<EffectType> effects;
 	private @Getter List<String> disabledWorlds;
-
 	private @Getter String prefix = FormatUtil.format("&3[&eSwornGuns&3]&e ");
 
 	@Override
@@ -88,11 +85,11 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		reloadConfig();
 
 		// Initialize variables
-		loadedGuns = new HashMap<String, Gun>();
-		players = new HashMap<String, GunPlayer>();
+		loadedGuns = new HashMap<>();
+		bullets = new HashMap<>();
+		players = new HashMap<>();
+		effects = new HashMap<>();
 
-		bullets = new ArrayList<Bullet>();
-		effects = new ArrayList<EffectType>();
 		disabledWorlds = getConfig().getStringList("disabledWorlds");
 
 		// Handlers
@@ -159,7 +156,7 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 		getServer().getScheduler().cancelTasks(this);
 		getServer().getServicesManager().unregisterAll(this);
 
-		for (Bullet bullet : Util.newList(bullets))
+		for (Bullet bullet : bullets.values())
 		{
 			bullet.destroy();
 		}
@@ -339,13 +336,6 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	}
 
 	@Override
-	@Deprecated
-	public Gun getGun(Material material)
-	{
-		return getGun(new MyMaterial(material, (short) 0));
-	}
-
-	@Override
 	public Gun getGun(MyMaterial material)
 	{
 		for (Gun gun : loadedGuns.values())
@@ -383,32 +373,25 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	@Override
 	public void removeBullet(Bullet bullet)
 	{
-		bullets.remove(bullet);
+		bullets.remove(bullet.getId());
 	}
 
 	@Override
 	public void addBullet(Bullet bullet)
 	{
-		bullets.add(bullet);
+		bullets.put(bullet.getId(), bullet);
 	}
 
 	@Override
 	public Bullet getBullet(Entity proj)
 	{
-		for (Bullet bullet : Util.newList(bullets))
+		for (Bullet bullet : bullets.values())
 		{
 			if (bullet.getProjectile().getUniqueId() == proj.getUniqueId())
 				return bullet;
 		}
 
 		return null;
-	}
-
-	@Override
-	@Deprecated
-	public List<Gun> getGunsByType(ItemStack item)
-	{
-		return getGunsByType(new MyMaterial(item.getType(), item.getDurability()));
 	}
 
 	@Override
@@ -428,13 +411,13 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 	@Override
 	public void removeEffect(EffectType effectType)
 	{
-		effects.remove(effectType);
+		effects.remove(effectType.getId());
 	}
 
 	@Override
 	public void addEffect(EffectType effectType)
 	{
-		effects.add(effectType);
+		effects.put(effectType.getId(), effectType);
 	}
 
 	public static final Sound getSound(String sound)
@@ -475,12 +458,15 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 				}
 			}
 
-			for (Bullet bullet : Util.newList(bullets))
+			for (Entry<Integer, Bullet> entry : bullets.entrySet())
 			{
+				int id = entry.getKey();
+				Bullet bullet = entry.getValue();
+				
 				// Don't tick null bullets
 				if (bullet == null)
 				{
-					bullets.remove(bullet);
+					bullets.remove(id);
 					continue;
 				}
 
@@ -491,15 +477,24 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 				catch (Throwable ex)
 				{
 					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking bullet " + bullet));
+
+					try
+					{
+						bullets.remove(id);
+						bullet.remove();
+					} catch (Throwable ex1) { }
 				}
 			}
 
-			for (EffectType effect : Util.newList(effects))
+			for (Entry<Integer, EffectType> entry : effects.entrySet())
 			{
+				int id = entry.getKey();
+				EffectType effect = entry.getValue();
+				
 				// Don't tick null effects
 				if (effect == null)
 				{
-					effects.remove(effect);
+					effects.remove(id);
 					continue;
 				}
 
@@ -510,6 +505,8 @@ public class SwornGuns extends JavaPlugin implements SwornGunsAPI
 				catch (Throwable ex)
 				{
 					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking effect " + effect));
+
+					effects.remove(id);
 				}
 			}
 		}
