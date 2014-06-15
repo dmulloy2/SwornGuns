@@ -8,7 +8,7 @@ import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
 import net.dmulloy2.swornguns.types.MyMaterial;
-import net.dmulloy2.swornguns.types.Reloadable;
+import net.dmulloy2.types.Reloadable;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;

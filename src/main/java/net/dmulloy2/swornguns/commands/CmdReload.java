@@ -2,7 +2,7 @@ package net.dmulloy2.swornguns.commands;
 
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Permission;
-import net.dmulloy2.swornguns.types.Reloadable;
+import net.dmulloy2.types.Reloadable;
 
 /**
  * @author dmulloy2

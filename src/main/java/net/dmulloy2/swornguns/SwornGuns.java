@@ -26,14 +26,15 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import lombok.Getter;
+import net.dmulloy2.SwornPlugin;
+import net.dmulloy2.commands.CmdHelp;
+import net.dmulloy2.handlers.CommandHandler;
+import net.dmulloy2.handlers.LogHandler;
+import net.dmulloy2.handlers.PermissionHandler;
 import net.dmulloy2.swornguns.api.SwornGunsAPI;
-import net.dmulloy2.swornguns.commands.CmdHelp;
 import net.dmulloy2.swornguns.commands.CmdList;
 import net.dmulloy2.swornguns.commands.CmdReload;
 import net.dmulloy2.swornguns.commands.CmdToggle;
-import net.dmulloy2.swornguns.handlers.CommandHandler;
-import net.dmulloy2.swornguns.handlers.LogHandler;
-import net.dmulloy2.swornguns.handlers.PermissionHandler;
 import net.dmulloy2.swornguns.io.WeaponReader;
 import net.dmulloy2.swornguns.listeners.EntityListener;
 import net.dmulloy2.swornguns.listeners.PlayerListener;
@@ -42,10 +43,10 @@ import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
 import net.dmulloy2.swornguns.types.MyMaterial;
-import net.dmulloy2.swornguns.util.FormatUtil;
-import net.dmulloy2.swornguns.util.Util;
 import net.dmulloy2.swornrpg.SwornRPG;
 import net.dmulloy2.ultimatearena.UltimateArena;
+import net.dmulloy2.util.FormatUtil;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -54,19 +55,14 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * @author dmulloy2
  */
 
-public class SwornGuns extends JavaPlugin implements SwornGunsAPI
+public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 {
-	private @Getter PermissionHandler permissionHandler;
-	private @Getter CommandHandler commandHandler;
-	private @Getter LogHandler logHandler;
-
 	private @Getter Map<String, Gun> loadedGuns;
 	private @Getter Map<Integer, Bullet> bullets;
 	private @Getter Map<String, GunPlayer> players;

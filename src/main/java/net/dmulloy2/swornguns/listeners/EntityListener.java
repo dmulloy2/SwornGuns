@@ -6,8 +6,8 @@ import java.util.List;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.Gun;
-import net.dmulloy2.swornguns.types.Reloadable;
-import net.dmulloy2.swornguns.util.MaterialUtil;
+import net.dmulloy2.types.Reloadable;
+import net.dmulloy2.util.MaterialUtil;
 
 import org.bukkit.Effect;
 import org.bukkit.GameMode;

@@ -4,7 +4,7 @@
 package net.dmulloy2.swornguns.types;
 
 import lombok.Data;
-import net.dmulloy2.swornguns.util.FormatUtil;
+import net.dmulloy2.util.FormatUtil;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

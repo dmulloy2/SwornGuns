@@ -6,7 +6,7 @@ import java.util.Random;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.util.Util;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.Color;
 import org.bukkit.Effect;

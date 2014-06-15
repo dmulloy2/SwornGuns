@@ -7,10 +7,10 @@ import java.util.Random;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.util.FormatUtil;
-import net.dmulloy2.swornguns.util.MaterialUtil;
-import net.dmulloy2.swornguns.util.NumberUtil;
-import net.dmulloy2.swornguns.util.Util;
+import net.dmulloy2.util.FormatUtil;
+import net.dmulloy2.util.MaterialUtil;
+import net.dmulloy2.util.NumberUtil;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.Location;
 import org.bukkit.Material;

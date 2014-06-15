@@ -12,8 +12,8 @@ import java.util.logging.Level;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
-import net.dmulloy2.swornguns.util.NumberUtil;
-import net.dmulloy2.swornguns.util.Util;
+import net.dmulloy2.util.NumberUtil;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.Effect;
 

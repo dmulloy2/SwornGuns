@@ -10,12 +10,13 @@ import java.util.Map.Entry;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.util.InventoryUtil;
-import net.dmulloy2.swornguns.util.Util;
 import net.dmulloy2.swornrpg.io.PlayerDataCache;
 import net.dmulloy2.swornrpg.types.PlayerData;
+import net.dmulloy2.types.Reloadable;
 import net.dmulloy2.ultimatearena.arenas.Arena;
 import net.dmulloy2.ultimatearena.types.FieldType;
+import net.dmulloy2.util.InventoryUtil;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -68,7 +69,7 @@ public class GunPlayer implements Reloadable
 		if (gun == null)
 			return;
 
-		if (plugin.getPermissionHandler().canFireGun(controller, gun))
+		if (canFireGun(gun))
 		{
 			if (clickType.equalsIgnoreCase("right"))
 			{
@@ -236,7 +237,8 @@ public class GunPlayer implements Reloadable
 
 	public final boolean checkAmmo(Gun gun, int amount)
 	{
-		return InventoryUtil.amtItem(controller.getInventory(), gun.getAmmo()) >= amount;
+		MyMaterial ammo = gun.getAmmo();
+		return InventoryUtil.amount(controller.getInventory(), ammo.getMaterial(), ammo.getData()) >= amount;
 	}
 
 	public final void removeAmmo(Gun gun, int amount)
@@ -244,7 +246,8 @@ public class GunPlayer implements Reloadable
 		if (amount <= 0)
 			return;
 
-		InventoryUtil.removeItem(controller.getInventory(), gun.getAmmo(), amount);
+		MyMaterial ammo = gun.getAmmo();
+		InventoryUtil.remove(controller.getInventory(), ammo.getMaterial(), ammo.getData(), amount);
 	}
 
 	// ---- Naming
@@ -259,7 +262,7 @@ public class GunPlayer implements Reloadable
 				Gun gun = getGun(item);
 				if (gun != null)
 				{
-					if (plugin.getPermissionHandler().canFireGun(controller, gun))
+					if (canFireGun(gun))
 					{
 						ItemMeta meta = item.getItemMeta();
 
@@ -293,13 +296,14 @@ public class GunPlayer implements Reloadable
 		StringBuilder add = new StringBuilder();
 		if (gun.isHasClip())
 		{
+			MyMaterial ammo = gun.getAmmo();
 			int maxClip = gun.getMaxClipSize();
-			int ammo = (int) Math.floor(InventoryUtil.amtItem(controller.getInventory(), gun.getAmmo())
+			int amount = (int) Math.floor(InventoryUtil.amount(controller.getInventory(), ammo.getMaterial(), ammo.getData())
 					/ gun.getAmmoAmtNeeded());
-			int ammoLeft = ammo - maxClip + gun.getRoundsFired();
+			int ammoLeft = amount - maxClip + gun.getRoundsFired();
 			if (ammoLeft < 0)
 				ammoLeft = 0;
-			int leftInClip = ammo - ammoLeft;
+			int leftInClip = amount - ammoLeft;
 
 			add.append(ChatColor.YELLOW + "    \u00AB" + leftInClip + " \uFFE8 " + ammoLeft + "\u00BB");
 
@@ -328,13 +332,24 @@ public class GunPlayer implements Reloadable
 
 	// ---- Util
 
+	public final boolean canFireGun(Gun gun)
+	{
+		if (plugin.getDisabledWorlds().contains(controller.getWorld().getName()))
+			return false;
+
+		if (gun.isNeedsPermission())
+			return plugin.getPermissionHandler().hasPermission(controller, "swornguns.fire." + gun.getFileName()) 
+					|| plugin.getPermissionHandler().hasPermission(controller, "swornguns.fire.*");
+		return true;
+	}
+
 	public final void calculateGuns()
 	{
 		Map<MyMaterial, List<Gun>> byMaterial = new HashMap<MyMaterial, List<Gun>>();
 
 		for (Gun gun : plugin.getLoadedGuns().values())
 		{
-			if (plugin.getPermissionHandler().canFireGun(controller, gun))
+			if (canFireGun(gun))
 			{
 				Gun copy = gun.clone();
 				copy.setOwner(this);
