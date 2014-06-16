@@ -152,15 +152,16 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		getServer().getScheduler().cancelTasks(this);
 		getServer().getServicesManager().unregisterAll(this);
 
-		for (Bullet bullet : bullets.values())
+		for (Bullet bullet : new HashMap<>(bullets).values())
 		{
-			bullet.destroy();
+			if (bullet != null)
+				bullet.destroy();
 		}
 
-		for (GunPlayer gp : players.values())
+		for (GunPlayer player : new HashMap<>(players).values())
 		{
-			if (gp != null)
-				gp.unload();
+			if (player != null)
+				player.unload();
 		}
 
 		loadedGuns.clear();
@@ -432,7 +433,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		@Override
 		public void run()
 		{
-			for (Entry<String, GunPlayer> entry : players.entrySet())
+			for (Entry<String, GunPlayer> entry : new HashMap<>(players).entrySet())
 			{
 				String name = entry.getKey();
 				GunPlayer player = entry.getValue();
@@ -454,7 +455,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 				}
 			}
 
-			for (Entry<Integer, Bullet> entry : bullets.entrySet())
+			for (Entry<Integer, Bullet> entry : new HashMap<>(bullets).entrySet())
 			{
 				int id = entry.getKey();
 				Bullet bullet = entry.getValue();
@@ -482,7 +483,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 				}
 			}
 
-			for (Entry<Integer, EffectType> entry : effects.entrySet())
+			for (Entry<Integer, EffectType> entry : new HashMap<>(effects).entrySet())
 			{
 				int id = entry.getKey();
 				EffectType effect = entry.getValue();
@@ -520,7 +521,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		loadProjectiles();
 
 		// Refresh players
-		for (Entry<String, GunPlayer> entry : players.entrySet())
+		for (Entry<String, GunPlayer> entry : new HashMap<>(players).entrySet())
 		{
 			GunPlayer player = entry.getValue();
 

@@ -334,7 +334,12 @@ public class GunPlayer implements Reloadable
 
 	public final boolean canFireGun(Gun gun)
 	{
-		if (plugin.getDisabledWorlds().contains(controller.getWorld().getName()))
+		return canFireGun(gun, true);
+	}
+
+	public final boolean canFireGun(Gun gun, boolean world)
+	{
+		if (world && plugin.getDisabledWorlds().contains(controller.getWorld().getName()))
 			return false;
 
 		if (gun.isNeedsPermission())
@@ -349,7 +354,7 @@ public class GunPlayer implements Reloadable
 
 		for (Gun gun : plugin.getLoadedGuns().values())
 		{
-			if (canFireGun(gun))
+			if (canFireGun(gun, false))
 			{
 				Gun copy = gun.clone();
 				copy.setOwner(this);

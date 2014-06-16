@@ -7,7 +7,7 @@
 # guns-only: Do blood effect for only guns
 blood-effect:
   enabled: true
-  block-id: 152
+  block-id: REDSTONE_BLOCK
   guns-only: false
 
 # Smoke effect when entities are hit by a bullet

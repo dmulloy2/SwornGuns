@@ -315,20 +315,23 @@ public class EntityListener implements Listener, Reloadable
 			}
 		}
 
+		this.factionsEnabled = false;
+		this.swornNationsEnabled = false;
+
 		this.setupFactionsIntegration();
 	}
 
 	private final void setupFactionsIntegration()
 	{
 		PluginManager pm = plugin.getServer().getPluginManager();
-		if (pm.isPluginEnabled("Factions"))
+		if (pm.getPlugin("Factions") != null)
 		{
 			Plugin pl = pm.getPlugin("Factions");
 			String version = pl.getDescription().getVersion();
 			factionsEnabled = version.startsWith("1.6");
 		}
 
-		if (pm.isPluginEnabled("SwornNations"))
+		if (pm.getPlugin("SwornNations") != null)
 		{
 			factionsEnabled = true;
 			swornNationsEnabled = true;
