@@ -14,7 +14,6 @@ public class CmdToggle extends SwornGunsCommand
 		super(plugin);
 		this.name = "toggle";
 		this.description = "Toggle gun firing";
-		
 		this.mustBePlayer = true;
 	}
 

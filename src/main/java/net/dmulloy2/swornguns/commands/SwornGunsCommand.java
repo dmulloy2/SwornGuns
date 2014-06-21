@@ -10,10 +10,10 @@ import net.dmulloy2.swornguns.SwornGuns;
 public abstract class SwornGunsCommand extends Command
 {
 	protected final SwornGuns plugin;
-
 	public SwornGunsCommand(SwornGuns plugin)
 	{
 		super(plugin);
 		this.plugin = plugin;
+		this.usesPrefix = true;
 	}
 }

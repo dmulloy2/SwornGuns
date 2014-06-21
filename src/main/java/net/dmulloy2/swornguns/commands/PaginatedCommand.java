@@ -12,10 +12,10 @@ import net.dmulloy2.swornguns.SwornGuns;
 public abstract class PaginatedCommand extends net.dmulloy2.commands.PaginatedCommand
 {
 	protected final SwornGuns plugin;
-
 	public PaginatedCommand(SwornGuns plugin)
 	{
 		super(plugin);
 		this.plugin = plugin;
+		this.usesPrefix = true;
 	}
 }

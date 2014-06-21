@@ -99,10 +99,10 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 		// Register commands
 		commandHandler.setCommandPrefix("swornguns");
-		commandHandler.registerCommand(new CmdHelp(this));
-		commandHandler.registerCommand(new CmdList(this));
-		commandHandler.registerCommand(new CmdReload(this));
-		commandHandler.registerCommand(new CmdToggle(this));
+		commandHandler.registerPrefixedCommand(new CmdHelp(this));
+		commandHandler.registerPrefixedCommand(new CmdList(this));
+		commandHandler.registerPrefixedCommand(new CmdReload(this));
+		commandHandler.registerPrefixedCommand(new CmdToggle(this));
 
 		// Register events
 		PluginManager pm = getServer().getPluginManager();

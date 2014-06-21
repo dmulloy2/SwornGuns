@@ -17,8 +17,6 @@ public class CmdReload extends SwornGunsCommand implements Reloadable
 		this.aliases.add("rl");
 		this.description = "Reload SwornGuns";
 		this.permission = Permission.RELOAD;
-
-		this.mustBePlayer = false;
 	}
 
 	@Override
