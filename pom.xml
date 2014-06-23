@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.dmulloy2</groupId>
   <artifactId>swornguns</artifactId>
@@ -36,7 +37,7 @@
   </profiles>
 
   <build>
-    <plugins> 
+    <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -59,28 +60,28 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-shade-plugin</artifactId>
-		<version>1.4</version>
-		<executions>
-		  <execution>
-		    <phase>package</phase>
-			<goals>
-			  <goal>shade</goal>
-			</goals>
-			<configuration>
-			  <artifactSet>
-			    <includes>
-			      <include>net.dmulloy2:swornapi*</include>
-			    </includes>
-			  </artifactSet>
-		    </configuration>
-		  </execution>
-	    </executions>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <includes>
+                  <include>net.dmulloy2:swornapi*</include>
+                </includes>
+              </artifactSet>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <resources>
       <resource>
-  	    <targetPath>.</targetPath>
+        <targetPath>.</targetPath>
         <directory>${basedir}/src/main/resources/</directory>
         <filtering>true</filtering>
         <includes>
@@ -88,7 +89,7 @@
         </includes>
       </resource>
       <resource>
-  	    <targetPath>guns/</targetPath>
+        <targetPath>guns/</targetPath>
         <directory>${basedir}/src/main/resources/guns/</directory>
         <filtering>true</filtering>
         <includes>
@@ -96,7 +97,7 @@
         </includes>
       </resource>
       <resource>
-  	    <targetPath>projectile/</targetPath>
+        <targetPath>projectile/</targetPath>
         <directory>${basedir}/src/main/resources/projectile/</directory>
         <filtering>true</filtering>
         <includes>
@@ -112,7 +113,7 @@
       </resource>
     </resources>
   </build>
-  
+
   <dependencies>
     <dependency>
       <groupId>net.dmulloy2</groupId>
@@ -120,7 +121,7 @@
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
- 	  <groupId>org.projectlombok</groupId>
+      <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>0.12.0</version>
       <scope>provided</scope>
