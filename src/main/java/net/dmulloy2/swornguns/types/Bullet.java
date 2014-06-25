@@ -248,6 +248,7 @@ public class Bullet
 		// Destroy
 		if (projectile != null)
 			projectile.remove();
+
 		destroy();
 	}
 
@@ -343,15 +344,15 @@ public class Bullet
 	private final FireworkEffect getFireworkEffect()
 	{
 		// Colors
-		List<Color> c = new ArrayList<Color>();
-		c.add(Color.RED);
-		c.add(Color.RED);
-		c.add(Color.RED);
-		c.add(Color.ORANGE);
-		c.add(Color.ORANGE);
-		c.add(Color.ORANGE);
-		c.add(Color.BLACK);
-		c.add(Color.GRAY);
+		List<Color> colors = new ArrayList<Color>();
+		colors.add(Color.RED);
+		colors.add(Color.RED);
+		colors.add(Color.RED);
+		colors.add(Color.ORANGE);
+		colors.add(Color.ORANGE);
+		colors.add(Color.ORANGE);
+		colors.add(Color.BLACK);
+		colors.add(Color.GRAY);
 
 		// Type
 		Random rand = new Random();
@@ -362,12 +363,19 @@ public class Bullet
 		}
 
 		// Build the effect
-		FireworkEffect e = FireworkEffect.builder().flicker(true).withColor(c).withFade(c).with(type).trail(true).build();
-		return e;
+		FireworkEffect effect = FireworkEffect.builder()
+				.flicker(true)
+				.withColor(colors)
+				.withFade(colors)
+				.with(type)
+				.trail(true)
+				.build();
+
+		return effect;
 	}
 
 	@SuppressWarnings("deprecation") // Old Event
-	private final EntityDamageByEntityEvent callDamageEvent(LivingEntity damager, LivingEntity entity, DamageCause cause, double damage)
+	private final EntityDamageByEntityEvent getDamageEvent(Entity damager, Entity entity, DamageCause cause, double damage)
 	{
 		try
 		{
@@ -409,8 +417,8 @@ public class Bullet
 						if (lentity.getHealth() > 0.0D)
 						{
 							// Call event
-							EntityDamageByEntityEvent event = callDamageEvent(shooter.getPlayer(), lentity,
-									DamageCause.ENTITY_EXPLOSION, damage);
+							EntityDamageByEntityEvent event = getDamageEvent(shooter.getPlayer(), lentity, DamageCause.ENTITY_EXPLOSION,
+									damage);
 							plugin.getServer().getPluginManager().callEvent(event);
 							if (! event.isCancelled())
 							{
@@ -440,7 +448,7 @@ public class Bullet
 					LivingEntity lentity = (LivingEntity) entity;
 					if (lentity.getHealth() > 0.0D)
 					{
-						EntityDamageByEntityEvent event = callDamageEvent(shooter.getPlayer(), lentity, DamageCause.FIRE_TICK, 1.0D);
+						EntityDamageByEntityEvent event = getDamageEvent(shooter.getPlayer(), lentity, DamageCause.FIRE_TICK, 1.0D);
 						plugin.getServer().getPluginManager().callEvent(event);
 						if (! event.isCancelled())
 						{
@@ -467,7 +475,7 @@ public class Bullet
 					LivingEntity lentity = (LivingEntity) entity;
 					if (lentity.getHealth() > 0.0D)
 					{
-						EntityDamageByEntityEvent event = callDamageEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D);
+						EntityDamageByEntityEvent event = getDamageEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D);
 						plugin.getServer().getPluginManager().callEvent(event);
 						if (! event.isCancelled())
 						{
