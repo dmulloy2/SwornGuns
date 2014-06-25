@@ -194,7 +194,7 @@ public class EntityListener implements Listener, Reloadable
 						return;
 					}
 
-					// hurt.setLastDamage(0.0D);
+					// TODO: Take into account new DamageModifier API
 					event.setDamage(damage * mult);
 
 					// Armor penetration
