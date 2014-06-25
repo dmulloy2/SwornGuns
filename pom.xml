@@ -14,7 +14,7 @@
   <repositories>
     <repository>
       <id>md_5-releases</id>
-      <url>http://repo.md-5.net/content/repositories/snapshots/</url>
+      <url>http://repo.md-5.net/content/repositories/public/</url>
     </repository>
     <repository>
       <id>minesworn-repo</id>
