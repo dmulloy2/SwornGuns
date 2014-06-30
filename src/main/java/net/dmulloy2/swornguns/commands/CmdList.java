@@ -3,6 +3,7 @@ package net.dmulloy2.swornguns.commands;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.dmulloy2.commands.PaginatedCommand;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.util.FormatUtil;
@@ -13,13 +14,16 @@ import net.dmulloy2.util.FormatUtil;
 
 public class CmdList extends PaginatedCommand
 {
+	private final SwornGuns plugin;
 	public CmdList(SwornGuns plugin)
 	{
 		super(plugin);
+		this.plugin = plugin;
 		this.name = "list";
 		this.optionalArgs.add("page");
 		this.description = "Displays all available guns";
 		this.linesPerPage = 6;
+		this.usesPrefix = true;
 	}
 
 	@Override
