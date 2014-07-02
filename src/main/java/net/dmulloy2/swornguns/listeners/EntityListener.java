@@ -91,7 +91,7 @@ public class EntityListener implements Listener, Reloadable
 
 			// Realism start - block cracking
 			boolean applicable = false;
-			
+
 			if (! checkFactions(b.getLocation(), true))
 			{
 				if (blockCrack)
@@ -108,9 +108,9 @@ public class EntityListener implements Listener, Reloadable
 			}
 
 			// UltimateArena - check for inside arena
-			if (plugin.getUltimateArena() != null)
+			if (plugin.getUltimateArenaHandler().isEnabled())
 			{
-				if (plugin.getUltimateArena().isInArena(bullet.getShooter().getPlayer()))
+				if (plugin.getUltimateArenaHandler().isInArena(bullet.getShooter().getPlayer()))
 					applicable = false;
 			}
 
@@ -223,7 +223,7 @@ public class EntityListener implements Listener, Reloadable
 	{
 		return Math.abs(location.getY() - eyeLocation.getY()) <= d;
 	}
-	
+
 	// Realism start - blood effects
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onEntityDamage(EntityDamageEvent event)

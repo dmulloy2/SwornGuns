@@ -82,7 +82,6 @@ public class Gun implements Cloneable
 	private String projType = "";
 	private String reloadType = "NORMAL";
 	private String explosionType = "FIREWORK";
-	private String outOfAmmoMessage = "";
 
 	private String gunName;
 	private String fileName;
@@ -180,10 +179,8 @@ public class Gun implements Cloneable
 			else
 			{
 				owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
-				if (! outOfAmmoMessage.isEmpty())
-					owner.getPlayer().sendMessage(FormatUtil.format(outOfAmmoMessage, ammo.getName()));
-				else
-					owner.getPlayer().sendMessage(FormatUtil.format("&6This gun needs &c{0}", ammo.getName()));
+				owner.getPlayer().sendMessage(plugin.getPrefix() +
+						FormatUtil.format("&eThis gun needs &b{0}&e!", ammo.getName()));
 
 				finishShooting();
 			}
@@ -250,7 +247,7 @@ public class Gun implements Cloneable
 
 	/**
 	 * Returns an exact replica of this gun
-	 * 
+	 *
 	 * @return An exact replica of this gun
 	 */
 	private final Gun copy()
@@ -298,7 +295,6 @@ public class Gun implements Cloneable
 		g.releaseTime = this.releaseTime;
 		g.canGoPastMaxDistance = this.canGoPastMaxDistance;
 		g.priority = this.priority;
-		g.outOfAmmoMessage = this.outOfAmmoMessage;
 
 		if (releaseEffect != null)
 		{
@@ -391,7 +387,7 @@ public class Gun implements Cloneable
 
 	/**
 	 * Handles recoil for a player
-	 * 
+	 *
 	 * @param player
 	 *        - {@link Player} to handle recoil for
 	 */
@@ -415,7 +411,7 @@ public class Gun implements Cloneable
 
 	/**
 	 * Does knockback for an entity
-	 * 
+	 *
 	 * @param entity
 	 *        - {@link LivingEntity} to do knock back for
 	 * @param speed
@@ -479,7 +475,7 @@ public class Gun implements Cloneable
 
 	/**
 	 * Sets the name of the gun
-	 * 
+	 *
 	 * @param val
 	 *        - Name of the gun
 	 */
@@ -511,7 +507,7 @@ public class Gun implements Cloneable
 
 	/**
 	 * Sets the gun's type
-	 * 
+	 *
 	 * @param val
 	 *        - The gun's type
 	 */
@@ -533,7 +529,7 @@ public class Gun implements Cloneable
 
 	/**
 	 * Sets the gun's ammo type
-	 * 
+	 *
 	 * @param val
 	 *        - The gun's ammo type
 	 */
@@ -555,7 +551,7 @@ public class Gun implements Cloneable
 
 	/**
 	 * Sets this gun's lore
-	 * 
+	 *
 	 * @param val
 	 *        - Composite lore string
 	 */
@@ -572,7 +568,7 @@ public class Gun implements Cloneable
 
 	/**
 	 * Adds gun sounds from a composite string
-	 * 
+	 *
 	 * @param val
 	 *        - Composite string of sounds
 	 */

@@ -10,11 +10,8 @@ import java.util.Map.Entry;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornrpg.io.PlayerDataCache;
 import net.dmulloy2.swornrpg.types.PlayerData;
 import net.dmulloy2.types.Reloadable;
-import net.dmulloy2.ultimatearena.arenas.Arena;
-import net.dmulloy2.ultimatearena.types.FieldType;
 import net.dmulloy2.util.InventoryUtil;
 import net.dmulloy2.util.Util;
 
@@ -229,7 +226,13 @@ public class GunPlayer implements Reloadable
 		if (gun.isUnlimitedAmmo())
 			return 0;
 
-		if (isPlayerInArena() || unlimitedAmmoEnabled())
+		if (plugin.getUltimateArenaHandler().isEnabled())
+		{
+			if (plugin.getUltimateArenaHandler().isInGunArena(controller))
+				return 0;
+		}
+
+		if (unlimitedAmmoEnabled())
 			return 0;
 
 		return gun.getAmmoAmtNeeded();
@@ -343,7 +346,7 @@ public class GunPlayer implements Reloadable
 			return false;
 
 		if (gun.isNeedsPermission())
-			return plugin.getPermissionHandler().hasPermission(controller, "swornguns.fire." + gun.getFileName()) 
+			return plugin.getPermissionHandler().hasPermission(controller, "swornguns.fire." + gun.getFileName())
 					|| plugin.getPermissionHandler().hasPermission(controller, "swornguns.fire.*");
 		return true;
 	}
@@ -412,32 +415,13 @@ public class GunPlayer implements Reloadable
 	{
 		try
 		{
-			if (! plugin.isUseSwornRPG())
+			if (! plugin.getSwornRPGHandler().isEnabled())
 				return false;
 
 			if (data == null)
-			{
-				PlayerDataCache cache = plugin.getSwornRPG().getPlayerDataCache();
-				data = cache.getData(controller);
-			}
+				data = plugin.getSwornRPGHandler().getPlayerData(controller);
 
 			return data != null && data.isUnlimitedAmmoEnabled();
-		} catch (Throwable ex) { }
-		return false;
-	}
-
-	public final boolean isPlayerInArena()
-	{
-		try
-		{
-			if (! plugin.isUseUltimateArena())
-				return false;
-
-			if (plugin.getUltimateArena().isInArena(controller))
-			{
-				Arena ar = plugin.getUltimateArena().getArenaPlayer(controller).getArena();
-				return ar.getType() != FieldType.HUNGER;
-			}
 		} catch (Throwable ex) { }
 		return false;
 	}

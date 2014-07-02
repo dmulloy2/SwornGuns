@@ -35,6 +35,8 @@ import net.dmulloy2.swornguns.api.SwornGunsAPI;
 import net.dmulloy2.swornguns.commands.CmdList;
 import net.dmulloy2.swornguns.commands.CmdReload;
 import net.dmulloy2.swornguns.commands.CmdToggle;
+import net.dmulloy2.swornguns.integration.SwornRPGHandler;
+import net.dmulloy2.swornguns.integration.UltimateArenaHandler;
 import net.dmulloy2.swornguns.io.WeaponReader;
 import net.dmulloy2.swornguns.listeners.EntityListener;
 import net.dmulloy2.swornguns.listeners.PlayerListener;
@@ -43,8 +45,6 @@ import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
 import net.dmulloy2.swornguns.types.MyMaterial;
-import net.dmulloy2.swornrpg.SwornRPG;
-import net.dmulloy2.ultimatearena.UltimateArena;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.Util;
 
@@ -53,7 +53,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -63,6 +62,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 {
+	private @Getter UltimateArenaHandler ultimateArenaHandler;
+	private @Getter SwornRPGHandler swornRPGHandler;
+
 	private @Getter Map<String, Gun> loadedGuns;
 	private @Getter Map<Integer, Bullet> bullets;
 	private @Getter Map<String, GunPlayer> players;
@@ -94,8 +96,8 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		commandHandler = new CommandHandler(this);
 
 		// Integration
-		setupSwornRPGIntegration();
-		setupUltimateArenaIntegration();
+		ultimateArenaHandler = new UltimateArenaHandler(this);
+		swornRPGHandler = new SwornRPGHandler(this);
 
 		// Register commands
 		commandHandler.setCommandPrefix("swornguns");
@@ -171,48 +173,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		permissions.clear();
 
 		logHandler.log("{0} has been disabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
-	}
-
-	// ---- Integration
-
-	private @Getter boolean useUltimateArena;
-	private @Getter UltimateArena ultimateArena;
-
-	private void setupUltimateArenaIntegration()
-	{
-		try
-		{
-			PluginManager pm = getServer().getPluginManager();
-			if (pm.isPluginEnabled("UltimateArena"))
-			{
-				Plugin pl = pm.getPlugin("UltimateArena");
-				if (pl instanceof UltimateArena)
-				{
-					ultimateArena = (UltimateArena) pl;
-					useUltimateArena = true;
-				}
-			}
-		} catch (Throwable ex) { }
-	}
-
-	private @Getter boolean useSwornRPG;
-	private @Getter SwornRPG swornRPG;
-
-	private void setupSwornRPGIntegration()
-	{
-		try
-		{
-			PluginManager pm = getServer().getPluginManager();
-			if (pm.isPluginEnabled("SwornRPG"))
-			{
-				Plugin pl = pm.getPlugin("SwornRPG");
-				if (pl instanceof SwornRPG)
-				{
-					swornRPG = (SwornRPG) pl;
-					useSwornRPG = true;
-				}
-			}
-		} catch (Throwable ex) { }
 	}
 
 	private void loadProjectiles()
@@ -459,7 +419,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 			{
 				int id = entry.getKey();
 				Bullet bullet = entry.getValue();
-				
+
 				// Don't tick null bullets
 				if (bullet == null)
 				{
@@ -487,7 +447,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 			{
 				int id = entry.getKey();
 				EffectType effect = entry.getValue();
-				
+
 				// Don't tick null effects
 				if (effect == null)
 				{

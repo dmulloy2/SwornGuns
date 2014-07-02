@@ -161,8 +161,6 @@ public class WeaponReader
 				ret.setPriority(NumberUtil.toInt(val));
 			if (var.equals("lore"))
 				ret.setLore(val);
-			if (var.equals("outofammomessage"))
-				ret.setOutOfAmmoMessage(val);
 			if (var.equals("warnifnopermission"))
 				ret.setWarnIfNoPermission(Boolean.parseBoolean(val));
 			if (var.equals("unlimitedammo"))
