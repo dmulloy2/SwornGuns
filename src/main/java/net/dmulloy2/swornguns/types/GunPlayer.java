@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornrpg.types.PlayerData;
+import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.types.Reloadable;
 import net.dmulloy2.util.InventoryUtil;
 import net.dmulloy2.util.Util;

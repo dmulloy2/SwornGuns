@@ -44,7 +44,7 @@ import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
-import net.dmulloy2.swornguns.types.MyMaterial;
+import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.Util;
 
