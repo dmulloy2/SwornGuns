@@ -42,6 +42,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
+
 /**
  * @author dmulloy2
  */
@@ -374,6 +377,8 @@ public class Bullet
 		return effect;
 	}
 
+	private static final Function<? super Double, Double> ZERO = Functions.constant(-0.0);
+
 	@SuppressWarnings("deprecation") // Old Event
 	private final EntityDamageByEntityEvent getDamageEvent(Entity damager, Entity entity, DamageCause cause, double damage)
 	{
@@ -382,7 +387,10 @@ public class Bullet
 			Map<DamageModifier, Double> modifiers = new HashMap<>();
 			modifiers.put(DamageModifier.BASE, damage);
 
-			return new EntityDamageByEntityEvent(damager, entity, cause, modifiers);
+			Map<DamageModifier, Function<? super Double, Double>> functions = new HashMap<>();
+			functions.put(DamageModifier.BASE, ZERO);
+
+			return new EntityDamageByEntityEvent(damager, entity, cause, modifiers, functions);
 		}
 		catch (Throwable ex)
 		{
