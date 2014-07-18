@@ -110,7 +110,7 @@ public class Gun implements Cloneable
 		if (owner != null && owner.getPlayer().isOnline() && owner.getPlayer().getHealth() > 0.0D && ! reloading)
 		{
 			int ammoAmtNeeded = owner.getAmmoNeeded(this);
-			if ((owner.checkAmmo(this, ammoAmtNeeded) && ammoAmtNeeded > 0) || ammoAmtNeeded == 0)
+			if (ammoAmtNeeded == 0 || owner.checkAmmo(this, ammoAmtNeeded))
 			{
 				owner.removeAmmo(this, ammoAmtNeeded);
 

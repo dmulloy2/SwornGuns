@@ -37,6 +37,7 @@ public class SwornRPGHandler extends IntegrationHandler
 			if (pm.getPlugin("SwornRPG") != null)
 			{
 				swornRPG = (SwornRPG) pm.getPlugin("SwornRPG");
+				plugin.getLogHandler().log("SwornRPG integration successful!");
 				enabled = true;
 			}
 		}

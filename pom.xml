@@ -80,6 +80,8 @@
                   <shadedPattern>net.dmulloy2.swornguns</shadedPattern>
                   <excludes>
                     <exclude>net.dmulloy2.swornguns*</exclude>
+                    <exclude>net.dmulloy2.swornrpg*</exclude>
+                    <exclude>net.dmulloy2.ultimatearena*</exclude>
                   </excludes>
                 </relocation>
               </relocations>

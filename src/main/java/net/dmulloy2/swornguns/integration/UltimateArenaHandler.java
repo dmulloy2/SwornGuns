@@ -38,6 +38,7 @@ public class UltimateArenaHandler extends IntegrationHandler
 			if (pm.getPlugin("UltimateArena") != null)
 			{
 				ultimateArena = (UltimateArena) pm.getPlugin("UltimateArena");
+				plugin.getLogHandler().log("UltimateArena integration successful!");
 				enabled = true;
 			}
 		}
