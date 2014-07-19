@@ -16,7 +16,7 @@ import org.bukkit.entity.Player;
 public class EffectType
 {
 	private static int nextID = 1;
-	
+
 	private int maxDuration;
 	private int duration;
 	private int id;
@@ -67,7 +67,7 @@ public class EffectType
 		{
 			yRad = 0.75D;
 
-			for (Player player : plugin.getServer().getOnlinePlayers())
+			for (Player player : Util.getOnlinePlayers())
 			{
 				if (player.getWorld().getUID() == location.getWorld().getUID())
 				{

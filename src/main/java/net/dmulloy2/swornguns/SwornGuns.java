@@ -279,7 +279,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 	private void getOnlinePlayers()
 	{
-		for (Player player : getServer().getOnlinePlayers())
+		for (Player player : Util.getOnlinePlayers())
 		{
 			if (! players.containsKey(player.getName()))
 				players.put(player.getName(), new GunPlayer(this, player));
