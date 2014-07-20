@@ -4,7 +4,6 @@
 package net.dmulloy2.swornguns.commands;
 
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.types.StringJoiner;
 
 /**
  * @author dmulloy2
@@ -25,7 +24,7 @@ public class CmdVersion extends SwornGunsCommand
 	{
 		sendMessage("&3====[ &eSwornGuns &3]====");
 		sendMessage("&bVersion&e: {0}", plugin.getDescription().getVersion());
-		sendMessage("&bAuthors&e: {0}", new StringJoiner("&b, &e").appendAll(plugin.getDescription().getAuthors()));
+		sendMessage("&bAuthor&e: dmulloy2");
 		sendMessage("&bIssues&e: https://github.com/dmulloy2/SwornGuns/issues");
 	}
 }
