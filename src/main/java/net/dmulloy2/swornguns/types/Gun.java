@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
@@ -509,12 +510,17 @@ public class Gun implements Cloneable
 	/**
 	 * Sets the gun's type
 	 *
-	 * @param val
-	 *        - The gun's type
+	 * @param val The gun's type
 	 */
 	public void setGunType(String val)
 	{
 		Material material = MaterialUtil.getMaterial(getValueFromString(val));
+		if (material == null)
+		{
+			plugin.getLogHandler().log(Level.WARNING, "Gun {0} has a null material: {1}!", fileName, val);
+			return;
+		}
+
 		short data = getDataFromString(val);
 
 		boolean ignoreData = false;

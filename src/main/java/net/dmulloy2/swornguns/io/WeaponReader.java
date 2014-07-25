@@ -61,10 +61,16 @@ public class WeaponReader
 			{
 				computeData(line);
 			}
+
+			if (ret.getMaterial() == null)
+			{
+				plugin.getLogHandler().log("Failed to load gun " + this.file.getName() + ": null material!");
+				this.loaded = false;
+			}
 		}
-		catch (Exception e)
+		catch (Throwable ex)
 		{
-			plugin.getLogHandler().log(Level.SEVERE, Util.getUsefulStack(e, "loading gun: " + file.getName()));
+			plugin.getLogHandler().log(Level.SEVERE, Util.getUsefulStack(ex, "loading gun: " + file.getName()));
 			this.loaded = false;
 		}
 	}

@@ -18,6 +18,7 @@
 package net.dmulloy2.swornguns;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -236,7 +237,15 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 			}
 		}
 
-		children = dir.listFiles();
+		children = dir.listFiles(new FileFilter()
+		{
+			@Override
+			public boolean accept(File file)
+			{
+				// Filter mac crap
+				return ! file.getName().contains("store");
+			}
+		});
 
 		for (File child : children)
 		{
