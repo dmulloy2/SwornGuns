@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import lombok.Getter;
@@ -68,7 +69,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 	private @Getter Map<String, Gun> loadedGuns;
 	private @Getter Map<Integer, Bullet> bullets;
-	private @Getter Map<String, GunPlayer> players;
+	private @Getter Map<UUID, GunPlayer> players;
 	private @Getter Map<Integer, EffectType> effects;
 
 	private @Getter List<String> disabledWorlds;
@@ -290,15 +291,15 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	{
 		for (Player player : Util.getOnlinePlayers())
 		{
-			if (! players.containsKey(player.getName()))
-				players.put(player.getName(), new GunPlayer(this, player));
+			if (! players.containsKey(player.getUniqueId()))
+				players.put(player.getUniqueId(), new GunPlayer(this, player));
 		}
 	}
 
 	@Override
 	public GunPlayer getGunPlayer(Player player)
 	{
-		return players.get(player.getName());
+		return players.get(player.getUniqueId());
 	}
 
 	@Override
@@ -321,18 +322,18 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 	public void onJoin(Player player)
 	{
-		if (! players.containsKey(player.getName()))
-			players.put(player.getName(), new GunPlayer(this, player));
+		if (! players.containsKey(player.getUniqueId()))
+			players.put(player.getUniqueId(), new GunPlayer(this, player));
 	}
 
 	public void onQuit(Player player)
 	{
-		if (players.containsKey(player.getName()))
+		if (players.containsKey(player.getUniqueId()))
 		{
-			GunPlayer gp = players.get(player.getName());
+			GunPlayer gp = players.get(player.getUniqueId());
 			gp.unload();
 
-			players.remove(player.getName());
+			players.remove(player.getUniqueId());
 		}
 	}
 
@@ -353,7 +354,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	{
 		for (Bullet bullet : bullets.values())
 		{
-			if (bullet.getProjectile().getUniqueId() == proj.getUniqueId())
+			if (bullet.getProjectile().getUniqueId().equals(proj.getUniqueId()))
 				return bullet;
 		}
 
@@ -363,7 +364,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	@Override
 	public List<Gun> getGunsByType(MyMaterial material)
 	{
-		List<Gun> ret = new ArrayList<Gun>();
+		List<Gun> ret = new ArrayList<>();
 
 		for (Gun gun : loadedGuns.values())
 		{
@@ -402,15 +403,15 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		@Override
 		public void run()
 		{
-			for (Entry<String, GunPlayer> entry : new HashMap<>(players).entrySet())
+			for (Entry<UUID, GunPlayer> entry : new HashMap<>(players).entrySet())
 			{
-				String name = entry.getKey();
+				UUID uniqueId = entry.getKey();
 				GunPlayer player = entry.getValue();
 
 				// Don't tick null players
 				if (player == null)
 				{
-					players.remove(name);
+					players.remove(uniqueId);
 					continue;
 				}
 
@@ -420,7 +421,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 				}
 				catch (Throwable ex)
 				{
-					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + name));
+					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + player.getName()));
 				}
 			}
 
@@ -490,7 +491,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		loadProjectiles();
 
 		// Refresh players
-		for (Entry<String, GunPlayer> entry : new HashMap<>(players).entrySet())
+		for (Entry<UUID, GunPlayer> entry : new HashMap<>(players).entrySet())
 		{
 			GunPlayer player = entry.getValue();
 

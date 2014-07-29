@@ -7,12 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornrpg.types.PlayerData;
 import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.types.Reloadable;
+import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.InventoryUtil;
 import net.dmulloy2.util.Util;
 
@@ -34,13 +36,15 @@ public class GunPlayer implements Reloadable
 {
 	private ItemStack lastHeldItem;
 	private Gun currentlyFiring;
-	private Player controller;
 	private List<Gun> guns;
-	private String name;
 
 	private boolean enabled;
 	private boolean aimedIn;
 	private int ticks;
+
+	private final String name;
+	private final UUID uniqueId;
+	private final Player controller;
 
 	private final SwornGuns plugin;
 	public GunPlayer(SwornGuns plugin, Player player)
@@ -48,6 +52,7 @@ public class GunPlayer implements Reloadable
 		this.plugin = plugin;
 		this.controller = player;
 		this.name = player.getName();
+		this.uniqueId = player.getUniqueId();
 		this.enabled = true;
 		this.calculateGuns();
 	}
@@ -67,46 +72,38 @@ public class GunPlayer implements Reloadable
 		if (gun == null)
 			return;
 
-		if (canFireGun(gun))
+		if (! canFireGun(gun))
 		{
-			if (clickType.equalsIgnoreCase("right"))
+			if (! canFireGun(gun, false) && gun.isWarnIfNoPermission())
+				controller.sendMessage(plugin.getPrefix() + FormatUtil.format("&cYou do not have permission to fire this gun!"));
+			return;
+		}
+
+		if (clickType.equals("right"))
+		{
+			if (gun.isCanAimRight())
 			{
-				if (gun.isCanClickRight() || gun.isCanAimRight())
-				{
-					if (! gun.isCanAimRight())
-					{
-						gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
-						gun.setLastFired(0);
-						if (currentlyFiring == null)
-						{
-							fireGun(gun);
-						}
-					}
-					else
-					{
-						checkAim();
-					}
-				}
+				checkAim();
+				return;
 			}
-			else if (clickType.equalsIgnoreCase("left"))
+
+			gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
+			gun.setLastFired(0);
+			if (currentlyFiring == null)
+				fireGun(gun);
+		}
+		else
+		{
+			if (gun.isCanAimLeft())
 			{
-				if (gun.isCanClickLeft() || gun.isCanAimLeft())
-				{
-					if (! gun.isCanAimLeft())
-					{
-						gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
-						gun.setLastFired(0);
-						if (currentlyFiring == null)
-						{
-							fireGun(gun);
-						}
-					}
-					else
-					{
-						checkAim();
-					}
-				}
+				checkAim();
+				return;
 			}
+
+			gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
+			gun.setLastFired(0);
+			if (currentlyFiring == null)
+				fireGun(gun);
 		}
 	}
 
@@ -125,7 +122,7 @@ public class GunPlayer implements Reloadable
 
 		if (controller == null || ! controller.isOnline())
 		{
-			plugin.getPlayers().remove(name);
+			plugin.getPlayers().remove(uniqueId);
 			unload();
 			return;
 		}
@@ -215,7 +212,7 @@ public class GunPlayer implements Reloadable
 		}
 		else
 		{
-			controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
+			controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 4));
 			this.aimedIn = true;
 		}
 	}
@@ -336,6 +333,12 @@ public class GunPlayer implements Reloadable
 
 	// ---- Util
 
+	public final void unload()
+	{
+		this.guns = null;
+		this.lastHeldItem = null;
+	}
+
 	public final boolean canFireGun(Gun gun)
 	{
 		return canFireGun(gun, true);
@@ -354,7 +357,7 @@ public class GunPlayer implements Reloadable
 
 	public final void calculateGuns()
 	{
-		Map<MyMaterial, List<Gun>> byMaterial = new HashMap<MyMaterial, List<Gun>>();
+		Map<MyMaterial, List<Gun>> byMaterial = new HashMap<>();
 
 		for (Gun gun : plugin.getLoadedGuns().values())
 		{
@@ -397,17 +400,6 @@ public class GunPlayer implements Reloadable
 		this.guns = sortedGuns;
 	}
 
-	public final void unload()
-	{
-		this.controller = null;
-		this.currentlyFiring = null;
-
-		for (Gun gun : guns)
-		{
-			gun.clear();
-		}
-	}
-
 	// ---- Integration
 
 	private PlayerData data;
@@ -433,7 +425,7 @@ public class GunPlayer implements Reloadable
 	public void reload()
 	{
 		// Clear the list
-		guns = new ArrayList<Gun>();
+		guns.clear();
 
 		// Recalculate
 		calculateGuns();
@@ -451,7 +443,7 @@ public class GunPlayer implements Reloadable
 		if (obj instanceof GunPlayer)
 		{
 			GunPlayer that = (GunPlayer) obj;
-			return this.name.equals(that.name);
+			return this.uniqueId.equals(that.uniqueId);
 		}
 
 		return false;
@@ -461,7 +453,7 @@ public class GunPlayer implements Reloadable
 	public int hashCode()
 	{
 		int hash = 97;
-		hash *= 1 + name.hashCode();
+		hash *= 1 + uniqueId.hashCode();
 		return hash;
 	}
 }
