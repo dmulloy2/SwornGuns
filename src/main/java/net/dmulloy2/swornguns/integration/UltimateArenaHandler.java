@@ -8,7 +8,6 @@ import net.dmulloy2.integration.IntegrationHandler;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.ultimatearena.UltimateArena;
 import net.dmulloy2.ultimatearena.arenas.Arena;
-import net.dmulloy2.ultimatearena.types.FieldType;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -55,7 +54,7 @@ public class UltimateArenaHandler extends IntegrationHandler
 			if (enabled && ultimateArena != null)
 			{
 				Arena arena = ultimateArena.getArena(player);
-				return arena != null && arena.getType() != FieldType.HUNGER;
+				return arena != null && arena.getConfig().isUnlimitedAmmo();
 			}
 		} catch (Throwable ex) { }
 		return false;
