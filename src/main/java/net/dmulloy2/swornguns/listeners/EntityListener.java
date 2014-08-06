@@ -138,9 +138,8 @@ public class EntityListener implements Listener, Reloadable
 				}
 			}
 			// Realism end
+			check.remove();
 		}
-
-		event.getEntity().remove();
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
