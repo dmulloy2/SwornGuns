@@ -3,11 +3,14 @@
  */
 package net.dmulloy2.swornguns.integration;
 
+import java.util.logging.Level;
+
 import lombok.Getter;
 import net.dmulloy2.integration.IntegrationHandler;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.ultimatearena.UltimateArena;
 import net.dmulloy2.ultimatearena.arenas.Arena;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -43,6 +46,7 @@ public class UltimateArenaHandler extends IntegrationHandler
 		}
 		catch (Throwable ex)
 		{
+			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "setting up UA integration"));
 			enabled = false;
 		}
 	}
@@ -56,8 +60,14 @@ public class UltimateArenaHandler extends IntegrationHandler
 				Arena arena = ultimateArena.getArena(player);
 				return arena != null && arena.getConfig().isUnlimitedAmmo();
 			}
-		} catch (Throwable ex) { }
-		return false;
+
+			return false;
+		}
+		catch (Throwable ex)
+		{
+			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "isInGunArena(" + player.getName() + ")"));
+			return false;
+		}
 	}
 
 	public final boolean isInArena(Player player)

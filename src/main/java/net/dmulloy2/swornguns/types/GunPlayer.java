@@ -92,7 +92,7 @@ public class GunPlayer implements Reloadable
 			if (currentlyFiring == null)
 				fireGun(gun);
 		}
-		else
+		else if (clickType.equals("left"))
 		{
 			if (gun.isCanAimLeft())
 			{

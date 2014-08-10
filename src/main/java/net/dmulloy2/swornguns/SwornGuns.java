@@ -472,7 +472,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 				catch (Throwable ex)
 				{
 					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking effect " + effect));
-
 					effects.remove(id);
 				}
 			}
