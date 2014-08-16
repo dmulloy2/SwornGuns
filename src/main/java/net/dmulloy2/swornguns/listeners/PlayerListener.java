@@ -44,23 +44,19 @@ public class PlayerListener implements Listener
 	public void onPlayerDropItem(PlayerDropItemEvent event)
 	{
 		Item dropped = event.getItemDrop();
-		Player dropper = event.getPlayer();
-		GunPlayer gp = plugin.getGunPlayer(dropper);
-		if (gp != null)
+		GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
+		ItemStack lastHold = gp.getLastItemHeld();
+		if (lastHold != null)
 		{
-			ItemStack lastHold = gp.getLastItemHeld();
-			if (lastHold != null)
+			Gun gun = gp.getGun(dropped.getItemStack());
+			if (gun != null)
 			{
-				Gun gun = gp.getGun(dropped.getItemStack());
-				if (gun != null)
+				if (lastHold.getType() == dropped.getItemStack().getType())
 				{
-					if (lastHold.getType() == dropped.getItemStack().getType())
+					if (gun.isHasClip() && gun.isChanged() && gun.isReloadGunOnDrop())
 					{
-						if (gun.isHasClip() && gun.isChanged() && gun.isReloadGunOnDrop())
-						{
-							gun.reloadGun();
-							event.setCancelled(true);
-						}
+						gun.reloadGun();
+						event.setCancelled(true);
 					}
 				}
 			}
@@ -78,9 +74,6 @@ public class PlayerListener implements Listener
 			clickType = "right";
 
 		GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
-		if (gp == null)
-			plugin.onJoin(event.getPlayer());
-
 		gp.handleClick(clickType);
 	}
 
@@ -91,8 +84,8 @@ public class PlayerListener implements Listener
 		// Useful for per-world permissions and stuff
 		if (plugin.getConfig().getBoolean("updateGunsOnWorldChange", false))
 		{
-			final GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
-	
+			final Player player = event.getPlayer();
+
 			// This basically ensures that permissions have a chance to
 			// load and accounts for async world changed event
 			new BukkitRunnable()
@@ -100,6 +93,7 @@ public class PlayerListener implements Listener
 				@Override
 				public void run()
 				{
+					GunPlayer gp = plugin.getGunPlayer(player);
 					gp.calculateGuns();
 				}
 			}.runTaskLater(plugin, 20L);

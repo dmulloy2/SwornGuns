@@ -299,6 +299,9 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	@Override
 	public GunPlayer getGunPlayer(Player player)
 	{
+		if (! players.containsKey(player.getUniqueId()))
+			players.put(player.getUniqueId(), new GunPlayer(this, player));
+
 		return players.get(player.getUniqueId());
 	}
 
