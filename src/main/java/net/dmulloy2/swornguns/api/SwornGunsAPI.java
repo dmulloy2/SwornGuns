@@ -12,18 +12,15 @@ import net.dmulloy2.types.Reloadable;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permission;
 
 /**
  * API Implementation for {@link SwornGuns}
- * 
+ *
  * @author dmulloy2
  */
 
 public abstract interface SwornGunsAPI extends Reloadable
 {
-	Permission getPermission(Gun gun);
-
 	GunPlayer getGunPlayer(Player player);
 
 	Gun getGun(MyMaterial material);

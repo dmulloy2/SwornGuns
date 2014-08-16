@@ -132,8 +132,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 		getOnlinePlayers();
 
-		registerPermissions();
-
 		// Update timer
 		if (getConfig().getBoolean("runUpdateTimerAsync", false))
 		{
@@ -172,7 +170,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		effects.clear();
 		bullets.clear();
 		players.clear();
-		permissions.clear();
 
 		logHandler.log("{0} has been disabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
 	}
@@ -206,7 +203,19 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 			{
 				Gun gun = reader.getGun();
 				gun.setThrowable(true);
-				loadedGuns.put(gun.getFileName(), gun);
+				loadedGuns.put(child.getName(), gun);
+				if (gun.isNeedsPermission())
+				{
+					PluginManager pm = getServer().getPluginManager();
+					String node = "swornguns.fire." + child.getName();
+					Permission permission = pm.getPermission(node);
+					if (permission == null)
+					{
+						permission = new Permission(node, PermissionDefault.OP);
+						pm.addPermission(permission);
+					}
+				}
+
 				loaded++;
 			}
 			else
@@ -254,7 +263,19 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 			if (reader.isLoaded())
 			{
 				Gun gun = reader.getGun();
-				loadedGuns.put(gun.getFileName(), gun);
+				loadedGuns.put(child.getName(), gun);
+				if (gun.isNeedsPermission())
+				{
+					PluginManager pm = getServer().getPluginManager();
+					String node = "swornpermissions.fire." + child.getName();
+					Permission permission = pm.getPermission(node);
+					if (permission == null)
+					{
+						permission = new Permission(node, PermissionDefault.OP);
+						pm.addPermission(permission);
+					}
+				}
+
 				loaded++;
 			}
 			else
@@ -264,27 +285,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		}
 
 		logHandler.log("Loaded {0} guns!", loaded);
-	}
-
-	private Map<String, Permission> permissions;
-
-	private void registerPermissions()
-	{
-		permissions = new HashMap<String, Permission>();
-
-		for (Gun gun : loadedGuns.values())
-		{
-			PermissionDefault def = gun.isNeedsPermission() ? PermissionDefault.FALSE : PermissionDefault.TRUE;
-			Permission perm = new Permission("swornguns.fire." + gun.getFileName(), def);
-			getServer().getPluginManager().addPermission(perm);
-			permissions.put(gun.getFileName(), perm);
-		}
-	}
-
-	@Override
-	public Permission getPermission(Gun gun)
-	{
-		return permissions.get(gun.getFileName());
 	}
 
 	private void getOnlinePlayers()
@@ -321,12 +321,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	public Gun getGun(String gunName)
 	{
 		return loadedGuns.get(gunName);
-	}
-
-	public void onJoin(Player player)
-	{
-		if (! players.containsKey(player.getUniqueId()))
-			players.put(player.getUniqueId(), new GunPlayer(this, player));
 	}
 
 	public void onQuit(Player player)
