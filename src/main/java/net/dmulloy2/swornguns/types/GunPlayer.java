@@ -226,7 +226,7 @@ public class GunPlayer implements Reloadable
 
 		if (plugin.getUltimateArenaHandler().isEnabled())
 		{
-			if (plugin.getUltimateArenaHandler().isInGunArena(controller))
+			if (plugin.getUltimateArenaHandler().isAmmoUnlimited(controller))
 				return 0;
 		}
 

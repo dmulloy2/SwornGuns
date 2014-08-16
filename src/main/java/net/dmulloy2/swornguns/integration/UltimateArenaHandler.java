@@ -51,7 +51,7 @@ public class UltimateArenaHandler extends IntegrationHandler
 		}
 	}
 
-	public final boolean isInGunArena(Player player)
+	public final boolean isAmmoUnlimited(Player player)
 	{
 		try
 		{
@@ -65,7 +65,7 @@ public class UltimateArenaHandler extends IntegrationHandler
 		}
 		catch (Throwable ex)
 		{
-			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "isInGunArena(" + player.getName() + ")"));
+			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "isAmmoUnlimited(" + player.getName() + ")"));
 			return false;
 		}
 	}
@@ -79,7 +79,13 @@ public class UltimateArenaHandler extends IntegrationHandler
 				Arena arena = ultimateArena.getArena(player);
 				return arena != null;
 			}
-		} catch (Throwable ex) { }
-		return false;
+
+			return false;
+		}
+		catch (Throwable ex)
+		{
+			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "isInArena(" + player.getName() + ")"));
+			return false;
+		}
 	}
 }
