@@ -36,8 +36,8 @@ public class Gun implements Cloneable
 	private boolean canAimRight;
 	private boolean canGoPastMaxDistance;
 	private boolean needsPermission;
-	private boolean canClickRight;
-	private boolean canClickLeft;
+	private boolean canFireRight;
+	private boolean canFireLeft;
 	private boolean hasClip = true;
 	private boolean reloadGunOnDrop = true;
 	private boolean firing;
@@ -276,8 +276,8 @@ public class Gun implements Cloneable
 		g.reloadTime = this.reloadTime;
 		g.canAimLeft = this.canAimLeft;
 		g.canAimRight = this.canAimRight;
-		g.canClickLeft = this.canClickLeft;
-		g.canClickRight = this.canClickRight;
+		g.canFireLeft = this.canFireLeft;
+		g.canFireRight = this.canFireRight;
 		g.hasSmokeTrail = this.hasSmokeTrail;
 		g.armorPenetration = this.armorPenetration;
 		g.isThrowable = this.isThrowable;

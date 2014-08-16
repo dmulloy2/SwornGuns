@@ -87,10 +87,14 @@ public class GunPlayer implements Reloadable
 				return;
 			}
 
-			gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
-			gun.setLastFired(0);
-			if (currentlyFiring == null)
-				fireGun(gun);
+			if (gun.isCanFireRight())
+			{
+				gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
+				gun.setLastFired(0);
+				if (currentlyFiring == null)
+					fireGun(gun);
+				return;
+			}
 		}
 		else if (clickType.equals("left"))
 		{
@@ -100,10 +104,14 @@ public class GunPlayer implements Reloadable
 				return;
 			}
 
-			gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
-			gun.setLastFired(0);
-			if (currentlyFiring == null)
-				fireGun(gun);
+			if (gun.isCanFireLeft())
+			{
+				gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
+				gun.setLastFired(0);
+				if (currentlyFiring == null)
+					fireGun(gun);
+				return;
+			}
 		}
 	}
 

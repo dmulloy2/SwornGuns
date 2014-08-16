@@ -120,13 +120,13 @@ public class WeaponReader
 			if (var.equals("canheadshot"))
 				ret.setCanHeadshot(Boolean.parseBoolean(val));
 			if (var.equals("canshootleft"))
-				ret.setCanClickLeft(Boolean.parseBoolean(val));
+				ret.setCanFireLeft(Boolean.parseBoolean(val));
 			if (var.equals("canshootright"))
-				ret.setCanClickRight(Boolean.parseBoolean(val));
+				ret.setCanFireRight(Boolean.parseBoolean(val));
 			if (var.equals("canclickleft"))
-				ret.setCanClickLeft(Boolean.parseBoolean(val));
+				ret.setCanFireLeft(Boolean.parseBoolean(val));
 			if (var.equals("canclickright"))
-				ret.setCanClickRight(Boolean.parseBoolean(val));
+				ret.setCanFireRight(Boolean.parseBoolean(val));
 			if (var.equals("knockback"))
 				ret.setKnockback(NumberUtil.toDouble(val));
 			if (var.equals("recoil"))

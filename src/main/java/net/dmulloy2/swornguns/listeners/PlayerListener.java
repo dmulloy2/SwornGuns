@@ -73,8 +73,11 @@ public class PlayerListener implements Listener
 		else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)
 			clickType = "right";
 
-		GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
-		gp.handleClick(clickType);
+		if (! clickType.isEmpty())
+		{
+			GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
+			gp.handleClick(clickType);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
