@@ -18,8 +18,8 @@
 package net.dmulloy2.swornguns;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +46,7 @@ import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
+import net.dmulloy2.swornguns.types.MacFileFilter;
 import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.Util;
@@ -174,28 +175,26 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		logHandler.log("{0} has been disabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
 	}
 
+	private static final List<String> stockProjectiles = Arrays.asList(
+			"flashbang", "grenade", "molotov", "smokegrenade"
+	);
+
 	private void loadProjectiles()
 	{
 		int loaded = 0;
 
 		File dir = new File(getDataFolder(), "projectile");
 
-		File[] children = dir.listFiles();
+		File[] children = dir.listFiles(MacFileFilter.get());
 		if (children.length == 0)
 		{
-			String[] stock = new String[]
-			{
-					"flashbang", "grenade", "molotov", "smokegrenade"
-			};
-
-			for (String s : stock)
+			for (String s : stockProjectiles)
 			{
 				saveResource("projectile" + File.separator + s, false);
 			}
 		}
 
-		children = dir.listFiles();
-
+		children = dir.listFiles(MacFileFilter.get());
 		for (File child : children)
 		{
 			WeaponReader reader = new WeaponReader(this, child);
@@ -227,36 +226,28 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		logHandler.log("Loaded {0} projectiles!", loaded);
 	}
 
+	private static final List<String> stockGuns = Arrays.asList(
+			"AutoShotgun", "DoubleBarrel", "Flamethrower", "Pistol", "Rifle", "RocketLauncher", "Shotgun", "Sniper"
+	);
+
 	private void loadGuns()
 	{
 		int loaded = 0;
 
 		File dir = new File(getDataFolder(), "guns");
+		if (! dir.exists())
+			dir.mkdirs();
 
-		File[] children = dir.listFiles();
+		File[] children = dir.listFiles(MacFileFilter.get());
 		if (children.length == 0)
 		{
-			String[] stock = new String[]
-			{
-					"AutoShotgun", "DoubleBarrel", "Flamethrower", "Pistol", "Rifle", "RocketLauncher", "Shotgun", "Sniper"
-			};
-
-			for (String s : stock)
+			for (String s : stockGuns)
 			{
 				saveResource("guns" + File.separator + s, false);
 			}
 		}
 
-		children = dir.listFiles(new FileFilter()
-		{
-			@Override
-			public boolean accept(File file)
-			{
-				// Filter mac crap
-				return ! file.getName().contains("store");
-			}
-		});
-
+		children = dir.listFiles(MacFileFilter.get());
 		for (File child : children)
 		{
 			WeaponReader reader = new WeaponReader(this, child);
@@ -267,7 +258,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 				if (gun.isNeedsPermission())
 				{
 					PluginManager pm = getServer().getPluginManager();
-					String node = "swornpermissions.fire." + child.getName();
+					String node = "swornguns.fire." + child.getName();
 					Permission permission = pm.getPermission(node);
 					if (permission == null)
 					{
