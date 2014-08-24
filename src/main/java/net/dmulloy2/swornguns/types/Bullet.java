@@ -22,7 +22,7 @@ import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Firework;
-import org.bukkit.entity.Fish;
+import org.bukkit.entity.FishHook;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LargeFireball;
 import org.bukkit.entity.LivingEntity;
@@ -111,7 +111,8 @@ public class Bullet
 					mclass = Fireball.class;
 					break;
 				case "fish":
-					mclass = Fish.class;
+				case "fishhook":
+					mclass = FishHook.class;
 					break;
 				case "largefireball":
 					mclass = LargeFireball.class;
