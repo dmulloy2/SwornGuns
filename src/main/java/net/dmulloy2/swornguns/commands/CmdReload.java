@@ -2,13 +2,12 @@ package net.dmulloy2.swornguns.commands;
 
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Permission;
-import net.dmulloy2.types.Reloadable;
 
 /**
  * @author dmulloy2
  */
 
-public class CmdReload extends SwornGunsCommand implements Reloadable
+public class CmdReload extends SwornGunsCommand
 {
 	public CmdReload(SwornGuns plugin)
 	{
@@ -22,15 +21,8 @@ public class CmdReload extends SwornGunsCommand implements Reloadable
 	@Override
 	public void perform()
 	{
-		reload();
-	}
-
-	@Override
-	public void reload()
-	{
-		sendpMessage("&eReloading SwornGuns...");
-
 		long start = System.currentTimeMillis();
+		sendpMessage("&eReloading SwornGuns...");
 
 		plugin.reload();
 

@@ -28,12 +28,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
-
-import com.massivecraft.factions.Board;
-import com.massivecraft.factions.FLocation;
-import com.massivecraft.factions.Faction;
 
 /**
  * @author dmulloy2
@@ -47,18 +41,15 @@ public class EntityListener implements Listener, Reloadable
 	private boolean bloodEffectGunsOnly;
 	private boolean smokeEffect;
 	private boolean bulletSoundEnabled;
-	private boolean factionsEnabled;
-	private boolean swornNationsEnabled;
 
 	private Sound bulletSound;
 	private Material bloodEffectType;
-	private final List<Material> shatterBlocks;
+	private List<Material> shatterBlocks;
 
 	private final SwornGuns plugin;
 	public EntityListener(SwornGuns plugin)
 	{
 		this.plugin = plugin;
-		this.shatterBlocks = new ArrayList<Material>();
 		this.reload(); // Load configuration
 	}
 
@@ -92,7 +83,7 @@ public class EntityListener implements Listener, Reloadable
 			// Realism start - block cracking
 			boolean applicable = false;
 
-			if (! checkFactions(b.getLocation(), true))
+			if (! plugin.getFactionsHandler().checkFactions(b.getLocation(), true))
 			{
 				if (blockCrack)
 				{
@@ -252,46 +243,6 @@ public class EntityListener implements Listener, Reloadable
 	}
 	// Realism end
 
-	// Realism start - factions checks
-	public final boolean checkFactions(Location location, boolean safeZoneCheck)
-	{
-		return safeZoneCheck ? isSafeZone(location) || isWarZone(location) : isWarZone(location);
-	}
-
-	public final boolean checkFactions(Player player, boolean safeZoneCheck)
-	{
-		return checkFactions(player.getLocation(), safeZoneCheck);
-	}
-
-	private final boolean isWarZone(Location location)
-	{
-		if (factionsEnabled)
-		{
-			Faction fac = Board.getFactionAt(new FLocation(location));
-			if (swornNationsEnabled)
-				fac = Board.getAbsoluteFactionAt(new FLocation(location));
-
-			return fac.isWarZone();
-		}
-
-		return false;
-	}
-
-	private final boolean isSafeZone(Location location)
-	{
-		if (factionsEnabled)
-		{
-			Faction fac = Board.getFactionAt(new FLocation(location));
-			if (swornNationsEnabled)
-				fac = Board.getAbsoluteFactionAt(new FLocation(location));
-
-			return fac.isSafeZone();
-		}
-
-		return false;
-	}
-	// Realism end
-
 	@Override
 	public void reload()
 	{
@@ -304,36 +255,12 @@ public class EntityListener implements Listener, Reloadable
 		this.bulletSound = SwornGuns.getSound(plugin.getConfig().getString("bullet-sound.sound"));
 		this.bloodEffectType = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
 
-		List<String> configMaterials = plugin.getConfig().getStringList("block-shatter.blocks");
-		for (String configMaterial : configMaterials)
+		this.shatterBlocks = new ArrayList<>();
+		for (String configMaterial : plugin.getConfig().getStringList("block-shatter.blocks"))
 		{
 			Material material = MaterialUtil.getMaterial(configMaterial);
 			if (material != null)
-			{
 				shatterBlocks.add(material);
-			}
-		}
-
-		this.factionsEnabled = false;
-		this.swornNationsEnabled = false;
-
-		this.setupFactionsIntegration();
-	}
-
-	private final void setupFactionsIntegration()
-	{
-		PluginManager pm = plugin.getServer().getPluginManager();
-		if (pm.getPlugin("Factions") != null)
-		{
-			Plugin pl = pm.getPlugin("Factions");
-			String version = pl.getDescription().getVersion();
-			factionsEnabled = version.startsWith("1.6");
-		}
-
-		if (pm.getPlugin("SwornNations") != null)
-		{
-			factionsEnabled = true;
-			swornNationsEnabled = true;
 		}
 	}
 }

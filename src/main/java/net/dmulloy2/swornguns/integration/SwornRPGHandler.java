@@ -3,11 +3,14 @@
  */
 package net.dmulloy2.swornguns.integration;
 
+import java.util.logging.Level;
+
 import lombok.Getter;
 import net.dmulloy2.integration.IntegrationHandler;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornrpg.SwornRPG;
 import net.dmulloy2.swornrpg.types.PlayerData;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -43,6 +46,7 @@ public class SwornRPGHandler extends IntegrationHandler
 		}
 		catch (Throwable ex)
 		{
+			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "setting up SwornRPG integration"));
 			enabled = false;
 		}
 	}
@@ -52,9 +56,7 @@ public class SwornRPGHandler extends IntegrationHandler
 		try
 		{
 			if (enabled && swornRPG != null)
-			{
 				return swornRPG.getPlayerDataCache().getData(player);
-			}
 		} catch (Throwable ex) { }
 		return null;
 	}

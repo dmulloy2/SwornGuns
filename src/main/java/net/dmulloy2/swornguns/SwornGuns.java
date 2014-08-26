@@ -37,6 +37,7 @@ import net.dmulloy2.swornguns.api.SwornGunsAPI;
 import net.dmulloy2.swornguns.commands.CmdList;
 import net.dmulloy2.swornguns.commands.CmdReload;
 import net.dmulloy2.swornguns.commands.CmdToggle;
+import net.dmulloy2.swornguns.integration.FactionsHandler;
 import net.dmulloy2.swornguns.integration.SwornRPGHandler;
 import net.dmulloy2.swornguns.integration.UltimateArenaHandler;
 import net.dmulloy2.swornguns.io.WeaponReader;
@@ -65,9 +66,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 {
+	// Integration
 	private @Getter UltimateArenaHandler ultimateArenaHandler;
+	private @Getter FactionsHandler factionsHandler;
 	private @Getter SwornRPGHandler swornRPGHandler;
 
+	// Maps
 	private @Getter Map<String, Gun> loadedGuns;
 	private @Getter Map<Integer, Bullet> bullets;
 	private @Getter Map<UUID, GunPlayer> players;
@@ -95,11 +99,12 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 		// Handlers
 		logHandler = new LogHandler(this);
-		permissionHandler = new PermissionHandler(this);
 		commandHandler = new CommandHandler(this);
+		permissionHandler = new PermissionHandler(this);
 
 		// Integration
 		ultimateArenaHandler = new UltimateArenaHandler(this);
+		factionsHandler = new FactionsHandler(this);
 		swornRPGHandler = new SwornRPGHandler(this);
 
 		// Register commands
