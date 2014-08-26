@@ -103,24 +103,23 @@ public class WeaponReader
 				gun.setFlashRadius(NumberUtil.toDouble(val));
 			if (var.equals("canheadshot"))
 				gun.setCanHeadshot(Boolean.parseBoolean(val));
-			if (var.equals("canshootleft"))
+
+			// Firing
+			if (var.equals("canshootleft") || var.equals("canclickleft") || var.equals("canfireleft"))
 				gun.setCanFireLeft(Boolean.parseBoolean(val));
-			if (var.equals("canshootright"))
+			if (var.equals("canshootright") || var.equals("canclickright") || var.equals("canfireright"))
 				gun.setCanFireRight(Boolean.parseBoolean(val));
-			if (var.equals("canclickleft"))
-				gun.setCanFireLeft(Boolean.parseBoolean(val));
-			if (var.equals("canclickright"))
-				gun.setCanFireRight(Boolean.parseBoolean(val));
+
+			// Aiming
+			if (var.equals("canaimleft") || var.equals("canaim"))
+				gun.setCanAimLeft(Boolean.parseBoolean(val));
+			if (var.equals("canaimright"))
+				gun.setCanAimRight(Boolean.parseBoolean(val));
+
 			if (var.equals("knockback"))
 				gun.setKnockback(NumberUtil.toDouble(val));
 			if (var.equals("recoil"))
 				gun.setRecoil(NumberUtil.toDouble(val));
-			if (var.equals("canaim"))
-				gun.setCanAimLeft(Boolean.parseBoolean(val));
-			if (var.equals("canaimleft"))
-				gun.setCanAimLeft(Boolean.parseBoolean(val));
-			if (var.equals("canaimright"))
-				gun.setCanAimRight(Boolean.parseBoolean(val));
 			if (var.equals("bullettype"))
 				gun.setProjType(val);
 			if (var.equals("needspermission"))

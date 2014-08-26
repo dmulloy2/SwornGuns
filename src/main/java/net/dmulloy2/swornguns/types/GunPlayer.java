@@ -79,38 +79,42 @@ public class GunPlayer implements Reloadable
 			return;
 		}
 
-		if (clickType.equals("right"))
+		if (clickType.equalsIgnoreCase("right"))
 		{
-			if (gun.isCanAimRight())
+			if (gun.isCanFireRight() || gun.isCanAimRight())
 			{
-				checkAim();
-				return;
-			}
-
-			if (gun.isCanFireRight())
-			{
-				gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
-				gun.setLastFired(0);
-				if (currentlyFiring == null)
-					fireGun(gun);
-				return;
+				if (! gun.isCanAimRight())
+				{
+					gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
+					gun.setLastFired(0);
+					if (currentlyFiring == null)
+					{
+						fireGun(gun);
+					}
+				}
+				else
+				{
+					checkAim();
+				}
 			}
 		}
-		else if (clickType.equals("left"))
+		else if (clickType.equalsIgnoreCase("left"))
 		{
-			if (gun.isCanAimLeft())
+			if (gun.isCanFireLeft() || gun.isCanAimLeft())
 			{
-				checkAim();
-				return;
-			}
-
-			if (gun.isCanFireLeft())
-			{
-				gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
-				gun.setLastFired(0);
-				if (currentlyFiring == null)
-					fireGun(gun);
-				return;
+				if (! gun.isCanAimLeft())
+				{
+					gun.setHeldDownTicks(gun.getHeldDownTicks() + 1);
+					gun.setLastFired(0);
+					if (currentlyFiring == null)
+					{
+						fireGun(gun);
+					}
+				}
+				else
+				{
+					checkAim();
+				}
 			}
 		}
 	}
@@ -220,7 +224,7 @@ public class GunPlayer implements Reloadable
 		}
 		else
 		{
-			controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 4));
+			controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
 			this.aimedIn = true;
 		}
 	}
