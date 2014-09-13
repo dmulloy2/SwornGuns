@@ -1,6 +1,5 @@
 package net.dmulloy2.swornguns.listeners;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.dmulloy2.swornguns.SwornGuns;
@@ -254,13 +253,6 @@ public class EntityListener implements Listener, Reloadable
 		this.bulletSoundEnabled = plugin.getConfig().getBoolean("bullet-sound.enabled");
 		this.bulletSound = SwornGuns.getSound(plugin.getConfig().getString("bullet-sound.sound"));
 		this.bloodEffectType = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
-
-		this.shatterBlocks = new ArrayList<>();
-		for (String configMaterial : plugin.getConfig().getStringList("block-shatter.blocks"))
-		{
-			Material material = MaterialUtil.getMaterial(configMaterial);
-			if (material != null)
-				shatterBlocks.add(material);
-		}
+		this.shatterBlocks = MaterialUtil.fromStrings(plugin.getConfig().getStringList("block-shatter.blocks"));
 	}
 }

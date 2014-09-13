@@ -16,7 +16,7 @@ import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.types.Reloadable;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.InventoryUtil;
-import net.dmulloy2.util.Util;
+import net.dmulloy2.util.ListUtil;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -151,7 +151,7 @@ public class GunPlayer implements Reloadable
 			}
 		}
 
-		for (Gun gun : Util.newList(guns))
+		for (Gun gun : ListUtil.newList(guns))
 		{
 			// Don't tick null guns
 			if (gun == null)

@@ -10,9 +10,9 @@ import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.util.FormatUtil;
+import net.dmulloy2.util.ListUtil;
 import net.dmulloy2.util.MaterialUtil;
 import net.dmulloy2.util.NumberUtil;
-import net.dmulloy2.util.Util;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -126,7 +126,7 @@ public class Gun implements Cloneable
 				this.changed = true;
 				this.roundsFired++;
 
-				for (Sound sound : Util.newList(gunSound))
+				for (Sound sound : ListUtil.newList(gunSound))
 				{
 					if (sound != null)
 					{
