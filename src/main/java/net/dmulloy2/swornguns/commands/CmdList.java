@@ -20,7 +20,7 @@ public class CmdList extends PaginatedCommand
 		super(plugin);
 		this.plugin = plugin;
 		this.name = "list";
-		this.optionalArgs.add("page");
+		this.addOptionalArg("page");
 		this.description = "Displays all available guns";
 		this.linesPerPage = 6;
 		this.usesPrefix = true;
