@@ -45,7 +45,7 @@ public class PlayerListener implements Listener
 	{
 		Item dropped = event.getItemDrop();
 		GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
-		ItemStack lastHold = gp.getLastItemHeld();
+		ItemStack lastHold = gp.getLastHeldItem();
 		if (lastHold != null)
 		{
 			Gun gun = gp.getGun(dropped.getItemStack());

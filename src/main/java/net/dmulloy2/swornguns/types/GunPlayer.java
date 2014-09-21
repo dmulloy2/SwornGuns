@@ -17,6 +17,7 @@ import net.dmulloy2.types.Reloadable;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.InventoryUtil;
 import net.dmulloy2.util.ListUtil;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -44,13 +45,11 @@ public class GunPlayer implements Reloadable
 
 	private final String name;
 	private final UUID uniqueId;
-	private final Player controller;
 
 	private final SwornGuns plugin;
 	public GunPlayer(SwornGuns plugin, Player player)
 	{
 		this.plugin = plugin;
-		this.controller = player;
 		this.name = player.getName();
 		this.uniqueId = player.getUniqueId();
 		this.enabled = true;
@@ -64,7 +63,8 @@ public class GunPlayer implements Reloadable
 		if (! enabled)
 			return;
 
-		ItemStack inHand = controller.getItemInHand();
+		Player player = getPlayer();
+		ItemStack inHand = player.getItemInHand();
 		if (inHand == null || inHand.getType() == Material.AIR)
 			return;
 
@@ -75,7 +75,7 @@ public class GunPlayer implements Reloadable
 		if (! canFireGun(gun))
 		{
 			if (! canFireGun(gun, false) && gun.isWarnIfNoPermission())
-				controller.sendMessage(plugin.getPrefix() + FormatUtil.format("&cYou do not have permission to fire this gun!"));
+				player.sendMessage(plugin.getPrefix() + FormatUtil.format("&cYou do not have permission to fire this gun!"));
 			return;
 		}
 
@@ -132,21 +132,22 @@ public class GunPlayer implements Reloadable
 	{
 		this.ticks++;
 
-		if (controller == null || ! controller.isOnline())
+		Player player = getPlayer();
+		if (player == null || ! player.isOnline())
 		{
 			plugin.getPlayers().remove(uniqueId);
 			unload();
 			return;
 		}
 
-		ItemStack hand = controller.getItemInHand();
+		ItemStack hand = player.getItemInHand();
 		this.lastHeldItem = hand;
 
 		if (ticks % 10 == 0 && hand != null)
 		{
 			if (getGun(hand) == null)
 			{
-				controller.removePotionEffect(PotionEffectType.SLOW);
+				player.removePotionEffect(PotionEffectType.SLOW);
 				this.aimedIn = false;
 			}
 		}
@@ -162,14 +163,14 @@ public class GunPlayer implements Reloadable
 
 			gun.tick();
 
-			if (controller.isDead())
+			if (player.isDead())
 			{
 				gun.finishReloading();
 			}
 
 			if (hand != null && gun.getMaterial().matches(hand) && isAimedIn() && ! gun.isCanAimLeft() && ! gun.isCanAimRight())
 			{
-				controller.removePotionEffect(PotionEffectType.SLOW);
+				player.removePotionEffect(PotionEffectType.SLOW);
 				this.aimedIn = false;
 			}
 
@@ -184,12 +185,7 @@ public class GunPlayer implements Reloadable
 
 	public final Player getPlayer()
 	{
-		return controller;
-	}
-
-	public final ItemStack getLastItemHeld()
-	{
-		return lastHeldItem;
+		return Util.matchPlayer(name);
 	}
 
 	public final Gun getGun(ItemStack item)
@@ -219,12 +215,12 @@ public class GunPlayer implements Reloadable
 	{
 		if (aimedIn)
 		{
-			controller.removePotionEffect(PotionEffectType.SLOW);
+			getPlayer().removePotionEffect(PotionEffectType.SLOW);
 			this.aimedIn = false;
 		}
 		else
 		{
-			controller.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
+			getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
 			this.aimedIn = true;
 		}
 	}
@@ -238,7 +234,7 @@ public class GunPlayer implements Reloadable
 
 		if (plugin.getUltimateArenaHandler().isEnabled())
 		{
-			if (plugin.getUltimateArenaHandler().isAmmoUnlimited(controller))
+			if (plugin.getUltimateArenaHandler().isAmmoUnlimited(getPlayer()))
 				return 0;
 		}
 
@@ -251,7 +247,7 @@ public class GunPlayer implements Reloadable
 	public final boolean checkAmmo(Gun gun, int amount)
 	{
 		MyMaterial ammo = gun.getAmmo();
-		return InventoryUtil.amount(controller.getInventory(), ammo.getMaterial(), ammo.getData()) >= amount;
+		return InventoryUtil.amount(getPlayer().getInventory(), ammo.getMaterial(), ammo.getData()) >= amount;
 	}
 
 	public final void removeAmmo(Gun gun, int amount)
@@ -260,14 +256,15 @@ public class GunPlayer implements Reloadable
 			return;
 
 		MyMaterial ammo = gun.getAmmo();
-		InventoryUtil.remove(controller.getInventory(), ammo.getMaterial(), ammo.getData(), amount);
+		InventoryUtil.remove(getPlayer().getInventory(), ammo.getMaterial(), ammo.getData(), amount);
 	}
 
 	// ---- Naming
 
 	public final void renameGuns()
 	{
-		PlayerInventory inv = controller.getInventory();
+		Player player = getPlayer();
+		PlayerInventory inv = player.getInventory();
 		for (ItemStack item : inv.getContents())
 		{
 			if (item != null && item.getType() != Material.AIR)
@@ -279,7 +276,7 @@ public class GunPlayer implements Reloadable
 					{
 						ItemMeta meta = item.getItemMeta();
 
-						String name = getGunName(gun);
+						String name = getGunName(player, gun);
 						if (! name.isEmpty())
 							meta.setDisplayName(name);
 
@@ -304,14 +301,14 @@ public class GunPlayer implements Reloadable
 		}
 	}
 
-	private final String getGunName(Gun gun)
+	private final String getGunName(Player player, Gun gun)
 	{
 		StringBuilder add = new StringBuilder();
 		if (gun.isHasClip())
 		{
 			MyMaterial ammo = gun.getAmmo();
 			int maxClip = gun.getMaxClipSize();
-			int amount = (int) Math.floor(InventoryUtil.amount(controller.getInventory(), ammo.getMaterial(), ammo.getData())
+			int amount = (int) Math.floor(InventoryUtil.amount(player.getInventory(), ammo.getMaterial(), ammo.getData())
 					/ gun.getAmmoAmtNeeded());
 			int ammoLeft = amount - maxClip + gun.getRoundsFired();
 			if (ammoLeft < 0)
@@ -358,12 +355,13 @@ public class GunPlayer implements Reloadable
 
 	public final boolean canFireGun(Gun gun, boolean world)
 	{
-		if (world && plugin.getDisabledWorlds().contains(controller.getWorld().getName()))
+		Player player = getPlayer();
+		if (world && plugin.getDisabledWorlds().contains(player.getWorld().getName()))
 			return false;
 
 		if (gun.isNeedsPermission())
-			return plugin.getPermissionHandler().hasPermission(controller, "swornguns.fire." + gun.getFileName())
-					|| plugin.getPermissionHandler().hasPermission(controller, "swornguns.fire.*");
+			return plugin.getPermissionHandler().hasPermission(player, "swornguns.fire." + gun.getFileName())
+					|| plugin.getPermissionHandler().hasPermission(player, "swornguns.fire.*");
 		return true;
 	}
 
@@ -424,7 +422,7 @@ public class GunPlayer implements Reloadable
 				return false;
 
 			if (data == null)
-				data = plugin.getSwornRPGHandler().getPlayerData(controller);
+				data = plugin.getSwornRPGHandler().getPlayerData(getPlayer());
 
 			return data != null && data.isUnlimitedAmmoEnabled();
 		} catch (Throwable ex) { }
