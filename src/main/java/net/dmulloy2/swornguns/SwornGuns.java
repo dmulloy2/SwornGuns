@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -396,76 +397,66 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		@Override
 		public void run()
 		{
-			for (Entry<UUID, GunPlayer> entry : new HashMap<>(players).entrySet())
+			if (! players.isEmpty())
 			{
-				UUID uniqueId = entry.getKey();
-				GunPlayer player = entry.getValue();
-
-				// Don't tick null players
-				if (player == null)
+				Iterator<GunPlayer> playerIter = players.values().iterator();
+				while (playerIter.hasNext())
 				{
-					players.remove(uniqueId);
-					continue;
-				}
-
-				try
-				{
-					player.tick();
-				}
-				catch (Throwable ex)
-				{
-					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + player.getName()));
-				}
-			}
-
-			for (Entry<Integer, Bullet> entry : new HashMap<>(bullets).entrySet())
-			{
-				int id = entry.getKey();
-				Bullet bullet = entry.getValue();
-
-				// Don't tick null bullets
-				if (bullet == null)
-				{
-					bullets.remove(id);
-					continue;
-				}
-
-				try
-				{
-					bullet.tick();
-				}
-				catch (Throwable ex)
-				{
-					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking bullet " + bullet));
+					GunPlayer player = playerIter.next();
 
 					try
 					{
-						bullets.remove(id);
-						bullet.remove();
-					} catch (Throwable ex1) { }
+						player.tick();
+					}
+					catch (Throwable ex)
+					{
+						logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + player.getName()));
+					}
 				}
 			}
 
-			for (Entry<Integer, EffectType> entry : new HashMap<>(effects).entrySet())
+			if (! bullets.isEmpty())
 			{
-				int id = entry.getKey();
-				EffectType effect = entry.getValue();
+				Iterator<Entry<Integer, Bullet>> bulletsIter = bullets.entrySet().iterator();
+				while (bulletsIter.hasNext())
+				{
+					Entry<Integer, Bullet> entry = bulletsIter.next();
+					Bullet bullet = entry.getValue();
 
-				// Don't tick null effects
-				if (effect == null)
-				{
-					effects.remove(id);
-					continue;
-				}
+					try
+					{
+						bullet.tick();
+					}
+					catch (Throwable ex)
+					{
+						logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking bullet " + bullet));
 
-				try
-				{
-					effect.tick();
+						try
+						{
+							bullets.remove(entry.getKey());
+							bullet.remove();
+						} catch (Throwable ex1) { }
+					}
 				}
-				catch (Throwable ex)
+			}
+
+			if (! effects.isEmpty())
+			{
+				Iterator<Entry<Integer, EffectType>> effectsIter = effects.entrySet().iterator();
+				while (effectsIter.hasNext())
 				{
-					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking effect " + effect));
-					effects.remove(id);
+					Entry<Integer, EffectType> entry = effectsIter.next();
+					EffectType effect = entry.getValue();
+
+					try
+					{
+						effect.tick();
+					}
+					catch (Throwable ex)
+					{
+						logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking effect " + effect));
+						effects.remove(entry.getKey());
+					}
 				}
 			}
 		}
