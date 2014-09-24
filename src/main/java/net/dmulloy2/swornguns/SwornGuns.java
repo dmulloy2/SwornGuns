@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import lombok.Getter;
@@ -92,9 +93,9 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 		// Initialize variables
 		loadedGuns = new HashMap<>();
-		bullets = new HashMap<>();
-		players = new HashMap<>();
-		effects = new HashMap<>();
+		bullets = new ConcurrentHashMap<>();
+		players = new ConcurrentHashMap<>();
+		effects = new ConcurrentHashMap<>();
 
 		disabledWorlds = getConfig().getStringList("disabledWorlds");
 
