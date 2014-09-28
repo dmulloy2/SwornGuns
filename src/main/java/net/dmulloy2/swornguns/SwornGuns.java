@@ -162,24 +162,39 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		getServer().getScheduler().cancelTasks(this);
 		getServer().getServicesManager().unregisterAll(this);
 
-		for (Bullet bullet : new HashMap<>(bullets).values())
+		if (! bullets.isEmpty())
 		{
-			if (bullet != null)
-				bullet.destroy();
+			Iterator<Bullet> bulletIter = bullets.values().iterator();
+			while (bulletIter.hasNext())
+			{
+				bulletIter.next().destroy();
+			}
 		}
 
-		for (GunPlayer player : new HashMap<>(players).values())
+		if (! players.isEmpty())
 		{
-			if (player != null)
-				player.unload();
+			Iterator<GunPlayer> playerIter = players.values().iterator();
+			while (playerIter.hasNext())
+			{
+				playerIter.next().unload();
+			}
 		}
 
-		loadedGuns.clear();
-		effects.clear();
-		bullets.clear();
-		players.clear();
+		clearMemory();
 
 		logHandler.log("{0} has been disabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
+	}
+
+	private final void clearMemory()
+	{
+		loadedGuns.clear();
+		loadedGuns = null;
+		effects.clear();
+		effects = null;
+		bullets.clear();
+		bullets = null;
+		players.clear();
+		players = null;
 	}
 
 	private static final List<String> stockProjectiles = Arrays.asList(
