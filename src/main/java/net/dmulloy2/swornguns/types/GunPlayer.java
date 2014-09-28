@@ -17,7 +17,6 @@ import net.dmulloy2.types.Reloadable;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.InventoryUtil;
 import net.dmulloy2.util.ListUtil;
-import net.dmulloy2.util.Util;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -43,13 +42,15 @@ public class GunPlayer implements Reloadable
 	private boolean aimedIn;
 	private int ticks;
 
-	private final String name;
-	private final UUID uniqueId;
+	private String name;
+	private UUID uniqueId;
+	private Player player;
+	private SwornGuns plugin;
 
-	private final SwornGuns plugin;
 	public GunPlayer(SwornGuns plugin, Player player)
 	{
 		this.plugin = plugin;
+		this.player = player;
 		this.name = player.getName();
 		this.uniqueId = player.getUniqueId();
 		this.enabled = true;
@@ -185,7 +186,7 @@ public class GunPlayer implements Reloadable
 
 	public final Player getPlayer()
 	{
-		return Util.matchPlayer(name);
+		return player;
 	}
 
 	public final Gun getGun(ItemStack item)
@@ -344,8 +345,14 @@ public class GunPlayer implements Reloadable
 
 	public final void unload()
 	{
-		this.guns = null;
-		this.lastHeldItem = null;
+		lastHeldItem = null;
+		currentlyFiring = null;
+		guns.clear();
+		guns = null;
+		name = null;
+		uniqueId = null;
+		player = null;
+		plugin = null;
 	}
 
 	public final boolean canFireGun(Gun gun)

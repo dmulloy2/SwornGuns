@@ -475,18 +475,14 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		loadProjectiles();
 
 		// Refresh players
-		for (Entry<UUID, GunPlayer> entry : new HashMap<>(players).entrySet())
+		if (! players.isEmpty())
 		{
-			GunPlayer player = entry.getValue();
-
-			// Don't reload null players
-			if (player == null)
+			Iterator<GunPlayer> playerIter = players.values().iterator();
+			while (playerIter.hasNext())
 			{
-				players.remove(entry.getKey());
-				continue;
+				GunPlayer player = playerIter.next();
+				player.reload();
 			}
-
-			player.reload();
 		}
 
 		// Get any players we may have missed
