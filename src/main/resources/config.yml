@@ -43,7 +43,3 @@ disabledWorlds:
 # Whether or not to update guns when a player changes worlds
 # Useful for per-world permissions and stuff
 updateGunsOnWorldChange: false
-
-# Run Update Timer async
-# WARNING: This may cause crashes! Only use as a last-ditch effort!
-runUpdateTimerAsync: false

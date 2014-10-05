@@ -21,7 +21,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -141,17 +140,9 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		getOnlinePlayers();
 
 		// Update timer
-		if (getConfig().getBoolean("runUpdateTimerAsync", false))
-		{
-			logHandler.log("Running Update Timer asynchronously! This may cause crashes, you have been warned!");
-			new UpdateTimer().runTaskTimerAsynchronously(this, 20L, 1L);
-		}
-		else
-		{
-			new UpdateTimer().runTaskTimer(this, 20L, 1L);
-		}
+		new UpdateTimer().runTaskTimer(this, 20L, 1L);
 
-		logHandler.log("{0} has been enabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
+		logHandler.log("{0} has been enabled. Took {1} ms.", getDescription().getFullName(), System.currentTimeMillis() - start);
 	}
 
 	@Override
@@ -164,25 +155,23 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 		if (! bullets.isEmpty())
 		{
-			Iterator<Bullet> bulletIter = bullets.values().iterator();
-			while (bulletIter.hasNext())
+			for (Bullet bullet : bullets.values())
 			{
-				bulletIter.next().destroy();
+				bullet.destroy();
 			}
 		}
 
 		if (! players.isEmpty())
 		{
-			Iterator<GunPlayer> playerIter = players.values().iterator();
-			while (playerIter.hasNext())
+			for (GunPlayer player : players.values())
 			{
-				playerIter.next().unload();
+				player.unload();
 			}
 		}
 
 		clearMemory();
 
-		logHandler.log("{0} has been disabled ({1}ms)", getDescription().getFullName(), System.currentTimeMillis() - start);
+		logHandler.log("{0} has been disabled. Took {1} ms.", getDescription().getFullName(), System.currentTimeMillis() - start);
 	}
 
 	private final void clearMemory()
@@ -197,9 +186,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		players = null;
 	}
 
-	private static final List<String> stockProjectiles = Arrays.asList(
-			"flashbang", "grenade", "molotov", "smokegrenade"
-	);
+	private static final List<String> stockProjectiles = Arrays.asList("flashbang", "grenade", "molotov", "smokegrenade");
 
 	private void loadProjectiles()
 	{
@@ -248,9 +235,8 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		logHandler.log("Loaded {0} projectiles!", loaded);
 	}
 
-	private static final List<String> stockGuns = Arrays.asList(
-			"AutoShotgun", "DoubleBarrel", "Flamethrower", "Pistol", "Rifle", "RocketLauncher", "Shotgun", "Sniper"
-	);
+	private static final List<String> stockGuns = Arrays.asList("AutoShotgun", "DoubleBarrel", "Flamethrower", "Pistol", "Rifle",
+			"RocketLauncher", "Shotgun", "Sniper");
 
 	private void loadGuns()
 	{
@@ -415,11 +401,8 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		{
 			if (! players.isEmpty())
 			{
-				Iterator<GunPlayer> playerIter = players.values().iterator();
-				while (playerIter.hasNext())
+				for (GunPlayer player : players.values())
 				{
-					GunPlayer player = playerIter.next();
-
 					try
 					{
 						player.tick();
@@ -433,10 +416,8 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 			if (! bullets.isEmpty())
 			{
-				Iterator<Entry<Integer, Bullet>> bulletsIter = bullets.entrySet().iterator();
-				while (bulletsIter.hasNext())
+				for (Entry<Integer, Bullet> entry : bullets.entrySet())
 				{
-					Entry<Integer, Bullet> entry = bulletsIter.next();
 					Bullet bullet = entry.getValue();
 
 					try
@@ -458,10 +439,8 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 			if (! effects.isEmpty())
 			{
-				Iterator<Entry<Integer, EffectType>> effectsIter = effects.entrySet().iterator();
-				while (effectsIter.hasNext())
+				for (Entry<Integer, EffectType> entry : effects.entrySet())
 				{
-					Entry<Integer, EffectType> entry = effectsIter.next();
 					EffectType effect = entry.getValue();
 
 					try
@@ -492,10 +471,8 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		// Refresh players
 		if (! players.isEmpty())
 		{
-			Iterator<GunPlayer> playerIter = players.values().iterator();
-			while (playerIter.hasNext())
+			for (GunPlayer player : players.values())
 			{
-				GunPlayer player = playerIter.next();
 				player.reload();
 			}
 		}
