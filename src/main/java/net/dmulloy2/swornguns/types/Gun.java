@@ -79,7 +79,9 @@ public class Gun implements Cloneable
 	private double flashRadius;
 	private double knockback;
 	private double recoil;
+
 	private double gunVolume = 1.0D;
+	private double gunPitch = 2.0D;
 
 	private String projType = "";
 	private String reloadType = "NORMAL";
@@ -110,6 +112,7 @@ public class Gun implements Cloneable
 	{
 		if (owner != null && owner.getPlayer().isOnline() && owner.getPlayer().getHealth() > 0.0D && ! reloading)
 		{
+			Player player = owner.getPlayer();
 			int ammoAmtNeeded = owner.getAmmoNeeded(this);
 			if (ammoAmtNeeded == 0 || owner.checkAmmo(this, ammoAmtNeeded))
 			{
@@ -121,7 +124,7 @@ public class Gun implements Cloneable
 					return;
 				}
 
-				doRecoil(owner.getPlayer());
+				doRecoil(player);
 
 				this.changed = true;
 				this.roundsFired++;
@@ -131,9 +134,9 @@ public class Gun implements Cloneable
 					if (sound != null)
 					{
 						if (localGunSound)
-							owner.getPlayer().playSound(owner.getPlayer().getLocation(), sound, (float) gunVolume, 2.0F);
+							player.playSound(player.getLocation(), sound, (float) gunVolume, (float) gunPitch);
 						else
-							owner.getPlayer().getWorld().playSound(owner.getPlayer().getLocation(), sound, (float) gunVolume, 2.0F);
+							player.getWorld().playSound(player.getLocation(), sound, (float) gunVolume, (float) gunPitch);
 					}
 				}
 
@@ -155,7 +158,7 @@ public class Gun implements Cloneable
 					if (acc <= 0)
 						acc = 1;
 
-					Location ploc = owner.getPlayer().getLocation();
+					Location ploc = player.getLocation();
 
 					Random rand = new Random();
 
@@ -180,10 +183,8 @@ public class Gun implements Cloneable
 			}
 			else
 			{
-				owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
-				owner.getPlayer().sendMessage(plugin.getPrefix() +
-						FormatUtil.format("&eThis gun needs &b{0}&e!", ammo.getName()));
-
+				player.playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
+				player.sendMessage(plugin.getPrefix() + FormatUtil.format("&eThis gun needs &b{0}&e!", ammo.getName()));
 				finishShooting();
 			}
 		}

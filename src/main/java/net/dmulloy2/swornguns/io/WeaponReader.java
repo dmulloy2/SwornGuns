@@ -97,6 +97,8 @@ public class WeaponReader
 				gun.setExplodeRadius(NumberUtil.toDouble(val));
 			if (var.equals("gunvolume"))
 				gun.setGunVolume(NumberUtil.toDouble(val));
+			if (var.equals("gunpitch"))
+				gun.setGunPitch(NumberUtil.toDouble(val));
 			if (var.equals("fireradius"))
 				gun.setFireRadius(NumberUtil.toDouble(val));
 			if (var.equals("flashradius"))
