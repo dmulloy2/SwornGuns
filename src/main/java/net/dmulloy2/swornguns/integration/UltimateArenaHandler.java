@@ -10,6 +10,7 @@ import net.dmulloy2.integration.IntegrationHandler;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.ultimatearena.UltimateArena;
 import net.dmulloy2.ultimatearena.arenas.Arena;
+import net.dmulloy2.ultimatearena.types.ArenaPlayer;
 import net.dmulloy2.util.Util;
 
 import org.bukkit.entity.Player;
@@ -57,8 +58,12 @@ public class UltimateArenaHandler extends IntegrationHandler
 		{
 			if (enabled && ultimateArena != null)
 			{
-				Arena arena = ultimateArena.getArena(player);
-				return arena != null && arena.getConfig().isUnlimitedAmmo();
+				ArenaPlayer ap = ultimateArena.getArenaPlayer(player);
+				if (ap != null)
+				{
+					Arena arena = ap.getArena();
+					return arena != null && arena.getConfig().isUnlimitedAmmo();
+				}
 			}
 
 			return false;
@@ -76,8 +81,8 @@ public class UltimateArenaHandler extends IntegrationHandler
 		{
 			if (enabled && ultimateArena != null)
 			{
-				Arena arena = ultimateArena.getArena(player);
-				return arena != null;
+				ArenaPlayer ap = ultimateArena.getArenaPlayer(player);
+				return ap != null && ap.getArena() != null;
 			}
 
 			return false;
