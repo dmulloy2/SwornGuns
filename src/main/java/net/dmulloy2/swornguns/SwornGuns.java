@@ -38,7 +38,7 @@ import net.dmulloy2.swornguns.api.SwornGunsAPI;
 import net.dmulloy2.swornguns.commands.CmdList;
 import net.dmulloy2.swornguns.commands.CmdReload;
 import net.dmulloy2.swornguns.commands.CmdToggle;
-import net.dmulloy2.swornguns.integration.FactionsHandler;
+import net.dmulloy2.swornguns.integration.SwornNationsHandler;
 import net.dmulloy2.swornguns.integration.SwornRPGHandler;
 import net.dmulloy2.swornguns.integration.UltimateArenaHandler;
 import net.dmulloy2.swornguns.io.WeaponReader;
@@ -69,7 +69,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 {
 	// Integration
 	private @Getter UltimateArenaHandler ultimateArenaHandler;
-	private @Getter FactionsHandler factionsHandler;
+	private @Getter SwornNationsHandler swornNationsHandler;
 	private @Getter SwornRPGHandler swornRPGHandler;
 
 	// Maps
@@ -104,9 +104,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		permissionHandler = new PermissionHandler(this);
 
 		// Integration
-		ultimateArenaHandler = new UltimateArenaHandler(this);
-		factionsHandler = new FactionsHandler(this);
-		swornRPGHandler = new SwornRPGHandler(this);
+		setupIntegration();
 
 		// Register commands
 		commandHandler.setCommandPrefix("swornguns");
@@ -184,6 +182,39 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		bullets = null;
 		players.clear();
 		players = null;
+	}
+
+	private final void setupIntegration()
+	{
+		try
+		{
+			swornNationsHandler = new SwornNationsHandler(this);
+		} catch (Throwable ex) { }
+
+		try
+		{
+			swornRPGHandler = new SwornRPGHandler(this);
+		} catch (Throwable ex) { }
+
+		try
+		{
+			ultimateArenaHandler = new UltimateArenaHandler(this);
+		} catch (Throwable ex) { }
+	}
+
+	public final boolean isSwornNationsEnabled()
+	{
+		return swornNationsHandler != null && swornNationsHandler.isEnabled();
+	}
+
+	public final boolean isSwornRPGEnabled()
+	{
+		return swornRPGHandler != null && swornRPGHandler.isEnabled();
+	}
+
+	public final boolean isUltimateArenaEnabled()
+	{
+		return ultimateArenaHandler != null && ultimateArenaHandler.isEnabled();
 	}
 
 	private static final List<String> stockProjectiles = Arrays.asList("flashbang", "grenade", "molotov", "smokegrenade");

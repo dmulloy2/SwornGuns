@@ -5,59 +5,40 @@ package net.dmulloy2.swornguns.integration;
 
 import java.util.logging.Level;
 
-import lombok.Getter;
-import net.dmulloy2.integration.IntegrationHandler;
+import net.dmulloy2.integration.DependencyProvider;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornrpg.SwornRPG;
 import net.dmulloy2.swornrpg.types.PlayerData;
 import net.dmulloy2.util.Util;
 
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginManager;
 
 /**
  * @author dmulloy2
  */
 
-public class SwornRPGHandler extends IntegrationHandler
+public class SwornRPGHandler extends DependencyProvider<SwornRPG>
 {
-	private @Getter boolean enabled;
-	private @Getter SwornRPG swornRPG;
-
-	private final SwornGuns plugin;
 	public SwornRPGHandler(SwornGuns plugin)
 	{
-		this.plugin = plugin;
-		this.setup();
+		super(plugin, "SwornRPG");
 	}
 
-	@Override
-	public final void setup()
+	public final boolean isUnlimitedAmmoEnabled(Player player)
 	{
+		if (! isEnabled())
+			return false;
+
 		try
 		{
-			PluginManager pm = plugin.getServer().getPluginManager();
-			if (pm.getPlugin("SwornRPG") != null)
-			{
-				swornRPG = (SwornRPG) pm.getPlugin("SwornRPG");
-				plugin.getLogHandler().log("SwornRPG integration successful!");
-				enabled = true;
-			}
+			PlayerData data = getDependency().getPlayerDataCache().getData(player);
+			return data.isUnlimitedAmmoEnabled();
 		}
 		catch (Throwable ex)
 		{
-			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "setting up SwornRPG integration"));
-			enabled = false;
+			handler.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "isUnlimitedAmmoEnabled()"));
 		}
-	}
 
-	public final PlayerData getPlayerData(Player player)
-	{
-		try
-		{
-			if (enabled && swornRPG != null)
-				return swornRPG.getPlayerDataCache().getData(player);
-		} catch (Throwable ex) { }
-		return null;
+		return false;
 	}
 }

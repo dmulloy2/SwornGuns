@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornrpg.types.PlayerData;
 import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.types.Reloadable;
 import net.dmulloy2.util.FormatUtil;
@@ -233,7 +232,7 @@ public class GunPlayer implements Reloadable
 		if (gun.isUnlimitedAmmo())
 			return 0;
 
-		if (plugin.getUltimateArenaHandler().isEnabled())
+		if (plugin.isUltimateArenaEnabled())
 		{
 			if (plugin.getUltimateArenaHandler().isAmmoUnlimited(getPlayer()))
 				return 0;
@@ -419,20 +418,11 @@ public class GunPlayer implements Reloadable
 
 	// ---- Integration
 
-	private PlayerData data;
-
 	public final boolean unlimitedAmmoEnabled()
 	{
-		try
-		{
-			if (! plugin.getSwornRPGHandler().isEnabled())
-				return false;
+		if (plugin.isSwornRPGEnabled())
+			return plugin.getSwornRPGHandler().isUnlimitedAmmoEnabled(player);
 
-			if (data == null)
-				data = plugin.getSwornRPGHandler().getPlayerData(getPlayer());
-
-			return data != null && data.isUnlimitedAmmoEnabled();
-		} catch (Throwable ex) { }
 		return false;
 	}
 

@@ -82,23 +82,26 @@ public class EntityListener implements Listener, Reloadable
 			// Realism start - block cracking
 			boolean applicable = false;
 
-			if (! plugin.getFactionsHandler().checkFactions(b.getLocation(), true))
+			if (plugin.isSwornNationsEnabled())
 			{
-				if (blockCrack)
+				if (! plugin.getSwornNationsHandler().checkFactions(b.getLocation(), true))
 				{
-					if (mat == Material.STONE)
-						applicable = true;
-				}
-
-				if (blockShatter)
-				{
-					if (shatterBlocks.contains(mat))
-						applicable = true;
+					if (blockCrack)
+					{
+						if (mat == Material.STONE)
+							applicable = true;
+					}
+	
+					if (blockShatter)
+					{
+						if (shatterBlocks.contains(mat))
+							applicable = true;
+					}
 				}
 			}
 
 			// UltimateArena - check for inside arena
-			if (plugin.getUltimateArenaHandler().isEnabled())
+			if (plugin.isUltimateArenaEnabled())
 			{
 				if (plugin.getUltimateArenaHandler().isInArena(bullet.getShooter().getPlayer()))
 					applicable = false;

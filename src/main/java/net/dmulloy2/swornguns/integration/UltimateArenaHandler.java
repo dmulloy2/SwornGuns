@@ -5,8 +5,7 @@ package net.dmulloy2.swornguns.integration;
 
 import java.util.logging.Level;
 
-import lombok.Getter;
-import net.dmulloy2.integration.IntegrationHandler;
+import net.dmulloy2.integration.DependencyProvider;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.ultimatearena.UltimateArena;
 import net.dmulloy2.ultimatearena.arenas.Arena;
@@ -14,82 +13,54 @@ import net.dmulloy2.ultimatearena.types.ArenaPlayer;
 import net.dmulloy2.util.Util;
 
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginManager;
 
 /**
  * @author dmulloy2
  */
 
-public class UltimateArenaHandler extends IntegrationHandler
+public class UltimateArenaHandler extends DependencyProvider<UltimateArena>
 {
-	private @Getter boolean enabled;
-	private @Getter UltimateArena ultimateArena;
-
-	private final SwornGuns plugin;
 	public UltimateArenaHandler(SwornGuns plugin)
 	{
-		this.plugin = plugin;
-		this.setup();
-	}
-
-	@Override
-	public final void setup()
-	{
-		try
-		{
-			PluginManager pm = plugin.getServer().getPluginManager();
-			if (pm.getPlugin("UltimateArena") != null)
-			{
-				ultimateArena = (UltimateArena) pm.getPlugin("UltimateArena");
-				plugin.getLogHandler().log("UltimateArena integration successful!");
-				enabled = true;
-			}
-		}
-		catch (Throwable ex)
-		{
-			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "setting up UA integration"));
-			enabled = false;
-		}
+		super(plugin, "UltimateArena");
 	}
 
 	public final boolean isAmmoUnlimited(Player player)
 	{
+		if (! isEnabled())
+			return false;
+
 		try
 		{
-			if (enabled && ultimateArena != null)
+			ArenaPlayer ap = getDependency().getArenaPlayer(player);
+			if (ap != null)
 			{
-				ArenaPlayer ap = ultimateArena.getArenaPlayer(player);
-				if (ap != null)
-				{
-					Arena arena = ap.getArena();
-					return arena != null && arena.getConfig().isUnlimitedAmmo();
-				}
+				Arena arena = ap.getArena();
+				return arena != null && arena.getConfig().isUnlimitedAmmo();
 			}
 
 			return false;
 		}
 		catch (Throwable ex)
 		{
-			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "isAmmoUnlimited(" + player.getName() + ")"));
+			handler.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "isAmmoUnlimited(" + player.getName() + ")"));
 			return false;
 		}
 	}
 
 	public final boolean isInArena(Player player)
 	{
+		if (! isEnabled())
+			return false;
+
 		try
 		{
-			if (enabled && ultimateArena != null)
-			{
-				ArenaPlayer ap = ultimateArena.getArenaPlayer(player);
-				return ap != null && ap.getArena() != null;
-			}
-
-			return false;
+			ArenaPlayer ap = getDependency().getArenaPlayer(player);
+			return ap != null && ap.getArena() != null;
 		}
 		catch (Throwable ex)
 		{
-			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "isInArena(" + player.getName() + ")"));
+			handler.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "isInArena(" + player.getName() + ")"));
 			return false;
 		}
 	}
