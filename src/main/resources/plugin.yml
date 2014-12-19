@@ -1,6 +1,7 @@
 name: SwornGuns
 main: net.dmulloy2.swornguns.SwornGuns
-version: ${project.version} (Build ${project.build.number})
+#version: ${project.version} (Build ${project.build.number})
+version: ${project.version}
 author: dmulloy2
 description: Guns in Minecraft!
 softdepend: [UltimateArena, SwornRPG]
