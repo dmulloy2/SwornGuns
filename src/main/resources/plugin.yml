@@ -8,7 +8,7 @@ commands:
   swornguns:
     description: SwornGuns root command
     usage: /<command> <args>
-    aliases: [guns]
+    aliases: [gun, guns]
 permissions:
   swornguns.*:
     description: Allows access to all SwornGuns features
