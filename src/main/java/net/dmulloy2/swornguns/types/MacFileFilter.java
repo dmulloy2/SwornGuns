@@ -19,6 +19,6 @@ public class MacFileFilter implements FileFilter
 	@Override
 	public boolean accept(File file)
 	{
-		return ! file.getName().contains("store");
+		return ! file.getName().toLowerCase().contains("store");
 	}
 }
