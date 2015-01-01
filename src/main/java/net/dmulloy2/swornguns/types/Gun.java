@@ -17,7 +17,7 @@ import net.dmulloy2.util.NumberUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -96,6 +96,9 @@ public class Gun implements Cloneable
 
 	private List<Sound> gunSound = new ArrayList<Sound>();
 	private List<String> lore = new ArrayList<String>();
+
+	private transient int hits = 0;
+	private transient int lastHit = -1;
 
 	private final SwornGuns plugin;
 	public Gun(String name, SwornGuns plugin)
@@ -391,8 +394,7 @@ public class Gun implements Cloneable
 	/**
 	 * Handles recoil for a player
 	 *
-	 * @param player
-	 *        - {@link Player} to handle recoil for
+	 * @param player {@link Player} to handle recoil for
 	 */
 	private void doRecoil(Player player)
 	{
@@ -415,12 +417,10 @@ public class Gun implements Cloneable
 	/**
 	 * Does knockback for an entity
 	 *
-	 * @param entity
-	 *        - {@link LivingEntity} to do knock back for
-	 * @param speed
-	 *        - Knockback speed
+	 * @param entity {@link Entity} to do knock back for
+	 * @param speed Knockback speed
 	 */
-	public void doKnockback(LivingEntity entity, Vector speed)
+	public void doKnockback(Entity entity, Vector speed)
 	{
 		if (knockback > 0.0D)
 		{

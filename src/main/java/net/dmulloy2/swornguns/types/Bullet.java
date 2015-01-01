@@ -246,8 +246,8 @@ public class Bullet
 
 		this.dead = true;
 
-		// (Final) hit
-		onHit();
+		// Final hit
+		onHit(null);
 
 		// Destroy
 		if (projectile != null)
@@ -256,7 +256,7 @@ public class Bullet
 		destroy();
 	}
 
-	public final void onHit()
+	public final void onHit(Entity hit)
 	{
 		if (released)
 			return;
@@ -268,6 +268,20 @@ public class Bullet
 
 			if (shotFrom != null)
 			{
+				// Handle hit counter
+				if (hit != null)
+				{
+					if (shotFrom.getLastHit() != hit.getEntityId())
+					{
+						shotFrom.setLastHit(hit.getEntityId());
+						shotFrom.setHits(1);
+					}
+					else
+					{
+						shotFrom.setHits(shotFrom.getHits() + 1);
+					}
+				}
+	
 				int rad = (int) shotFrom.getExplodeRadius();
 				int rad2 = rad;
 				if (shotFrom.getFireRadius() > rad)

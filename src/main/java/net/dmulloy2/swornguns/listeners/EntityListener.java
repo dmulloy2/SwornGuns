@@ -7,6 +7,7 @@ import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.types.Reloadable;
 import net.dmulloy2.util.MaterialUtil;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
@@ -15,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -55,28 +57,47 @@ public class EntityListener implements Listener, Reloadable
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onProjectileHit(ProjectileHitEvent event)
 	{
-		Projectile check = event.getEntity();
-		Bullet bullet = plugin.getBullet(check);
+		Projectile entity = event.getEntity();
+		Bullet bullet = plugin.getBullet(entity);
 		if (bullet != null)
 		{
-			bullet.onHit();
+			// Attempt to determine which entity we hit
+			// This is a temporary solution
+			Entity hit = null;
+			Location loc = entity.getLocation();
+			List<Entity> nearbyEntities = entity.getNearbyEntities(2.0D, 2.0D, 2.0D);
+			for (Entity nearby : nearbyEntities)
+			{
+				if (nearby instanceof Damageable)
+				{
+					// Exact match
+					if (Util.checkLocation(loc, nearby.getLocation()))
+						hit = nearby;
+
+					// Find closest entity
+					if (hit == null || nearby.getLocation().distance(loc) < hit.getLocation().distance(loc))
+						hit = nearby;
+				}
+			}
+
+			bullet.onHit(hit);
 			bullet.setDestroyNextTick(true);
-			Projectile p = event.getEntity();
-			Block b = p.getLocation().getBlock();
-			Material mat = b.getType();
+
+			Block block = loc.getBlock();
+			Material mat = block.getType();
 
 			for (double i = 0.2D; i < 4.0D; i += 0.2D)
 			{
 				if (mat == Material.AIR)
 				{
-					b = p.getLocation().add(p.getVelocity().normalize().multiply(i)).getBlock();
-					mat = b.getType();
+					block = block.getLocation().add(entity.getVelocity().normalize().multiply(i)).getBlock();
+					mat = block.getType();
 				}
 			}
 
 			if (mat != Material.AIR)
 			{
-				p.getLocation().getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, mat);
+				block.getLocation().getWorld().playEffect(block.getLocation(), Effect.STEP_SOUND, mat);
 			}
 
 			// Realism start - block cracking
@@ -84,7 +105,7 @@ public class EntityListener implements Listener, Reloadable
 
 			if (plugin.isSwornNationsEnabled())
 			{
-				if (! plugin.getSwornNationsHandler().checkFactions(b.getLocation(), true))
+				if (! plugin.getSwornNationsHandler().checkFactions(block.getLocation(), true))
 				{
 					if (blockCrack)
 					{
@@ -109,7 +130,7 @@ public class EntityListener implements Listener, Reloadable
 
 			if (applicable)
 			{
-				BlockBreakEvent blockBreak = new BlockBreakEvent(b, bullet.getShooter().getPlayer());
+				BlockBreakEvent blockBreak = new BlockBreakEvent(block, bullet.getShooter().getPlayer());
 				plugin.getServer().getPluginManager().callEvent(blockBreak);
 				if (! blockBreak.isCancelled())
 				{
@@ -117,7 +138,7 @@ public class EntityListener implements Listener, Reloadable
 					{
 						if (mat == Material.STONE)
 						{
-							b.setType(Material.COBBLESTONE);
+							block.setType(Material.COBBLESTONE);
 						}
 					}
 
@@ -125,22 +146,23 @@ public class EntityListener implements Listener, Reloadable
 					{
 						if (shatterBlocks.contains(mat))
 						{
-							b.breakNaturally();
+							block.breakNaturally();
 						}
 					}
 				}
 			}
 			// Realism end
-			check.remove();
+
+			// entity.remove();
 		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
 	{
-		if (event.getEntity() instanceof LivingEntity)
+		if (event.getEntity() instanceof Damageable)
 		{
-			LivingEntity hurt = (LivingEntity) event.getEntity();
+			Damageable hurt = (Damageable) event.getEntity();
 			if (event.getDamager() instanceof Projectile)
 			{
 				Projectile proj = (Projectile) event.getDamager();
@@ -175,9 +197,16 @@ public class EntityListener implements Listener, Reloadable
 					double damage = shotFrom.getGunDamage();
 
 					// Headshot
-					double mult = 1.0D;
-					if (isNear(proj.getLocation(), hurt.getEyeLocation(), 0.26D) && bullet.getShotFrom().isCanHeadshot())
-						mult = 2.0D;
+					double mult = shotFrom.getHits();
+					if (shotFrom.isCanHeadshot() && hurt instanceof LivingEntity)
+					{
+						LivingEntity lentity = (LivingEntity) hurt;
+						if (isNear(proj.getLocation(), lentity.getEyeLocation(), 0.26D))
+							mult = mult * 2.0D;
+					}
+
+					shotFrom.setHits(0);
+					shotFrom.setLastHit(-1);
 
 					// Prevent multiple deaths
 					if (hurt.getHealth() <= 0.0D)
@@ -186,7 +215,6 @@ public class EntityListener implements Listener, Reloadable
 						return;
 					}
 
-					// TODO: Take into account new DamageModifier API
 					event.setDamage(damage * mult);
 
 					// Armor penetration
@@ -195,17 +223,12 @@ public class EntityListener implements Listener, Reloadable
 					{
 						double health = hurt.getHealth();
 						double newHealth = health - armorPenetration;
-
-						if (newHealth < 0)
-							newHealth = 0;
-						if (newHealth > 20)
-							newHealth = 20;
-
+						newHealth = Math.max(0, Math.min(newHealth, hurt.getMaxHealth()));
 						hurt.setHealth(newHealth);
 					}
 
-					bullet.getShotFrom().doKnockback(hurt, bullet.getVelocity());
-					bullet.remove();
+					shotFrom.doKnockback(hurt, bullet.getVelocity());
+					// bullet.remove();
 				}
 			}
 		}
