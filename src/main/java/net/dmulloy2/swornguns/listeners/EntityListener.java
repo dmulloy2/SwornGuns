@@ -215,11 +215,11 @@ public class EntityListener implements Listener, Reloadable
 						return;
 					}
 
-					event.setDamage(damage * mult);
+					Util.setDamage(event, damage * mult);
 
 					// Armor penetration
 					double armorPenetration = shotFrom.getArmorPenetration();
-					if (armorPenetration > 0.0D && (hurt.getHealth() - event.getDamage()) > 0.0D)
+					if (armorPenetration > 0.0D && (hurt.getHealth() - event.getFinalDamage()) > 0.0D)
 					{
 						double health = hurt.getHealth();
 						double newHealth = health - armorPenetration;
