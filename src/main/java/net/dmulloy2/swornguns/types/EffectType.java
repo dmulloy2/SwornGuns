@@ -114,7 +114,7 @@ public class EffectType
 	@Override
 	public String toString()
 	{
-		return "EffectType { type = " + type + ", radius = " + radius + ", duration = " + duration + " }";
+		return "EffectType[type=" + type + ", radius=" + radius + ", duration=" + duration + "]";
 	}
 
 	@Override

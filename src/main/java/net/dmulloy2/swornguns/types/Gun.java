@@ -1,7 +1,6 @@
 package net.dmulloy2.swornguns.types;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -478,8 +477,7 @@ public class Gun implements Cloneable
 	/**
 	 * Sets the name of the gun
 	 *
-	 * @param val
-	 *        - Name of the gun
+	 * @param val Name of the gun
 	 */
 	public void setName(String val)
 	{
@@ -537,8 +535,7 @@ public class Gun implements Cloneable
 	/**
 	 * Sets the gun's ammo type
 	 *
-	 * @param val
-	 *        - The gun's ammo type
+	 * @param val The gun's ammo type
 	 */
 	public void setAmmoType(String val)
 	{
@@ -559,15 +556,13 @@ public class Gun implements Cloneable
 	/**
 	 * Sets this gun's lore
 	 *
-	 * @param val
-	 *        - Composite lore string
+	 * @param val Composite lore string
 	 */
 	public void setLore(String val)
 	{
 		lore.clear();
 
-		String[] split = val.split(";");
-		for (String s : split)
+		for (String s : val.split(";"))
 		{
 			lore.add(FormatUtil.format(s));
 		}
@@ -576,12 +571,11 @@ public class Gun implements Cloneable
 	/**
 	 * Adds gun sounds from a composite string
 	 *
-	 * @param val
-	 *        - Composite string of sounds
+	 * @param val Composite string of sounds
 	 */
 	public void addGunSounds(String val)
 	{
-		for (String name : Arrays.asList(val.split(",")))
+		for (String name : val.split(","))
 		{
 			Sound sound = SwornGuns.getSound(name);
 			if (sound != null)
@@ -592,7 +586,7 @@ public class Gun implements Cloneable
 	@Override
 	public String toString()
 	{
-		return "Gun { name = " + fileName + ", material = " + material + ", priority = " + priority + " }";
+		return "Gun[name=" + fileName + ", material=" + material + ", priority=" + priority + "]";
 	}
 
 	@Override

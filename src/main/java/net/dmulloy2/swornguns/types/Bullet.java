@@ -281,7 +281,7 @@ public class Bullet
 						shotFrom.setHits(shotFrom.getHits() + 1);
 					}
 				}
-	
+
 				int rad = (int) shotFrom.getExplodeRadius();
 				int rad2 = rad;
 				if (shotFrom.getFireRadius() > rad)
@@ -526,9 +526,9 @@ public class Bullet
 	public String toString()
 	{
 		if (dead)
-			return "Bullet { dead = true }";
+			return "Bullet[dead=true]";
 
-		return "Bullet { shooter = " + shooter + ", shotFrom = " + shotFrom.getFileName() + ", id = " + id + " }";
+		return "Bullet[shooter=" + shooter + ", shotFrom=" + shotFrom.getFileName() + ", id=" + id + "]";
 	}
 
 	@Override

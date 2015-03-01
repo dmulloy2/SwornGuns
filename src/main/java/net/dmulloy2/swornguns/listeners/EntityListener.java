@@ -28,6 +28,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.ProjectileHitEvent;
 
 /**
@@ -152,8 +153,6 @@ public class EntityListener implements Listener, Reloadable
 				}
 			}
 			// Realism end
-
-			// entity.remove();
 		}
 	}
 
@@ -197,7 +196,8 @@ public class EntityListener implements Listener, Reloadable
 					double damage = shotFrom.getGunDamage();
 
 					// Headshot
-					double mult = shotFrom.getHits();
+					double mult = Math.max(shotFrom.getHits(), 1);
+
 					if (shotFrom.isCanHeadshot() && hurt instanceof LivingEntity)
 					{
 						LivingEntity lentity = (LivingEntity) hurt;
@@ -208,14 +208,8 @@ public class EntityListener implements Listener, Reloadable
 					shotFrom.setHits(0);
 					shotFrom.setLastHit(-1);
 
-					// Prevent multiple deaths
-					if (hurt.getHealth() <= 0.0D)
-					{
-						event.setCancelled(true);
-						return;
-					}
-
-					Util.setDamage(event, damage * mult);
+					damage = Math.min(20, damage * mult);
+					event.setDamage(DamageModifier.BASE, damage);
 
 					// Armor penetration
 					double armorPenetration = shotFrom.getArmorPenetration();
@@ -228,7 +222,6 @@ public class EntityListener implements Listener, Reloadable
 					}
 
 					shotFrom.doKnockback(hurt, bullet.getVelocity());
-					// bullet.remove();
 				}
 			}
 		}
