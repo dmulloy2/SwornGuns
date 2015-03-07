@@ -186,11 +186,7 @@ public class Gun implements Cloneable
 			else
 			{
 				player.playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
-				if (this.outOfAmmoMessage != null)
-				    player.sendMessage(plugin.getPrefix() + this.outOfAmmoMessage);
-				else {
-    				player.sendMessage(plugin.getPrefix() + FormatUtil.format("&eThis gun needs &b{0}&e!", ammo.getName()));
-				}
+				player.sendMessage(plugin.getPrefix() + FormatUtil.format("&eThis gun needs &b{0}&e!", ammo.getName()));
 				finishShooting();
 			}
 		}

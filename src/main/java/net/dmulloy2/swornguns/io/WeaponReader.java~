@@ -181,7 +181,7 @@ public class WeaponReader
 				}
 			}
 			if (var.equals("outofammomessage"))
-			    gun.setOutOfAmmoMessage(val);
+			    gun.setOutOfAmmoMessage(val);s
 		}
 	}
 }
