@@ -73,7 +73,10 @@ public class EntityListener implements Listener, Reloadable
 				{
 					// Exact match
 					if (Util.checkLocation(loc, nearby.getLocation()))
+					{
 						hit = nearby;
+						break;
+					}
 
 					// Find closest entity
 					if (hit == null || nearby.getLocation().distance(loc) < hit.getLocation().distance(loc))
@@ -156,12 +159,25 @@ public class EntityListener implements Listener, Reloadable
 		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
 	{
+		// Ensure all modifiers are real numbers
+		for (DamageModifier type : DamageModifier.values())
+		{
+			if (event.isApplicable(type) && Double.isNaN(event.getDamage(type)))
+				event.setDamage(type, 0.0D);
+		}
+
 		if (event.getEntity() instanceof Damageable)
 		{
 			Damageable hurt = (Damageable) event.getEntity();
+
+			// Fix NaN health
+			double health = hurt.getHealth();
+			if (Double.isNaN(health))
+				hurt.setHealth(hurt.getMaxHealth());
+
 			if (event.getDamager() instanceof Projectile)
 			{
 				Projectile proj = (Projectile) event.getDamager();
@@ -209,13 +225,13 @@ public class EntityListener implements Listener, Reloadable
 					shotFrom.setLastHit(-1);
 
 					damage = Math.min(20, damage * mult);
-					event.setDamage(DamageModifier.BASE, damage);
+					Util.setDamage(event, damage);
 
 					// Armor penetration
 					double armorPenetration = shotFrom.getArmorPenetration();
 					if (armorPenetration > 0.0D && (hurt.getHealth() - event.getFinalDamage()) > 0.0D)
 					{
-						double health = hurt.getHealth();
+						health = hurt.getHealth();
 						double newHealth = health - armorPenetration;
 						newHealth = Math.max(0, Math.min(newHealth, hurt.getMaxHealth()));
 						hurt.setHealth(newHealth);
