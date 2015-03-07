@@ -180,6 +180,8 @@ public class WeaponReader
 					gun.setReleaseEffect(effect);
 				}
 			}
+			if (var.equals("outofammomessage"))
+			    gun.setOutOfAmmoMessage(val);
 		}
 	}
 }

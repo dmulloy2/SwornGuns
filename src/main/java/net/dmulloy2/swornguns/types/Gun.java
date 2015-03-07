@@ -87,6 +87,7 @@ public class Gun implements Cloneable
 
 	private String gunName;
 	private String fileName;
+	private String outOfAmmoMessage;
 
 	private GunPlayer owner;
 
@@ -185,7 +186,11 @@ public class Gun implements Cloneable
 			else
 			{
 				player.playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
-				player.sendMessage(plugin.getPrefix() + FormatUtil.format("&eThis gun needs &b{0}&e!", ammo.getName()));
+				if (this.outOfAmmoMessage != null)
+				    player.sendMessage(plugin.getPrefix() + this.outOfAmmoMessage);
+				else {
+    				player.sendMessage(plugin.getPrefix() + FormatUtil.format("&eThis gun needs &b{0}&e!", ammo.getName()));
+				}
 				finishShooting();
 			}
 		}
@@ -566,6 +571,10 @@ public class Gun implements Cloneable
 		{
 			lore.add(FormatUtil.format(s));
 		}
+	}
+	
+	public void setOutOfAmmoMessage(String val) {
+	    this.outOfAmmoMessage = FormatUtil.format(val);
 	}
 
 	/**
