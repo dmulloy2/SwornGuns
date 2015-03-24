@@ -10,4 +10,4 @@ SwornGuns adds guns to Minecraft! It allows you to take normal items and turn th
 SwornGuns is built with Maven and requires Spigot, which can be found [here](http://www.spigotmc.org/wiki/buildtools/).
 
 ### Contribution
-See [here](https://github.com/dmulloy2/SwornGuns/CONTRIBUTING.md).
+See [here](https://github.com/dmulloy2/SwornGuns/blob/master/CONTRIBUTING.md).
