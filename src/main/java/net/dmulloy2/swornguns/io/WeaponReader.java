@@ -180,6 +180,13 @@ public class WeaponReader
 					gun.setReleaseEffect(effect);
 				}
 			}
+
+			if (var.equals("outofammomessage"))
+			{
+				// The old out of ammo message was hideous
+				if (! val.startsWith("This gun needs"))
+					gun.setOutOfAmmoMessage(val);
+			}
 		}
 	}
 }
