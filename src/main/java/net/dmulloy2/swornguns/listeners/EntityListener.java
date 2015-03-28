@@ -28,7 +28,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.ProjectileHitEvent;
 
 /**
@@ -162,13 +161,6 @@ public class EntityListener implements Listener, Reloadable
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
 	{
-		// Ensure all modifiers are real numbers
-		for (DamageModifier type : DamageModifier.values())
-		{
-			if (event.isApplicable(type) && Double.isNaN(event.getDamage(type)))
-				event.setDamage(type, 0.0D);
-		}
-
 		if (event.getEntity() instanceof Damageable)
 		{
 			Damageable hurt = (Damageable) event.getEntity();
@@ -176,7 +168,7 @@ public class EntityListener implements Listener, Reloadable
 			// Fix NaN health
 			double health = hurt.getHealth();
 			if (Double.isNaN(health))
-				hurt.setHealth(hurt.getMaxHealth());
+				hurt.setHealth(0.0D);
 
 			if (event.getDamager() instanceof Projectile)
 			{
@@ -225,11 +217,11 @@ public class EntityListener implements Listener, Reloadable
 					shotFrom.setLastHit(-1);
 
 					damage = Math.min(20, damage * mult);
-					Util.setDamage(event, damage);
+					hurt.damage(damage, shotFrom.getOwner().getPlayer());
 
 					// Armor penetration
 					double armorPenetration = shotFrom.getArmorPenetration();
-					if (armorPenetration > 0.0D && (hurt.getHealth() - event.getFinalDamage()) > 0.0D)
+					if (armorPenetration > 0.0D && hurt.getHealth() > 0.0D)
 					{
 						health = hurt.getHealth();
 						double newHealth = health - armorPenetration;
@@ -238,6 +230,7 @@ public class EntityListener implements Listener, Reloadable
 					}
 
 					shotFrom.doKnockback(hurt, bullet.getVelocity());
+					event.setCancelled(true);
 				}
 			}
 		}
