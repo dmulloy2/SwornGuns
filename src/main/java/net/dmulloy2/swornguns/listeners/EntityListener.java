@@ -28,6 +28,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.ProjectileHitEvent;
 
 /**
@@ -161,6 +162,13 @@ public class EntityListener implements Listener, Reloadable
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
 	{
+		// Ensure all modifiers are real numbers
+		for (DamageModifier type : DamageModifier.values())
+		{
+			if (event.isApplicable(type) && Double.isNaN(event.getDamage(type)))
+				event.setDamage(type, 0.0D);
+		}
+
 		if (event.getEntity() instanceof Damageable)
 		{
 			Damageable hurt = (Damageable) event.getEntity();
@@ -168,7 +176,10 @@ public class EntityListener implements Listener, Reloadable
 			// Fix NaN health
 			double health = hurt.getHealth();
 			if (Double.isNaN(health))
+			{
 				hurt.setHealth(0.0D);
+				hurt.resetMaxHealth();
+			}
 
 			if (event.getDamager() instanceof Projectile)
 			{
