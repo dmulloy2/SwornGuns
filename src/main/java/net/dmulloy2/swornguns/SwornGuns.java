@@ -38,6 +38,7 @@ import net.dmulloy2.swornguns.api.SwornGunsAPI;
 import net.dmulloy2.swornguns.commands.CmdList;
 import net.dmulloy2.swornguns.commands.CmdReload;
 import net.dmulloy2.swornguns.commands.CmdToggle;
+import net.dmulloy2.swornguns.commands.CmdVersion;
 import net.dmulloy2.swornguns.integration.SwornNationsHandler;
 import net.dmulloy2.swornguns.integration.SwornRPGHandler;
 import net.dmulloy2.swornguns.integration.UltimateArenaHandler;
@@ -112,6 +113,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		commandHandler.registerPrefixedCommand(new CmdList(this));
 		commandHandler.registerPrefixedCommand(new CmdReload(this));
 		commandHandler.registerPrefixedCommand(new CmdToggle(this));
+		commandHandler.registerPrefixedCommand(new CmdVersion(this));
 
 		// Register events
 		PluginManager pm = getServer().getPluginManager();
