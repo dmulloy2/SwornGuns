@@ -309,10 +309,18 @@ public class GunPlayer implements Reloadable
 			int maxClip = gun.getMaxClipSize();
 			int amount = (int) Math.floor(InventoryUtil.amount(player.getInventory(), ammo.getMaterial(), ammo.getData())
 					/ gun.getAmmoAmtNeeded());
-			int ammoLeft = amount - maxClip + gun.getRoundsFired();
-			if (ammoLeft < 0)
-				ammoLeft = 0;
-			int leftInClip = amount - ammoLeft;
+
+			int leftInClip, ammoLeft;
+			if (gun.getReloadType() == ReloadType.CLIP)
+			{
+				leftInClip = Math.max(0, gun.getClipRemaining());
+				ammoLeft = (Math.max(1, gun.getClipSize()) * amount) - leftInClip;
+			}
+			else
+			{
+				ammoLeft = Math.max(0, amount - maxClip + gun.getRoundsFired());
+				leftInClip = amount - ammoLeft;
+			}
 
 			add.append(ChatColor.YELLOW + "    \u00AB" + leftInClip + " \uFFE8 " + ammoLeft + "\u00BB");
 

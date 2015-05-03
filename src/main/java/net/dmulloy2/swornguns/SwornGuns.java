@@ -1,6 +1,7 @@
 /**
- * SwornGuns - a bukkit plugin
- * Copyright (C) 2013 - 2014 MineSworn and Affiliates
+ * SwornGuns - Guns in Minecraft
+ * Copyright (C) 2012 - 2015 MineSworn
+ * Copyright (C) 2013 - 2015 dmulloy2
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

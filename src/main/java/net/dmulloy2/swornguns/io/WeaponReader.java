@@ -9,6 +9,7 @@ import net.dmulloy2.io.IOUtil;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.EffectType;
 import net.dmulloy2.swornguns.types.Gun;
+import net.dmulloy2.swornguns.types.ReloadType;
 import net.dmulloy2.util.NumberUtil;
 import net.dmulloy2.util.Util;
 
@@ -104,19 +105,19 @@ public class WeaponReader
 			if (var.equals("flashradius"))
 				gun.setFlashRadius(NumberUtil.toDouble(val));
 			if (var.equals("canheadshot"))
-				gun.setCanHeadshot(Boolean.parseBoolean(val));
+				gun.setCanHeadshot(Util.toBoolean(val));
 
 			// Firing
 			if (var.equals("canshootleft") || var.equals("canclickleft") || var.equals("canfireleft"))
-				gun.setCanFireLeft(Boolean.parseBoolean(val));
+				gun.setCanFireLeft(Util.toBoolean(val));
 			if (var.equals("canshootright") || var.equals("canclickright") || var.equals("canfireright"))
-				gun.setCanFireRight(Boolean.parseBoolean(val));
+				gun.setCanFireRight(Util.toBoolean(val));
 
 			// Aiming
 			if (var.equals("canaimleft") || var.equals("canaim"))
-				gun.setCanAimLeft(Boolean.parseBoolean(val));
+				gun.setCanAimLeft(Util.toBoolean(val));
 			if (var.equals("canaimright"))
-				gun.setCanAimRight(Boolean.parseBoolean(val));
+				gun.setCanAimRight(Util.toBoolean(val));
 
 			if (var.equals("knockback"))
 				gun.setKnockback(NumberUtil.toDouble(val));
@@ -125,21 +126,21 @@ public class WeaponReader
 			if (var.equals("bullettype"))
 				gun.setProjType(val);
 			if (var.equals("needspermission"))
-				gun.setNeedsPermission(Boolean.parseBoolean(val));
+				gun.setNeedsPermission(Util.toBoolean(val));
 			if (var.equals("hassmoketrail"))
-				gun.setHasSmokeTrail(Boolean.parseBoolean(val));
+				gun.setHasSmokeTrail(Util.toBoolean(val));
 			if (var.equals("gunsound"))
 				gun.addGunSounds(val);
 			if (var.equals("maxclipsize"))
 				gun.setMaxClipSize(NumberUtil.toInt(val));
 			if (var.equals("hasclip"))
-				gun.setHasClip(Boolean.parseBoolean(val));
+				gun.setHasClip(Util.toBoolean(val));
 			if (var.equals("reloadgunondrop"))
-				gun.setReloadGunOnDrop(Boolean.parseBoolean(val));
+				gun.setReloadGunOnDrop(Util.toBoolean(val));
 			if (var.equals("localgunsound"))
-				gun.setLocalGunSound(Boolean.parseBoolean(val));
+				gun.setLocalGunSound(Util.toBoolean(val));
 			if (var.equalsIgnoreCase("canGoPastMaxDistance"))
-				gun.setCanGoPastMaxDistance(Boolean.parseBoolean(val));
+				gun.setCanGoPastMaxDistance(Util.toBoolean(val));
 			if (var.equals("bulletdelaytime"))
 				gun.setBulletDelayTime(NumberUtil.toInt(val));
 			if (var.equals("explosiondamage"))
@@ -147,17 +148,19 @@ public class WeaponReader
 			if (var.equals("timeuntilrelease"))
 				gun.setReleaseTime(NumberUtil.toInt(val));
 			if (var.equals("reloadtype"))
-				gun.setReloadType(val);
+				gun.setReloadType(ReloadType.getByName(val));
 			if (var.equals("priority"))
 				gun.setPriority(NumberUtil.toInt(val));
 			if (var.equals("lore"))
 				gun.setLore(val);
 			if (var.equals("warnifnopermission"))
-				gun.setWarnIfNoPermission(Boolean.parseBoolean(val));
+				gun.setWarnIfNoPermission(Util.toBoolean(val));
 			if (var.equals("unlimitedammo"))
-				gun.setUnlimitedAmmo(Boolean.parseBoolean(val));
+				gun.setUnlimitedAmmo(Util.toBoolean(val));
 			if (var.equals("explosiontype"))
 				gun.setExplosionType(val.toUpperCase());
+			if (var.equals("clipsize"))
+				gun.setClipSize(NumberUtil.toInt(val));
 			if (var.equals("play_effect_on_release"))
 			{
 				String[] effDat = val.split(",");

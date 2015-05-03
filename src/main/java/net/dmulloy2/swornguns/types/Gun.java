@@ -1,3 +1,21 @@
+/**
+ * SwornGuns - Guns in Minecraft
+ * Copyright (C) 2012 - 2015 MineSworn
+ * Copyright (C) 2013 - 2015 dmulloy2
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package net.dmulloy2.swornguns.types;
 
 import java.util.ArrayList;
@@ -64,6 +82,8 @@ public class Gun implements Cloneable
 	private int ticks;
 	private int heldDownTicks;
 	private int priority;
+	private int clipRemaining = -1;
+	private int clipSize;
 
 	private double gunDamage;
 	private double armorPenetration;
@@ -82,8 +102,8 @@ public class Gun implements Cloneable
 	private double gunPitch = 2.0D;
 
 	private String projType = "";
-	private String reloadType = "NORMAL";
 	private String explosionType = "FIREWORK";
+	private ReloadType reloadType = ReloadType.NORMAL;
 
 	private String gunName;
 	private String fileName;
@@ -112,18 +132,37 @@ public class Gun implements Cloneable
 	 */
 	public final void shoot()
 	{
-		if (owner != null && owner.getPlayer().isOnline() && owner.getPlayer().getHealth() > 0.0D && ! reloading)
-		{
-			Player player = owner.getPlayer();
-			int ammoAmtNeeded = owner.getAmmoNeeded(this);
-			if (ammoAmtNeeded == 0 || owner.checkAmmo(this, ammoAmtNeeded))
-			{
-				owner.removeAmmo(this, ammoAmtNeeded);
+		if (reloading || owner == null)
+			return;
 
-				if (roundsFired >= maxClipSize && hasClip)
+		Player player = owner.getPlayer();
+		if (player.isOnline() && player.getHealth() > 0.0D)
+		{
+			int ammoAmtNeeded = owner.getAmmoNeeded(this);
+			if (ammoAmtNeeded == 0 || owner.checkAmmo(this, ammoAmtNeeded) || clipRemaining > 0)
+			{
+				if (reloadType == ReloadType.CLIP)
 				{
-					reloadGun();
-					return;
+					if (clipRemaining == -1)
+						clipRemaining = clipSize;
+
+					clipRemaining--;
+					if (clipRemaining <= 0)
+					{
+						owner.removeAmmo(this, 1);
+						reloadGun();
+						return;
+					}
+				}
+				else
+				{
+					owner.removeAmmo(this, ammoAmtNeeded);
+
+					if (roundsFired >= maxClipSize && hasClip)
+					{
+						reloadGun();
+						return;
+					}
 				}
 
 				doRecoil(player);
@@ -321,6 +360,9 @@ public class Gun implements Cloneable
 	{
 		this.reloading = true;
 		this.gunReloadTimer = reloadTime;
+
+		if (reloadType == ReloadType.CLIP)
+			this.clipRemaining = clipSize;
 	}
 
 	/**
@@ -331,14 +373,14 @@ public class Gun implements Cloneable
 		if (reloading)
 		{
 			int amtReload = reloadTime - gunReloadTimer;
-			if (getReloadType().equalsIgnoreCase("bolt"))
+			if (reloadType == ReloadType.BOLT)
 			{
 				if (amtReload == 6)
 					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_OPEN, 2.0F, 1.5F);
 				if (amtReload == reloadTime - 4)
 					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_CLOSE, 1.0F, 1.5F);
 			}
-			else if (getReloadType().equalsIgnoreCase("pump") || getReloadType().equalsIgnoreCase("individual_bullet"))
+			else if (reloadType == ReloadType.PUMP || reloadType == ReloadType.INDIVIDUAL_BULLET)
 			{
 				int rep = (reloadTime - 10) / getMaxClipSize();
 				if (amtReload >= 5 && amtReload <= reloadTime - 5 && amtReload % rep == 0)
@@ -372,7 +414,7 @@ public class Gun implements Cloneable
 		}
 		else
 		{
-			if (getReloadType().equalsIgnoreCase("pump"))
+			if (reloadType == ReloadType.PUMP)
 			{
 				if (timer == 8)
 				{
@@ -385,7 +427,7 @@ public class Gun implements Cloneable
 				}
 			}
 
-			if (getReloadType().equalsIgnoreCase("bolt"))
+			if (reloadType == ReloadType.BOLT)
 			{
 				if (timer == getBulletDelayTime() - 4)
 					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_OPEN, 2.0F, 1.25F);
