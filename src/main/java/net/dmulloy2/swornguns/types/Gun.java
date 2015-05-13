@@ -139,13 +139,13 @@ public class Gun implements Cloneable
 		Player player = owner.getPlayer();
 		if (player.isOnline() && player.getHealth() > 0.0D)
 		{
-            if (clipRemaining == -1)
-            {
-                if (initialClip < 0 || initialClip > clipSize)
-                    clipRemaining = clipSize;
-                else
-                    clipRemaining = initialClip;
-            }
+			if (clipRemaining == -1)
+			{
+				if (initialClip < 0 || initialClip > clipSize)
+					clipRemaining = clipSize;
+				else
+					clipRemaining = initialClip;
+			}
 		
 			int ammoAmtNeeded = owner.getAmmoNeeded(this);
 			if (ammoAmtNeeded == 0 || owner.checkAmmo(this, ammoAmtNeeded) || clipRemaining > 0)

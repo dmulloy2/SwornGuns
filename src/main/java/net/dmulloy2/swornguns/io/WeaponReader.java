@@ -193,7 +193,7 @@ public class WeaponReader
 			
 			if (var.equals("initialclip"))
 			{
-                gun.setInitialClip(NumberUtil.toInt(val));
+				gun.setInitialClip(NumberUtil.toInt(val));
 			}
 		}
 	}
