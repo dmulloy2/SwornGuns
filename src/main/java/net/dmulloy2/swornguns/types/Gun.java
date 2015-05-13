@@ -84,6 +84,7 @@ public class Gun implements Cloneable
 	private int priority;
 	private int clipRemaining = -1;
 	private int clipSize;
+	private int initialClip = -1;
 
 	private double gunDamage;
 	private double armorPenetration;
@@ -138,14 +139,19 @@ public class Gun implements Cloneable
 		Player player = owner.getPlayer();
 		if (player.isOnline() && player.getHealth() > 0.0D)
 		{
+            if (clipRemaining == -1)
+            {
+                if (initialClip < 0 || initialClip > clipSize)
+                    clipRemaining = clipSize;
+                else
+                    clipRemaining = initialClip;
+            }
+		
 			int ammoAmtNeeded = owner.getAmmoNeeded(this);
 			if (ammoAmtNeeded == 0 || owner.checkAmmo(this, ammoAmtNeeded) || clipRemaining > 0)
 			{
 				if (reloadType == ReloadType.CLIP)
 				{
-					if (clipRemaining == -1)
-						clipRemaining = clipSize;
-
 					clipRemaining--;
 					if (clipRemaining <= 0 && owner.checkAmmo(this, 1))
 					{
