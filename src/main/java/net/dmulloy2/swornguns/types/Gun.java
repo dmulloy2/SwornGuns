@@ -139,7 +139,7 @@ public class Gun implements Cloneable
 		Player player = owner.getPlayer();
 		if (player.isOnline() && player.getHealth() > 0.0D)
 		{
-			if (clipRemaining == -1)
+			if (reloadType == ReloadType.CLIP && clipRemaining == -1)
 			{
 				if (initialClip < 0 || initialClip > clipSize)
 					clipRemaining = clipSize;
