@@ -147,7 +147,7 @@ public class Gun implements Cloneable
 						clipRemaining = clipSize;
 
 					clipRemaining--;
-					if (clipRemaining <= 0)
+					if (clipRemaining <= 0 && owner.checkAmmo(this, 1))
 					{
 						owner.removeAmmo(this, 1);
 						reloadGun();
