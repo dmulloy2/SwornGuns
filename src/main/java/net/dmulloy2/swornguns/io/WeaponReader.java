@@ -190,6 +190,11 @@ public class WeaponReader
 				if (! val.startsWith("This gun needs"))
 					gun.setOutOfAmmoMessage(val);
 			}
+			
+			if (var.equals("initialclip"))
+			{
+				gun.setInitialClip(NumberUtil.toInt(val));
+			}
 		}
 	}
 }
