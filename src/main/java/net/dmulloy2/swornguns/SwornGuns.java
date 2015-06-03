@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -77,7 +76,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	// Maps
 	private @Getter Map<String, Gun> loadedGuns;
 	private @Getter Map<Integer, Bullet> bullets;
-	private @Getter Map<UUID, GunPlayer> players;
+	private @Getter Map<String, GunPlayer> players;
 	private @Getter Map<Integer, EffectType> effects;
 
 	private @Getter List<String> disabledWorlds;
@@ -324,18 +323,19 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	{
 		for (Player player : Util.getOnlinePlayers())
 		{
-			if (! players.containsKey(player.getUniqueId()))
-				players.put(player.getUniqueId(), new GunPlayer(this, player));
+			if (! players.containsKey(player.getName()))
+				players.put(player.getName(), new GunPlayer(this, player));
 		}
 	}
 
 	@Override
 	public GunPlayer getGunPlayer(Player player)
 	{
-		if (! players.containsKey(player.getUniqueId()))
-			players.put(player.getUniqueId(), new GunPlayer(this, player));
+		GunPlayer gp = players.get(player.getName());
+		if (gp == null)
+			players.put(player.getName(), gp = new GunPlayer(this, player));
 
-		return players.get(player.getUniqueId());
+		return gp;
 	}
 
 	@Override
@@ -358,12 +358,11 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 	public void onQuit(Player player)
 	{
-		if (players.containsKey(player.getUniqueId()))
+		GunPlayer gp = players.get(player.getName());
+		if (gp != null)
 		{
-			GunPlayer gp = players.get(player.getUniqueId());
 			gp.unload();
-
-			players.remove(player.getUniqueId());
+			players.remove(player.getName());
 		}
 	}
 
@@ -382,13 +381,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	@Override
 	public Bullet getBullet(Entity proj)
 	{
-		for (Bullet bullet : bullets.values())
-		{
-			if (bullet.getProjectile().getUniqueId().equals(proj.getUniqueId()))
-				return bullet;
-		}
-
-		return null;
+		return bullets.get(proj.getEntityId());
 	}
 
 	@Override
@@ -421,9 +414,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	{
 		try
 		{
-			sound = sound.replaceAll(" ", "_");
-			sound = sound.toUpperCase();
-			return Sound.valueOf(sound);
+			return Sound.valueOf(sound.toLowerCase().replaceAll("_", " "));
 		} catch (Throwable ex) { }
 		return null;
 	}

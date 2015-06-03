@@ -52,8 +52,6 @@ import com.google.common.base.Functions;
 @Data
 public class Bullet
 {
-	public static int nextID = 1;
-
 	private int ticks;
 	private int releaseTime;
 
@@ -81,13 +79,14 @@ public class Bullet
 		this.shooter = shooter;
 		this.velocity = velocity;
 		this.active = true;
-		this.id = nextID++;
 
 		if (shotFrom.isThrowable())
 		{
 			ItemStack thrown = shotFrom.getMaterial().newItemStack(1);
 
 			this.projectile = shooter.getPlayer().getWorld().dropItem(shooter.getPlayer().getEyeLocation(), thrown);
+			this.id = projectile.getEntityId();
+
 			((Item) projectile).setPickupDelay(9999999);
 			this.startLocation = projectile.getLocation();
 		}
@@ -134,6 +133,8 @@ public class Bullet
 			}
 
 			this.projectile = shooter.getPlayer().launchProjectile(mclass);
+			this.id = projectile.getEntityId();
+
 			((Projectile) projectile).setShooter(shooter.getPlayer());
 			this.startLocation = projectile.getLocation();
 		}
@@ -150,36 +151,23 @@ public class Bullet
 
 	public final void tick()
 	{
-		if (dead || destroyNextTick)
+		// Make sure the bullet is still valid
+		if (dead || destroyNextTick || projectile == null || shooter == null)
 		{
 			remove();
 			return;
 		}
 
-		// Projectile Check
-		if (projectile == null)
+		// Remove the bullet if it's below bedrock
+		if (projectile.getLocation().getY() <= 0.0D)
 		{
 			remove();
 			return;
 		}
 
-		// Shooter check
-		if (shooter == null)
-		{
-			remove();
-			return;
-		}
-
-		// Player check
+		// Make sure the shooter is still valid
 		Player player = shooter.getPlayer();
 		if (player == null || ! player.isOnline() || player.getHealth() <= 0.0D)
-		{
-			remove();
-			return;
-		}
-
-		// Location check
-		if (projectile.getLocation().getY() <= 3.0D)
 		{
 			remove();
 			return;
@@ -192,9 +180,7 @@ public class Bullet
 		{
 			EffectType eff = shotFrom.getReleaseEffect();
 			if (eff != null)
-			{
 				eff.start(lastLocation);
-			}
 
 			remove();
 			return;
@@ -213,7 +199,7 @@ public class Bullet
 
 		if (active)
 		{
-			if (lastLocation.getWorld().getUID() == startLocation.getWorld().getUID())
+			if (lastLocation.getWorld().equals(startLocation.getWorld()))
 			{
 				double dis = lastLocation.distance(startLocation);
 				if (dis > shotFrom.getMaxDistance())

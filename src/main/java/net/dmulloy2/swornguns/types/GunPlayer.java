@@ -19,6 +19,7 @@ import net.dmulloy2.util.InventoryUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -57,9 +58,9 @@ public class GunPlayer implements Reloadable
 
 	// ---- Firing and Tick
 
-	public final void handleClick(String clickType)
+	public final void handleClick(Action action)
 	{
-		if (! enabled)
+		if (! enabled || action == Action.PHYSICAL)
 			return;
 
 		Player player = getPlayer();
@@ -78,7 +79,7 @@ public class GunPlayer implements Reloadable
 			return;
 		}
 
-		if (clickType.equalsIgnoreCase("right"))
+		if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)
 		{
 			if (gun.isCanFireRight() || gun.isCanAimRight())
 			{
@@ -97,7 +98,7 @@ public class GunPlayer implements Reloadable
 				}
 			}
 		}
-		else if (clickType.equalsIgnoreCase("left"))
+		else
 		{
 			if (gun.isCanFireLeft() || gun.isCanAimLeft())
 			{

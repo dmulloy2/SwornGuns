@@ -62,41 +62,53 @@ public class EntityListener implements Listener, Reloadable
 		Bullet bullet = plugin.getBullet(entity);
 		if (bullet != null)
 		{
-			// Attempt to determine which entity we hit
-			// This is a temporary solution
+			// Attempt to determine which entity we actually hit
+			// The damage events don't always fire properly
+
 			Entity hit = null;
+			double hitDistance = -1.0D;
+
 			Location loc = entity.getLocation();
+			Location nLoc = new Location(null, 0, 0, 0);
+
 			List<Entity> nearbyEntities = entity.getNearbyEntities(2.0D, 2.0D, 2.0D);
 			for (Entity nearby : nearbyEntities)
 			{
 				if (nearby instanceof Damageable)
 				{
+					nearby.getLocation(nLoc);
+
 					// Exact match
-					if (Util.checkLocation(loc, nearby.getLocation()))
+					if (Util.checkLocation(loc, nLoc))
 					{
 						hit = nearby;
 						break;
 					}
 
 					// Find closest entity
-					if (hit == null || nearby.getLocation().distance(loc) < hit.getLocation().distance(loc))
+					double distance = nLoc.distance(loc);
+					if (hit == null || distance < hitDistance)
+					{
 						hit = nearby;
+						hitDistance = distance;
+					}
 				}
 			}
 
 			bullet.onHit(hit);
 			bullet.setDestroyNextTick(true);
 
+			// ---- Effects
 			Block block = loc.getBlock();
 			Material mat = block.getType();
 
-			for (double i = 0.2D; i < 4.0D; i += 0.2D)
+			// Try to get a non-air block
+			double i = 0.2D;
+			while (mat == Material.AIR && i < 4.0D)
 			{
-				if (mat == Material.AIR)
-				{
-					block = block.getLocation().add(entity.getVelocity().normalize().multiply(i)).getBlock();
-					mat = block.getType();
-				}
+				block = block.getLocation().add(entity.getVelocity().normalize().multiply(i)).getBlock();
+				mat = block.getType();
+				i += 0.2D;
 			}
 
 			if (mat != Material.AIR)
@@ -104,58 +116,37 @@ public class EntityListener implements Listener, Reloadable
 				block.getLocation().getWorld().playEffect(block.getLocation(), Effect.STEP_SOUND, mat);
 			}
 
-			// Realism start - block cracking
-			boolean applicable = false;
-
-			if (plugin.isSwornNationsEnabled())
-			{
-				if (! plugin.getSwornNationsHandler().checkFactions(block.getLocation(), true))
-				{
-					if (blockCrack)
-					{
-						if (mat == Material.STONE)
-							applicable = true;
-					}
-	
-					if (blockShatter)
-					{
-						if (shatterBlocks.contains(mat))
-							applicable = true;
-					}
-				}
-			}
-
-			// UltimateArena - check for inside arena
+			// Make sure they aren't in an arena
 			if (plugin.isUltimateArenaEnabled())
 			{
 				if (plugin.getUltimateArenaHandler().isInArena(bullet.getShooter().getPlayer()))
-					applicable = false;
+					return;
 			}
 
-			if (applicable)
+			// Check with Factions too
+			if (plugin.isSwornNationsEnabled())
+			{
+				if (! plugin.getSwornNationsHandler().checkFactions(block.getLocation(), true))
+					return;
+			}
+
+			// Block cracking
+			if (blockCrack && mat == Material.STONE)
 			{
 				BlockBreakEvent blockBreak = new BlockBreakEvent(block, bullet.getShooter().getPlayer());
 				plugin.getServer().getPluginManager().callEvent(blockBreak);
 				if (! blockBreak.isCancelled())
-				{
-					if (blockCrack)
-					{
-						if (mat == Material.STONE)
-						{
-							block.setType(Material.COBBLESTONE);
-						}
-					}
-
-					if (blockShatter)
-					{
-						if (shatterBlocks.contains(mat))
-						{
-							block.breakNaturally();
-						}
-					}
-				}
+					block.setType(Material.COBBLESTONE);
 			}
-			// Realism end
+
+			// Block shattering
+			if (blockShatter && shatterBlocks.contains(mat))
+			{
+				BlockBreakEvent blockBreak = new BlockBreakEvent(block, bullet.getShooter().getPlayer());
+				plugin.getServer().getPluginManager().callEvent(blockBreak);
+				if (! blockBreak.isCancelled())
+					block.breakNaturally();
+			}
 		}
 	}
 

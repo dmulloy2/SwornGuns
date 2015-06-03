@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -66,25 +65,14 @@ public class PlayerListener implements Listener
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
-		String clickType = "";
-		Action action = event.getAction();
-		if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)
-			clickType = "left";
-		else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)
-			clickType = "right";
-
-		if (! clickType.isEmpty())
-		{
-			GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
-			gp.handleClick(clickType);
-		}
+		GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
+		gp.handleClick(event.getAction());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerChangedWorld(PlayerChangedWorldEvent event)
 	{
-		// Updates a player's guns when they change worlds,
-		// Useful for per-world permissions and stuff
+		// Updates a player's guns when they change worlds, useful for per-world permissions
 		if (plugin.getConfig().getBoolean("updateGunsOnWorldChange", false))
 		{
 			final Player player = event.getPlayer();
