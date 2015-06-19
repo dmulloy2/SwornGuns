@@ -414,7 +414,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	{
 		try
 		{
-			return Sound.valueOf(sound.toLowerCase().replaceAll("_", " "));
+			return Sound.valueOf(sound.toUpperCase().replaceAll(" ", "_"));
 		} catch (Throwable ex) { }
 		return null;
 	}
