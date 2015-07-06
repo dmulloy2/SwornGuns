@@ -22,7 +22,7 @@ public class CmdReload extends SwornGunsCommand
 	public void perform()
 	{
 		long start = System.currentTimeMillis();
-		sendpMessage("&eReloading SwornGuns...");
+		sendpMessage("&eReloading &bSwornGuns&e...");
 
 		plugin.reload();
 

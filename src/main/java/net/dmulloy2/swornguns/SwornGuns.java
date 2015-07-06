@@ -57,6 +57,7 @@ import net.dmulloy2.util.Util;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -228,15 +229,16 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		File dir = new File(getDataFolder(), "projectile");
 
 		File[] children = dir.listFiles(MacFileFilter.get());
-		if (children.length == 0)
+		if (children == null || children.length == 0)
 		{
 			for (String s : stockProjectiles)
 			{
 				saveResource("projectile" + File.separator + s, false);
 			}
+
+			children = dir.listFiles(MacFileFilter.get());
 		}
 
-		children = dir.listFiles(MacFileFilter.get());
 		for (File child : children)
 		{
 			WeaponReader reader = new WeaponReader(this, child);
@@ -280,15 +282,16 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 			dir.mkdirs();
 
 		File[] children = dir.listFiles(MacFileFilter.get());
-		if (children.length == 0)
+		if (children == null || children.length == 0)
 		{
 			for (String s : stockGuns)
 			{
 				saveResource("guns" + File.separator + s, false);
 			}
+
+			children = dir.listFiles(MacFileFilter.get());
 		}
 
-		children = dir.listFiles(MacFileFilter.get());
 		for (File child : children)
 		{
 			WeaponReader reader = new WeaponReader(this, child);
@@ -339,6 +342,20 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	}
 
 	@Override
+	@Deprecated
+	public Gun getGun(ItemStack item)
+	{
+		for (Gun gun : loadedGuns.values())
+		{
+			if (gun.getMaterial().matches(item))
+				return gun;
+		}
+
+		return null;
+	}
+
+	@Override
+	@Deprecated
 	public Gun getGun(MyMaterial material)
 	{
 		for (Gun gun : loadedGuns.values())
@@ -392,6 +409,20 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		for (Gun gun : loadedGuns.values())
 		{
 			if (gun.getMaterial().equals(material))
+				ret.add(gun);
+		}
+
+		return ret;
+	}
+
+	@Override
+	public List<Gun> getGunsByItem(ItemStack item)
+	{
+		List<Gun> ret = new ArrayList<>();
+
+		for (Gun gun : loadedGuns.values())
+		{
+			if (gun.getMaterial().matches(item))
 				ret.add(gun);
 		}
 

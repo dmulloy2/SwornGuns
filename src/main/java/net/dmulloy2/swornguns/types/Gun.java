@@ -20,6 +20,7 @@ package net.dmulloy2.swornguns.types;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Level;
 
@@ -116,9 +117,6 @@ public class Gun implements Cloneable
 
 	private List<Sound> gunSound = new ArrayList<Sound>();
 	private List<String> lore = new ArrayList<String>();
-
-	private transient int hits = 0;
-	private transient int lastHit = -1;
 
 	private final SwornGuns plugin;
 	public Gun(String name, SwornGuns plugin)
@@ -646,6 +644,9 @@ public class Gun implements Cloneable
 	@Override
 	public boolean equals(Object obj)
 	{
+		if (obj == null) return false;
+		if (obj == this) return true;
+
 		if (obj instanceof Gun)
 		{
 			Gun that = (Gun) obj;
@@ -658,11 +659,7 @@ public class Gun implements Cloneable
 	@Override
 	public int hashCode()
 	{
-		int hash = 98;
-		hash *= 1 + fileName.hashCode();
-		hash *= 1 + material.hashCode();
-		hash *= 1 + priority;
-		return hash;
+		return Objects.hash(fileName, material, priority);
 	}
 
 	@Override

@@ -8,6 +8,8 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import com.google.common.base.Objects;
+
 /**
  * @author dmulloy2
  */
@@ -120,6 +122,9 @@ public class EffectType
 	@Override
 	public boolean equals(Object obj)
 	{
+		if (obj == null) return false;
+		if (obj == this) return true;
+
 		if (obj instanceof EffectType)
 		{
 			EffectType that = (EffectType) obj;
@@ -132,10 +137,6 @@ public class EffectType
 	@Override
 	public int hashCode()
 	{
-		int hash = 100;
-		hash *= 1 + type.hashCode();
-		hash *= 1 + radius;
-		hash *= 1 + duration;
-		return hash;
+		return Objects.hashCode(type, radius, duration);
 	}
 }

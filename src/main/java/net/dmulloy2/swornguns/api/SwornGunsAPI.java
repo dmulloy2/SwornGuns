@@ -12,6 +12,7 @@ import net.dmulloy2.types.Reloadable;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * API Implementation for {@link SwornGuns}
@@ -23,7 +24,11 @@ public abstract interface SwornGunsAPI extends Reloadable
 {
 	GunPlayer getGunPlayer(Player player);
 
+	@Deprecated
 	Gun getGun(MyMaterial material);
+
+	@Deprecated
+	Gun getGun(ItemStack item);
 
 	Gun getGun(String gunName);
 
@@ -33,7 +38,10 @@ public abstract interface SwornGunsAPI extends Reloadable
 
 	Bullet getBullet(Entity proj);
 
+	@Deprecated
 	List<Gun> getGunsByType(MyMaterial material);
+
+	List<Gun> getGunsByItem(ItemStack item);
 
 	void removeEffect(EffectType effectType);
 

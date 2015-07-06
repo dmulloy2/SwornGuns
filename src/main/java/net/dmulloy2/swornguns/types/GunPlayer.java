@@ -26,6 +26,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.google.common.base.Objects;
+
 /**
  * @author dmulloy2
  */
@@ -190,14 +192,9 @@ public class GunPlayer implements Reloadable
 
 	public final Gun getGun(ItemStack item)
 	{
-		return getGun(new MyMaterial(item.getType(), item.getDurability()));
-	}
-
-	private final Gun getGun(MyMaterial material)
-	{
 		for (Gun gun : guns)
 		{
-			if (gun.getMaterial().equals(material))
+			if (gun.getMaterial().matches(item))
 				return gun;
 		}
 
@@ -455,10 +452,13 @@ public class GunPlayer implements Reloadable
 	@Override
 	public boolean equals(Object obj)
 	{
+		if (obj == null) return false;
+		if (obj == this) return true;
+
 		if (obj instanceof GunPlayer)
 		{
 			GunPlayer that = (GunPlayer) obj;
-			return this.uniqueId.equals(that.uniqueId);
+			return this.player.equals(that.player);
 		}
 
 		return false;
@@ -467,8 +467,6 @@ public class GunPlayer implements Reloadable
 	@Override
 	public int hashCode()
 	{
-		int hash = 97;
-		hash *= 1 + uniqueId.hashCode();
-		return hash;
+		return Objects.hashCode(player);
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 import lombok.Data;
@@ -233,7 +234,7 @@ public class Bullet
 		this.dead = true;
 
 		// Final hit
-		onHit(null);
+		onHit();
 
 		// Destroy
 		if (projectile != null)
@@ -242,7 +243,7 @@ public class Bullet
 		destroy();
 	}
 
-	public final void onHit(Entity hit)
+	public final void onHit()
 	{
 		if (released)
 			return;
@@ -254,20 +255,6 @@ public class Bullet
 
 			if (shotFrom != null)
 			{
-				// Handle hit counter
-				if (hit != null)
-				{
-					if (shotFrom.getLastHit() != hit.getEntityId())
-					{
-						shotFrom.setLastHit(hit.getEntityId());
-						shotFrom.setHits(1);
-					}
-					else
-					{
-						shotFrom.setHits(shotFrom.getHits() + 1);
-					}
-				}
-
 				int rad = (int) shotFrom.getExplodeRadius();
 				int rad2 = rad;
 				if (shotFrom.getFireRadius() > rad)
@@ -511,8 +498,8 @@ public class Bullet
 	@Override
 	public String toString()
 	{
-		if (dead)
-			return "Bullet[dead=true]";
+		if (destroyed)
+			return "Destroyed Bullet";
 
 		return "Bullet[shooter=" + shooter + ", shotFrom=" + shotFrom.getFileName() + ", id=" + id + "]";
 	}
@@ -520,7 +507,10 @@ public class Bullet
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (dead)
+		if (obj == null) return false;
+		if (obj == this) return true;
+
+		if (destroyed)
 			return this == obj;
 
 		if (obj instanceof Bullet)
@@ -535,10 +525,6 @@ public class Bullet
 	@Override
 	public int hashCode()
 	{
-		int hash = 99;
-		hash *= 1 + shooter.hashCode();
-		hash *= 1 + shotFrom.hashCode();
-		hash *= 1 + id;
-		return hash;
+		return Objects.hash(shooter, shotFrom, id);
 	}
 }
