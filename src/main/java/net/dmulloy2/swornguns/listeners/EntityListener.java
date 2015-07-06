@@ -257,11 +257,14 @@ public class EntityListener implements Listener, Reloadable
 							double newHealth = Math.max(0, hurt.getHealth() - armorPenetration);
 							hurt.setHealth(newHealth);
 						}
+
+						shotFrom.doKnockback(hurt, bullet.getVelocity());
 					}
 				}
 			}
 		}
 	}
+
 	private boolean isNear(Location location, Location eyeLocation, double d)
 	{
 		return Math.abs(location.getY() - eyeLocation.getY()) <= d;
