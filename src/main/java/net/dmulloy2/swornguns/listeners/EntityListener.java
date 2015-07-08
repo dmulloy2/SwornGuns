@@ -109,7 +109,7 @@ public class EntityListener implements Listener, Reloadable
 					nearby.getLocation(nLoc);
 
 					// Exact match
-					if (Util.checkLocation(loc, nLoc))
+					if (Util.coordsEqual(loc, nLoc))
 					{
 						hurt = (Damageable) nearby;
 						break;
