@@ -110,7 +110,11 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 		// Register commands
 		commandHandler.setCommandPrefix("swornguns");
-		commandHandler.registerPrefixedCommand(new CmdHelp(this));
+
+		CmdHelp cmdHelp = new CmdHelp(this);
+		cmdHelp.setHeader("&3 ---- &eSwornGuns Help &3-- &e{1}&3/&e{2} &3----");
+		commandHandler.registerPrefixedCommand(cmdHelp);
+
 		commandHandler.registerPrefixedCommand(new CmdList(this));
 		commandHandler.registerPrefixedCommand(new CmdReload(this));
 		commandHandler.registerPrefixedCommand(new CmdToggle(this));
