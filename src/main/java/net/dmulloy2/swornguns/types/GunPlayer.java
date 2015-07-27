@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +40,7 @@ public class GunPlayer implements Reloadable
 	private Gun currentlyFiring;
 	private List<Gun> guns;
 
+	private boolean errorReported;
 	private boolean enabled;
 	private boolean aimedIn;
 	private int ticks;
@@ -154,13 +156,16 @@ public class GunPlayer implements Reloadable
 			}
 		}
 
-		for (Gun gun : guns.toArray(new Gun[0]))
+		Iterator<Gun> iter = guns.iterator();
+		while (iter.hasNext())
 		{
+			Gun gun = iter.next();
+
 			// Don't tick null guns
 			if (gun == null)
 			{
-				guns.remove(gun);
-				continue;
+				iter.remove();
+				return;
 			}
 
 			gun.tick();
@@ -305,8 +310,9 @@ public class GunPlayer implements Reloadable
 		{
 			MyMaterial ammo = gun.getAmmo();
 			int maxClip = gun.getMaxClipSize();
+			int ammoAmtNeeded = Math.max(1, gun.getAmmoAmtNeeded());
 			int amount = (int) Math.floor(InventoryUtil.amount(player.getInventory(), ammo.getMaterial(), ammo.getData())
-					/ gun.getAmmoAmtNeeded());
+					/ ammoAmtNeeded);
 
 			int leftInClip, ammoLeft;
 			if (gun.getReloadType() == ReloadType.CLIP)
@@ -326,7 +332,8 @@ public class GunPlayer implements Reloadable
 			if (gun.isReloading())
 			{
 				int scale = 4;
-				int bars = Math.round(scale - ((gun.getGunReloadTimer() * scale) / gun.getReloadTime()));
+				int reloadTime = Math.max(1, gun.getReloadTime());
+				int bars = Math.round(scale - ((gun.getGunReloadTimer() * scale) / reloadTime));
 				for (int i = 0; i < bars; i++)
 				{
 					reload.append("\u25AA");

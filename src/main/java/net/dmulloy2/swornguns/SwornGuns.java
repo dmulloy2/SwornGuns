@@ -469,7 +469,11 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 					}
 					catch (Throwable ex)
 					{
-						logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + player.getName()));
+						if (! player.isErrorReported())
+						{
+							logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + player.getName()));
+							player.setErrorReported(true);
+						}
 					}
 				}
 			}
