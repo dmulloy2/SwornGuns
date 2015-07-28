@@ -10,7 +10,8 @@ import net.dmulloy2.types.IPermission;
 @Getter
 public enum Permission implements IPermission
 {
-	RELOAD;
+	RELOAD,
+	;
 
 	private final String node;
 	private Permission()

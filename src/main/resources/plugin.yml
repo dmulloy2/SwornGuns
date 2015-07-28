@@ -12,13 +12,13 @@ commands:
 permissions:
   swornguns.*:
     description: Allows access to all SwornGuns features
-    default: false
+    default: op
     children:
-      swornguns.toggle: true
-      sworngins.reload: true
+      swornguns.reload: true
+      swornguns.fire.*: true
   swornguns.reload:
-    description: Lets you reload the plugin
+    description: Allows access to '/gun reload'
     default: false
-  swornguns.fire:
-    description: Per-gun permissions
+  swornguns.fire.*:
+    description: Allows the firing of all guns
     default: op

@@ -377,10 +377,8 @@ public class GunPlayer implements Reloadable
 		if (world && plugin.getDisabledWorlds().contains(player.getWorld().getName()))
 			return false;
 
-		if (gun.isNeedsPermission())
-			return plugin.getPermissionHandler().hasPermission(player, "swornguns.fire." + gun.getFileName())
-					|| plugin.getPermissionHandler().hasPermission(player, "swornguns.fire.*");
-		return true;
+		return ! gun.isNeedsPermission() || player.isOp() || player.hasPermission("swornguns.fire." + gun.getFileName())
+				|| player.hasPermission("swornguns.fire.*");
 	}
 
 	public final void calculateGuns()
