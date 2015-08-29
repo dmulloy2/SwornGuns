@@ -34,6 +34,7 @@ import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.types.Reloadable;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.InventoryUtil;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -86,6 +87,13 @@ public class GunPlayer implements Reloadable
 			return;
 
 		Player player = getPlayer();
+		if (player == null || ! player.isOnline())
+		{
+			plugin.getPlayers().remove(name);
+			unload();
+			return;
+		}
+
 		ItemStack inHand = player.getItemInHand();
 		if (inHand == null || inHand.getType() == Material.AIR)
 			return;
@@ -157,7 +165,7 @@ public class GunPlayer implements Reloadable
 		Player player = getPlayer();
 		if (player == null || ! player.isOnline())
 		{
-			plugin.getPlayers().remove(uniqueId);
+			plugin.getPlayers().remove(name);
 			unload();
 			return;
 		}
@@ -210,6 +218,9 @@ public class GunPlayer implements Reloadable
 
 	public final Player getPlayer()
 	{
+		if (player == null)
+			return player = Util.matchPlayer(name);
+
 		return player;
 	}
 
@@ -376,7 +387,10 @@ public class GunPlayer implements Reloadable
 	{
 		lastHeldItem = null;
 		currentlyFiring = null;
-		guns.clear();
+
+		if (guns != null)
+			guns.clear();
+
 		guns = null;
 		name = null;
 		uniqueId = null;
