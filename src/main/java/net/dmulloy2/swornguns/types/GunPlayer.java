@@ -218,7 +218,7 @@ public class GunPlayer implements Reloadable
 
 	public final Player getPlayer()
 	{
-		if (player == null)
+		if (player == null && name != null)
 			return player = Util.matchPlayer(name);
 
 		return player;
@@ -390,9 +390,8 @@ public class GunPlayer implements Reloadable
 
 		if (guns != null)
 			guns.clear();
-
 		guns = null;
-		name = null;
+
 		uniqueId = null;
 		player = null;
 		plugin = null;
