@@ -452,7 +452,7 @@ public class Bullet
 	{
 		if (shotFrom.getFireRadius() > 0.0D)
 		{
-			lastLocation.getWorld().playSound(lastLocation, Sound.GLASS, 20.0F, 20.0F);
+			lastLocation.getWorld().playSound(lastLocation, Sound.BLOCK_GLASS_BREAK, 20.0F, 20.0F);
 			double rad = shotFrom.getFireRadius();
 			List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 			for (Entity entity : entities)
@@ -479,7 +479,7 @@ public class Bullet
 	{
 		if (shotFrom.getFlashRadius() > 0.0D)
 		{
-			lastLocation.getWorld().playSound(lastLocation, Sound.SPLASH, 20.0F, 20.0F);
+			lastLocation.getWorld().playSound(lastLocation, Sound.ENTITY_GENERIC_SPLASH, 20.0F, 20.0F);
 			double rad = shotFrom.getFlashRadius();
 			List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 			for (Entity entity : entities)

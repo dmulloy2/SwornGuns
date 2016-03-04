@@ -94,7 +94,7 @@ public class GunPlayer implements Reloadable
 			return;
 		}
 
-		ItemStack inHand = player.getItemInHand();
+		ItemStack inHand = player.getInventory().getItemInMainHand();
 		if (inHand == null || inHand.getType() == Material.AIR)
 			return;
 
@@ -170,7 +170,7 @@ public class GunPlayer implements Reloadable
 			return;
 		}
 
-		ItemStack hand = player.getItemInHand();
+		ItemStack hand = player.getInventory().getItemInMainHand();
 		this.lastHeldItem = hand;
 
 		if (ticks % 10 == 0 && hand != null)

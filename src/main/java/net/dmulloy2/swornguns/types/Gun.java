@@ -228,7 +228,7 @@ public class Gun implements Cloneable
 			}
 			else
 			{
-				player.playSound(owner.getPlayer().getLocation(), Sound.ITEM_BREAK, 20.0F, 20.0F);
+				player.playSound(owner.getPlayer().getLocation(), Sound.ENTITY_ITEM_BREAK, 20.0F, 20.0F);
 
 				if (outOfAmmoMessage.isEmpty())
 					player.sendMessage(plugin.getPrefix() + FormatUtil.format("&eThis gun needs &b{0}&e!", ammo.getName()));
@@ -380,39 +380,39 @@ public class Gun implements Cloneable
 			if (reloadType == ReloadType.BOLT)
 			{
 				if (amtReload == 6)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_OPEN, 2.0F, 1.5F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.5F);
 				if (amtReload == reloadTime - 4)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_CLOSE, 1.0F, 1.5F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.5F);
 			}
 			else if (reloadType == ReloadType.PUMP || reloadType == ReloadType.INDIVIDUAL_BULLET)
 			{
 				int rep = (reloadTime - 10) / getMaxClipSize();
 				if (amtReload >= 5 && amtReload <= reloadTime - 5 && amtReload % rep == 0)
 				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.NOTE_STICKS, 1.0F, 1.0F);
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.NOTE_SNARE_DRUM, 1.0F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, 1.0F, 1.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_SNARE, 1.0F, 2.0F);
 				}
 
 				if (amtReload == reloadTime - 3)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.PISTON_EXTEND, 1.0F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
 				else if (amtReload == reloadTime - 1)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.PISTON_RETRACT, 1.0F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
 			}
 			else
 			{
 				if (amtReload == 6)
 				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.FIRE_IGNITE, 2.0F, 2.0F);
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_OPEN, 1.0F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 1.0F, 2.0F);
 				}
 
 				if (amtReload == reloadTime / 2)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.PISTON_RETRACT, 0.33F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 0.33F, 2.0F);
 
 				if (amtReload == reloadTime - 4)
 				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.FIRE_IGNITE, 2.0F, 2.0F);
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_CLOSE, 1.0F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 2.0F);
 				}
 			}
 		}
@@ -422,21 +422,21 @@ public class Gun implements Cloneable
 			{
 				if (timer == 8)
 				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.PISTON_EXTEND, 1.0F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
 				}
 
 				if (timer == 6)
 				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.PISTON_RETRACT, 1.0F, 2.0F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
 				}
 			}
 
 			if (reloadType == ReloadType.BOLT)
 			{
 				if (timer == getBulletDelayTime() - 4)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_OPEN, 2.0F, 1.25F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.25F);
 				if (timer == 6)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.DOOR_CLOSE, 1.0F, 1.25F);
+					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.25F);
 			}
 		}
 	}
