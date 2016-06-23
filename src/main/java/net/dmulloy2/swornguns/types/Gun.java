@@ -30,6 +30,7 @@ import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.MaterialUtil;
 import net.dmulloy2.util.NumberUtil;
+import net.dmulloy2.util.Util;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -374,70 +375,77 @@ public class Gun implements Cloneable
 	 */
 	private void gunSounds()
 	{
-		if (reloading)
+		try
 		{
-			int amtReload = reloadTime - gunReloadTimer;
-			if (reloadType == ReloadType.BOLT)
+			if (reloading)
 			{
-				if (amtReload == 6)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.5F);
-				if (amtReload == reloadTime - 4)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.5F);
-			}
-			else if (reloadType == ReloadType.PUMP || reloadType == ReloadType.INDIVIDUAL_BULLET)
-			{
-				int rep = (reloadTime - 10) / getMaxClipSize();
-				if (amtReload >= 5 && amtReload <= reloadTime - 5 && amtReload % rep == 0)
+				int amtReload = reloadTime - gunReloadTimer;
+				if (reloadType == ReloadType.BOLT)
 				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, 1.0F, 1.0F);
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_SNARE, 1.0F, 2.0F);
+					if (amtReload == 6)
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.5F);
+					if (amtReload == reloadTime - 4)
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.5F);
 				}
+				else if (reloadType == ReloadType.PUMP || reloadType == ReloadType.INDIVIDUAL_BULLET)
+				{
+					int rep = (reloadTime - 10) / getMaxClipSize();
+					if (amtReload >= 5 && amtReload <= reloadTime - 5 && amtReload % rep == 0)
+					{
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, 1.0F, 1.0F);
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_SNARE, 1.0F, 2.0F);
+					}
 
-				if (amtReload == reloadTime - 3)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
-				else if (amtReload == reloadTime - 1)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
+					if (amtReload == reloadTime - 3)
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
+					else if (amtReload == reloadTime - 1)
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
+				}
+				else
+				{
+					if (amtReload == 6)
+					{
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 1.0F, 2.0F);
+					}
+
+					if (amtReload == reloadTime / 2)
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 0.33F, 2.0F);
+
+					if (amtReload == reloadTime - 4)
+					{
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 2.0F);
+					}
+				}
 			}
 			else
 			{
-				if (amtReload == 6)
+				if (reloadType == ReloadType.PUMP)
 				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 1.0F, 2.0F);
+					if (timer == 8)
+					{
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
+					}
+
+					if (timer == 6)
+					{
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
+					}
 				}
 
-				if (amtReload == reloadTime / 2)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 0.33F, 2.0F);
-
-				if (amtReload == reloadTime - 4)
+				if (reloadType == ReloadType.BOLT)
 				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 2.0F);
+					if (timer == getBulletDelayTime() - 4)
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.25F);
+					if (timer == 6)
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.25F);
 				}
 			}
 		}
-		else
+		catch (Throwable ex)
 		{
-			if (reloadType == ReloadType.PUMP)
-			{
-				if (timer == 8)
-				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
-				}
-
-				if (timer == 6)
-				{
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
-				}
-			}
-
-			if (reloadType == ReloadType.BOLT)
-			{
-				if (timer == getBulletDelayTime() - 4)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.25F);
-				if (timer == 6)
-					owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.25F);
-			}
+			plugin.getLogHandler().debug(Level.WARNING, Util.getUsefulStack(ex, "playing gun sounds"));
 		}
 	}
 

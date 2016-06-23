@@ -32,6 +32,7 @@ import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.types.Reloadable;
+import net.dmulloy2.util.CompatUtil;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.InventoryUtil;
 import net.dmulloy2.util.Util;
@@ -94,7 +95,7 @@ public class GunPlayer implements Reloadable
 			return;
 		}
 
-		ItemStack inHand = player.getInventory().getItemInMainHand();
+		ItemStack inHand = CompatUtil.getItemInMainHand(player);
 		if (inHand == null || inHand.getType() == Material.AIR)
 			return;
 
@@ -170,7 +171,7 @@ public class GunPlayer implements Reloadable
 			return;
 		}
 
-		ItemStack hand = player.getInventory().getItemInMainHand();
+		ItemStack hand = CompatUtil.getItemInMainHand(player);
 		this.lastHeldItem = hand;
 
 		if (ticks % 10 == 0 && hand != null)
