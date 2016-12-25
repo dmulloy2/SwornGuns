@@ -115,8 +115,8 @@ public class EntityListener implements Listener, Reloadable
 						break;
 					}
 
-					// Find closest entity
-					double distance = nLoc.distance(loc);
+					// Find the closest entity
+					double distance = nLoc.distanceSquared(loc);
 					if (hurt == null || distance < hurtDistance)
 					{
 						hurt = (Damageable) nearby;
