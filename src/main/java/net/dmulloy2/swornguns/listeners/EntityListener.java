@@ -18,7 +18,6 @@
  */
 package net.dmulloy2.swornguns.listeners;
 
-import java.util.EnumMap;
 import java.util.List;
 
 import net.dmulloy2.swornguns.SwornGuns;
@@ -47,12 +46,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.ProjectileHitEvent;
-
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * @author dmulloy2
@@ -128,12 +122,8 @@ public class EntityListener implements Listener, Reloadable
 			if (hurt != null)
 			{
 				// Call the damage event, which will be handled below
-				// Note: This is the same code from the EntityDamageByEntityEvent constructor, just non-deprecated
-				EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(proj, hurt, DamageCause.PROJECTILE,
-						new EnumMap<DamageModifier, Double>(ImmutableMap.of(DamageModifier.BASE, 0.0D)),
-						new EnumMap<DamageModifier, Function<? super Double, Double>>(ImmutableMap.of(DamageModifier.BASE,
-								Functions.constant(-0.0))));
-
+				@SuppressWarnings("deprecation")
+				EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(proj, hurt, DamageCause.PROJECTILE, 0);
 				plugin.getServer().getPluginManager().callEvent(damageEvent);
 			}
 
@@ -248,8 +238,8 @@ public class EntityListener implements Listener, Reloadable
 
 						// Deal the damage
 						double damage = shotFrom.getGunDamage() * mult;
-						event.setDamage(DamageModifier.BASE, damage);
-
+						event.setDamage(damage);
+						
 						// Armor penetration
 						double armorPenetration = shotFrom.getArmorPenetration();
 						if (armorPenetration > 0.0D && hurt.getHealth() - event.getFinalDamage() > 0.0D)
