@@ -392,8 +392,8 @@ public class Gun implements Cloneable
 					int rep = (reloadTime - 10) / getMaxClipSize();
 					if (amtReload >= 5 && amtReload <= reloadTime - 5 && amtReload % rep == 0)
 					{
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, 1.0F, 1.0F);
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_SNARE, 1.0F, 2.0F);
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.0F);
+						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1.0F, 2.0F);
 					}
 
 					if (amtReload == reloadTime - 3)
