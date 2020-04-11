@@ -150,7 +150,7 @@ public class GunPlayer implements Reloadable
 		}
 	}
 
-	private final void fireGun(Gun gun)
+	private void fireGun(Gun gun)
 	{
 		if (gun.getTimer() <= 0)
 		{
@@ -243,7 +243,7 @@ public class GunPlayer implements Reloadable
 		return aimedIn;
 	}
 
-	private final void checkAim()
+	private void checkAim()
 	{
 		if (aimedIn)
 		{
@@ -333,7 +333,7 @@ public class GunPlayer implements Reloadable
 		}
 	}
 
-	private final String getGunName(Player player, Gun gun)
+	private String getGunName(Player player, Gun gun)
 	{
 		StringBuilder add = new StringBuilder();
 		if (gun.isHasClip())
@@ -356,7 +356,11 @@ public class GunPlayer implements Reloadable
 				leftInClip = amount - ammoLeft;
 			}
 
-			add.append(ChatColor.YELLOW + "    \u00AB" + leftInClip + " \uFFE8 " + ammoLeft + "\u00BB");
+			add.append(ChatColor.YELLOW.toString())
+					.append("    \u00AB")
+					.append(leftInClip).append(" \uFFE8 ")
+					.append(ammoLeft)
+					.append("\u00BB");
 
 			StringBuilder reload = new StringBuilder();
 			if (gun.isReloading())
@@ -375,7 +379,11 @@ public class GunPlayer implements Reloadable
 					reload.append("\u25AB");
 				}
 
-				add.append(ChatColor.RED + "    " + reload.reverse().toString() + "RELOADING" + reload.toString());
+				add.append(ChatColor.RED.toString())
+						.append("    ")
+						.append(reload.reverse().toString())
+						.append("RELOADING")
+						.append(reload.toString());
 			}
 		}
 
@@ -425,31 +433,24 @@ public class GunPlayer implements Reloadable
 				copy.setOwner(this);
 
 				if (! byMaterial.containsKey(copy.getMaterial()))
-					byMaterial.put(copy.getMaterial(), new ArrayList<Gun>());
+					byMaterial.put(copy.getMaterial(), new ArrayList<>());
 
 				byMaterial.get(copy.getMaterial()).add(copy);
 			}
 		}
 
-		List<Gun> sortedGuns = new ArrayList<Gun>();
+		List<Gun> sortedGuns = new ArrayList<>();
 
 		for (Entry<MyMaterial, List<Gun>> entry : byMaterial.entrySet())
 		{
-			Map<Gun, Integer> priorityMap = new HashMap<Gun, Integer>();
+			Map<Gun, Integer> priorityMap = new HashMap<>();
 			for (Gun gun : entry.getValue())
 			{
 				priorityMap.put(gun, gun.getPriority());
 			}
 
-			List<Entry<Gun, Integer>> sortedEntries = new ArrayList<Entry<Gun, Integer>>(priorityMap.entrySet());
-			Collections.sort(sortedEntries, new Comparator<Entry<Gun, Integer>>()
-			{
-				@Override
-				public int compare(Entry<Gun, Integer> entry1, Entry<Gun, Integer> entry2)
-				{
-					return -entry1.getValue().compareTo(entry2.getValue());
-				}
-			});
+			List<Entry<Gun, Integer>> sortedEntries = new ArrayList<>(priorityMap.entrySet());
+			sortedEntries.sort((entry1, entry2) -> -entry1.getValue().compareTo(entry2.getValue()));
 
 			Gun gun = sortedEntries.get(0).getKey();
 			sortedGuns.add(gun);

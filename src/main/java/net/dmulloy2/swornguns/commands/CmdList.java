@@ -59,8 +59,8 @@ public class CmdList extends PaginatedCommand
 	@Override
 	public List<String> getLines(int startIndex, int endIndex)
 	{
-		List<String> lines = new ArrayList<String>();
-		List<Gun> guns = new ArrayList<Gun>(plugin.getLoadedGuns().values());
+		List<String> lines = new ArrayList<>();
+		List<Gun> guns = new ArrayList<>(plugin.getLoadedGuns().values());
 		for (int i = startIndex; i < endIndex && i < getListSize(); i++)
 		{
 			Gun gun = guns.get(i);

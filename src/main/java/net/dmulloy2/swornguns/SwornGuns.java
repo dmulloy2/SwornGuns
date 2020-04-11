@@ -112,7 +112,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		commandHandler.setCommandPrefix("swornguns");
 
 		CmdHelp cmdHelp = new CmdHelp(this);
-		cmdHelp.setHeader("&3 ---- &eSwornGuns Help &3-- &e{1}&3/&e{2} &3----");
 		commandHandler.registerPrefixedCommand(cmdHelp);
 
 		commandHandler.registerPrefixedCommand(new CmdList(this));
@@ -179,7 +178,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		logHandler.log("{0} has been disabled. Took {1} ms.", getDescription().getFullName(), System.currentTimeMillis() - start);
 	}
 
-	private final void clearMemory()
+	private void clearMemory()
 	{
 		loadedGuns.clear();
 		loadedGuns = null;
@@ -191,7 +190,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		players = null;
 	}
 
-	private final void setupIntegration()
+	private void setupIntegration()
 	{
 		try
 		{
@@ -445,7 +444,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		effects.put(effectType.getId(), effectType);
 	}
 
-	public static final Sound getSound(String sound)
+	public static Sound getSound(String sound)
 	{
 		try
 		{

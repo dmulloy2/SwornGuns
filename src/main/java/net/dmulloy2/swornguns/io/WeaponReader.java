@@ -78,7 +78,7 @@ public class WeaponReader
 		this.loaded = true;
 	}
 
-	private final void computeData(String str)
+	private void computeData(String str)
 	{
 		if (str.indexOf("=") > 0)
 		{

@@ -122,7 +122,6 @@ public class EntityListener implements Listener, Reloadable
 			if (hurt != null)
 			{
 				// Call the damage event, which will be handled below
-				@SuppressWarnings("deprecation")
 				EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(proj, hurt, DamageCause.PROJECTILE, 0);
 				plugin.getServer().getPluginManager().callEvent(damageEvent);
 			}

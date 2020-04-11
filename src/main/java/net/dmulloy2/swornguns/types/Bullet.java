@@ -18,40 +18,16 @@
  */
 package net.dmulloy2.swornguns.types;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
-import lombok.Data;
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
+
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.util.Util;
 
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Egg;
-import org.bukkit.entity.EnderPearl;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.FishHook;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.LargeFireball;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.SmallFireball;
-import org.bukkit.entity.Snowball;
-import org.bukkit.entity.ThrownExpBottle;
-import org.bukkit.entity.ThrownPotion;
-import org.bukkit.entity.WitherSkull;
+import org.bukkit.*;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
@@ -61,8 +37,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
+import lombok.Data;
 
 /**
  * @author dmulloy2
@@ -107,7 +82,6 @@ public class Bullet
 			this.id = projectile.getEntityId();
 
 			((Item) projectile).setPickupDelay(9999999);
-			this.startLocation = projectile.getLocation();
 		}
 		else
 		{
@@ -155,8 +129,8 @@ public class Bullet
 			this.id = projectile.getEntityId();
 
 			((Projectile) projectile).setShooter(shooter.getPlayer());
-			this.startLocation = projectile.getLocation();
 		}
+		this.startLocation = projectile.getLocation();
 
 		if (shotFrom.getReleaseTime() == -1)
 		{
@@ -322,7 +296,7 @@ public class Bullet
 		}
 	}
 
-	private final void explosion(Location location)
+	private void explosion(Location location)
 	{
 		if (shotFrom.getExplosionType().equals("TNT"))
 		{
@@ -350,10 +324,10 @@ public class Bullet
 		}
 	}
 
-	private final FireworkEffect getFireworkEffect()
+	private FireworkEffect getFireworkEffect()
 	{
 		// Colors
-		List<Color> colors = new ArrayList<Color>();
+		List<Color> colors = new ArrayList<>();
 		colors.add(Color.RED);
 		colors.add(Color.RED);
 		colors.add(Color.RED);
@@ -372,21 +346,20 @@ public class Bullet
 		}
 
 		// Build the effect
-		FireworkEffect effect = FireworkEffect.builder()
+
+		return FireworkEffect.builder()
 				.flicker(true)
 				.withColor(colors)
 				.withFade(colors)
 				.with(type)
 				.trail(true)
 				.build();
-
-		return effect;
 	}
 
-	private static final Function<? super Double, Double> ZERO = Functions.constant(-0.0);
+	private static final Function<? super Double, Double> ZERO = Functions.constant(-0.0)::apply;
 
 	@SuppressWarnings("deprecation") // Old Event
-	private final EntityDamageByEntityEvent getDamageEvent(Entity damager, Entity entity, DamageCause cause, double damage)
+	private EntityDamageByEntityEvent getDamageEvent(Entity damager, Entity entity, DamageCause cause, double damage)
 	{
 		try
 		{
@@ -404,7 +377,7 @@ public class Bullet
 		}
 	}
 
-	private final void explosionDamage()
+	private void explosionDamage()
 	{
 		if (shotFrom.getExplodeRadius() > 0.0D)
 		{
@@ -448,7 +421,7 @@ public class Bullet
 		}
 	}
 
-	private final void fireSpread()
+	private void fireSpread()
 	{
 		if (shotFrom.getFireRadius() > 0.0D)
 		{
@@ -475,7 +448,7 @@ public class Bullet
 		}
 	}
 
-	private final void flash()
+	private void flash()
 	{
 		if (shotFrom.getFlashRadius() > 0.0D)
 		{

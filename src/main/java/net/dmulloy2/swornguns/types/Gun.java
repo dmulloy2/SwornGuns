@@ -116,8 +116,8 @@ public class Gun implements Cloneable
 
 	private EffectType releaseEffect;
 
-	private List<Sound> gunSound = new ArrayList<Sound>();
-	private List<String> lore = new ArrayList<String>();
+	private List<Sound> gunSound = new ArrayList<>();
+	private List<String> lore = new ArrayList<>();
 
 	private final SwornGuns plugin;
 	public Gun(String name, SwornGuns plugin)
@@ -304,7 +304,7 @@ public class Gun implements Cloneable
 	 *
 	 * @return An exact replica of this gun
 	 */
-	private final Gun copy()
+	private Gun copy()
 	{
 		Gun g = new Gun(gunName, plugin);
 
