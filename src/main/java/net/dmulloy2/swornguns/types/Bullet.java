@@ -211,7 +211,6 @@ public class Bullet
 		if (ticks > 200)
 		{
 			remove();
-			return;
 		}
 	}
 
@@ -320,7 +319,7 @@ public class Bullet
 			try
 			{
 				firework.detonate();
-			} catch (Throwable ex) { }
+			} catch (Throwable ignored) { }
 		}
 	}
 
@@ -356,6 +355,7 @@ public class Bullet
 				.build();
 	}
 
+	@SuppressWarnings("Guava")
 	private static final Function<? super Double, Double> ZERO = Functions.constant(-0.0)::apply;
 
 	@SuppressWarnings("deprecation") // Old Event
@@ -502,7 +502,7 @@ public class Bullet
 		if (obj == this) return true;
 
 		if (destroyed)
-			return this == obj;
+			return false;
 
 		if (obj instanceof Bullet)
 		{

@@ -19,8 +19,6 @@
 package net.dmulloy2.swornguns.types;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -356,7 +354,7 @@ public class GunPlayer implements Reloadable
 				leftInClip = amount - ammoLeft;
 			}
 
-			add.append(ChatColor.YELLOW.toString())
+			add.append(ChatColor.YELLOW)
 					.append("    \u00AB")
 					.append(leftInClip).append(" \uFFE8 ")
 					.append(ammoLeft)
@@ -367,7 +365,7 @@ public class GunPlayer implements Reloadable
 			{
 				int scale = 4;
 				int reloadTime = Math.max(1, gun.getReloadTime());
-				int bars = Math.round(scale - ((gun.getGunReloadTimer() * scale) / reloadTime));
+				int bars = (int) Math.round(scale - (((double)gun.getGunReloadTimer() * scale) / reloadTime));
 				for (int i = 0; i < bars; i++)
 				{
 					reload.append("\u25AA");
@@ -379,15 +377,15 @@ public class GunPlayer implements Reloadable
 					reload.append("\u25AB");
 				}
 
-				add.append(ChatColor.RED.toString())
+				add.append(ChatColor.RED)
 						.append("    ")
-						.append(reload.reverse().toString())
+						.append(reload.reverse())
 						.append("RELOADING")
-						.append(reload.toString());
+						.append(reload);
 			}
 		}
 
-		return gun.getName() + add.toString();
+		return gun.getName() + add;
 	}
 
 	// ---- Util

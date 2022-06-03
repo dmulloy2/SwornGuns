@@ -38,7 +38,7 @@ import org.bukkit.inventory.ItemStack;
  * @author dmulloy2
  */
 
-public abstract interface SwornGunsAPI extends Reloadable
+public interface SwornGunsAPI extends Reloadable
 {
 	GunPlayer getGunPlayer(Player player);
 

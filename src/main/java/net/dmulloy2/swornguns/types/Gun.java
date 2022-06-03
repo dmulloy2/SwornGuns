@@ -558,7 +558,7 @@ public class Gun implements Cloneable
 	{
 		if (str.contains(":"))
 		{
-			String news = str.substring(str.indexOf(":") + 1, str.length());
+			String news = str.substring(str.indexOf(":") + 1);
 			return NumberUtil.toShort(news);
 		}
 
@@ -678,7 +678,7 @@ public class Gun implements Cloneable
 			Gun clone = (Gun) super.clone();
 			clone.clear();
 			return clone;
-		} catch (Throwable ex) { }
+		} catch (Throwable ignored) { }
 		return copy();
 	}
 }

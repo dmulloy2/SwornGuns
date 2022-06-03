@@ -4,6 +4,7 @@ version: ${project.version}${project.build.number}
 author: dmulloy2
 description: Guns in Minecraft!
 softdepend: [UltimateArena, SwornRPG]
+api-version: "1.13"
 commands: 
   swornguns:
     description: SwornGuns root command

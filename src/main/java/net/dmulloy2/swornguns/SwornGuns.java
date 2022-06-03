@@ -195,17 +195,17 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		try
 		{
 			swornNationsHandler = new SwornNationsHandler(this);
-		} catch (Throwable ex) { }
+		} catch (Throwable ignored) { }
 
 		try
 		{
 			swornRPGHandler = new SwornRPGHandler(this);
-		} catch (Throwable ex) { }
+		} catch (Throwable ignored) { }
 
 		try
 		{
 			ultimateArenaHandler = new UltimateArenaHandler(this);
-		} catch (Throwable ex) { }
+		} catch (Throwable ignored) { }
 	}
 
 	public final boolean isSwornNationsEnabled()
@@ -449,7 +449,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		try
 		{
 			return Sound.valueOf(sound.toUpperCase().replaceAll(" ", "_"));
-		} catch (Throwable ex) { }
+		} catch (Throwable ignored) { }
 		return null;
 	}
 
@@ -495,7 +495,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 						{
 							bullets.remove(entry.getKey());
 							bullet.remove();
-						} catch (Throwable ex1) { }
+						} catch (Throwable ignored) { }
 					}
 				}
 			}
