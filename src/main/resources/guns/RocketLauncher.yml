@@ -1,0 +1,35 @@
+hasSmokeTrail: true
+needsPermission: true
+canFireLeft: true
+material: diamond_hoe
+ammo: tnt
+ammoAmtNeeded: 1
+roundsPerBurst: 1
+reloadTime: 70
+maxDistance: 32
+bulletsPerClick: 1
+bulletDelay: 2
+releaseTime: -1
+maxClipSize: 3
+bulletDelayTime: 60
+clipRemaining: -1
+initialClip: -1
+gunDamage: 4.0
+armorPenetration: 4.0
+explosionDamage: 7.0
+bulletSpeed: 1.1
+accuracy: 0.19
+accuracy_aimed: 0.02
+accuracy_crouched: -1.0
+explodeRadius: 3.0
+fireRadius: 0.0
+flashRadius: 0.0
+knockback: 2.0
+recoil: 2.0
+gunVolume: 1.0
+gunPitch: 2.0
+projType: SNOWBALL
+explosionType: FIREWORK
+reloadType: normal
+displayName: '&eRocket Launcher'
+outOfAmmoMessage: '&6This gun needs &cTNT'

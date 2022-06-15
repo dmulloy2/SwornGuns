@@ -41,4 +41,14 @@ public enum ReloadType
 
 		return null;
 	}
+
+	public Object serialize()
+	{
+		return name().toLowerCase();
+	}
+
+	public static ReloadType deserialize(Object data)
+	{
+		return getByName(data.toString());
+	}
 }

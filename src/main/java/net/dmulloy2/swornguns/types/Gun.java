@@ -18,15 +18,12 @@
  */
 package net.dmulloy2.swornguns.types;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.logging.Level;
 
 import lombok.Data;
+import net.dmulloy2.io.FileSerialization;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.MaterialUtil;
 import net.dmulloy2.util.NumberUtil;
@@ -35,6 +32,7 @@ import net.dmulloy2.util.Util;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -44,7 +42,7 @@ import org.bukkit.util.Vector;
  */
 
 @Data
-public class Gun implements Cloneable
+public class Gun implements Cloneable, ConfigurationSerializable
 {
 	private boolean canHeadshot;
 	private boolean isThrowable;
@@ -64,8 +62,8 @@ public class Gun implements Cloneable
 	private boolean unlimitedAmmo;
 	private boolean warnIfNoPermission;
 
-	private MyMaterial material;
-	private MyMaterial ammo;
+	private Material material;
+	private Material ammo;
 
 	private int ammoAmtNeeded;
 	private int roundsPerBurst;
@@ -108,23 +106,47 @@ public class Gun implements Cloneable
 	private String explosionType = "FIREWORK";
 	private ReloadType reloadType = ReloadType.NORMAL;
 
-	private String gunName;
-	private String fileName;
+	private transient String gunName;
+	private String displayName;
 	private String outOfAmmoMessage = "";
 
-	private GunPlayer owner;
+	private EffectData releaseEffect;
 
-	private EffectType releaseEffect;
+	private transient List<Sound> gunSound = new ArrayList<>();
+	private transient List<String> lore = new ArrayList<>();
 
-	private List<Sound> gunSound = new ArrayList<>();
-	private List<String> lore = new ArrayList<>();
+	private transient GunPlayer owner;
+	private transient final SwornGuns plugin;
 
-	private final SwornGuns plugin;
 	public Gun(String name, SwornGuns plugin)
 	{
 		this.gunName = name;
-		this.fileName = name;
 		this.plugin = plugin;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void loadFromConfig(Map<String, Object> config)
+	{
+		// deserialize all the primitive values
+		FileSerialization.deserialize(this, config);
+
+		List<String> gunSoundNames = (List<String>) config.get("gunSound");
+		if (gunSoundNames != null)
+		{
+			gunSound.clear();
+			for (String name : gunSoundNames)
+			{
+				try
+				{
+					gunSound.add(Sound.valueOf(name.toUpperCase()));
+				}
+				catch (IllegalArgumentException ex)
+				{
+					plugin.getLogHandler().log(Level.WARNING, "Invalid sound \"{0}\" configured for gun {1}",
+						name, gunName);
+				}
+			}
+		}
 	}
 
 	/**
@@ -232,9 +254,11 @@ public class Gun implements Cloneable
 				player.playSound(owner.getPlayer().getLocation(), Sound.ENTITY_ITEM_BREAK, 20.0F, 20.0F);
 
 				if (outOfAmmoMessage.isEmpty())
-					player.sendMessage(plugin.getPrefix() + FormatUtil.format("&eThis gun needs &b{0}&e!", ammo.getName()));
+					player.sendMessage(plugin.getPrefix()
+						+ FormatUtil.format("&eThis gun needs &b{0}&e!", MaterialUtil.getName(ammo)));
 				else
-					player.sendMessage(plugin.getPrefix() + FormatUtil.format(outOfAmmoMessage, ammo.getName()));
+					player.sendMessage(plugin.getPrefix()
+						+ FormatUtil.format(outOfAmmoMessage, MaterialUtil.getName(ammo)));
 
 				finishShooting();
 			}
@@ -341,7 +365,6 @@ public class Gun implements Cloneable
 		g.maxClipSize = this.maxClipSize;
 		g.reloadGunOnDrop = this.reloadGunOnDrop;
 		g.localGunSound = this.localGunSound;
-		g.fileName = this.fileName;
 		g.explosionDamage = this.explosionDamage;
 		g.recoil = this.recoil;
 		g.knockback = this.knockback;
@@ -516,34 +539,6 @@ public class Gun implements Cloneable
 		return gunName;
 	}
 
-	/**
-	 * @return Ammo material
-	 */
-	@Deprecated
-	public Material getAmmoMaterial()
-	{
-		return ammo.getMaterial();
-	}
-
-	/**
-	 * @return Gun material
-	 */
-	@Deprecated
-	public Material getGunMaterial()
-	{
-		return material.getMaterial();
-	}
-
-	/**
-	 * Sets the name of the gun
-	 *
-	 * @param val Name of the gun
-	 */
-	public void setName(String val)
-	{
-		this.gunName = FormatUtil.format(val);
-	}
-
 	public String getValueFromString(String str)
 	{
 		if (str.contains(":"))
@@ -572,24 +567,13 @@ public class Gun implements Cloneable
 	 */
 	public void setGunType(String val)
 	{
-		Material material = MaterialUtil.getMaterial(getValueFromString(val));
+		Material material = Material.matchMaterial(val);
 		if (material == null)
 		{
-			plugin.getLogHandler().log(Level.WARNING, "Gun {0} has a null material: {1}!", fileName, val);
-			return;
+			throw new IllegalArgumentException("Invalid gun material: " + val);
 		}
 
-		short data = getDataFromString(val);
-
-		boolean ignoreData = false;
-
-		if (data < 0)
-		{
-			ignoreData = true;
-			data = 0;
-		}
-
-		this.material = new MyMaterial(material, data, ignoreData);
+		this.material = material;
 	}
 
 	/**
@@ -599,18 +583,13 @@ public class Gun implements Cloneable
 	 */
 	public void setAmmoType(String val)
 	{
-		Material material = MaterialUtil.getMaterial(getValueFromString(val));
-		short data = getDataFromString(val);
-
-		boolean ignoreData = false;
-
-		if (data < 0)
+		Material material = Material.matchMaterial(val);
+		if (material == null)
 		{
-			ignoreData = true;
-			data = 0;
+			throw new IllegalArgumentException("Invalid ammo material: " + val);
 		}
 
-		this.ammo = new MyMaterial(material, data, ignoreData);
+		this.ammo = material;
 	}
 
 	/**
@@ -646,7 +625,7 @@ public class Gun implements Cloneable
 	@Override
 	public String toString()
 	{
-		return "Gun[name=" + fileName + ", material=" + material + ", priority=" + priority + "]";
+		return "Gun[name=" + gunName + ", material=" + material + ", priority=" + priority + "]";
 	}
 
 	@Override
@@ -655,10 +634,9 @@ public class Gun implements Cloneable
 		if (obj == null) return false;
 		if (obj == this) return true;
 
-		if (obj instanceof Gun)
+		if (obj instanceof Gun that)
 		{
-			Gun that = (Gun) obj;
-			return this.fileName.equals(that.fileName) && this.material.equals(that.material) && this.priority == that.priority;
+			return this.gunName.equals(that.gunName) && this.material.equals(that.material) && this.priority == that.priority;
 		}
 
 		return false;
@@ -667,7 +645,7 @@ public class Gun implements Cloneable
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(fileName, material, priority);
+		return Objects.hash(gunName, material, priority);
 	}
 
 	@Override
@@ -680,5 +658,11 @@ public class Gun implements Cloneable
 			return clone;
 		} catch (Throwable ignored) { }
 		return copy();
+	}
+
+	@Override
+	public Map<String, Object> serialize()
+	{
+		return FileSerialization.serialize(this);
 	}
 }

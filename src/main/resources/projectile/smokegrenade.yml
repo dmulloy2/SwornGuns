@@ -1,0 +1,35 @@
+canHeadshot: true
+canFireRight: true
+canFireLeft: true
+reloadGunOnDrop: true
+material: ghast_tear
+ammo: ghast_tear
+ammoAmtNeeded: 1
+roundsPerBurst: 1
+bulletsPerClick: 1
+bulletDelay: 2
+releaseTime: 60
+maxClipSize: 30
+bulletDelayTime: 20
+clipRemaining: -1
+initialClip: -1
+gunDamage: 0.0
+armorPenetration: 0.0
+explosionDamage: -1.0
+bulletSpeed: 1.1
+accuracy: 0.0
+accuracy_aimed: -1.0
+accuracy_crouched: -1.0
+explodeRadius: 0.0
+fireRadius: 0.0
+flashRadius: 0.0
+knockback: 0.0
+recoil: 0.0
+gunVolume: 1.0
+gunPitch: 2.0
+projType: ''
+explosionType: FIREWORK
+reloadType: normal
+displayName: '&eSmoke Grenade'
+outOfAmmoMessage: No Ammo
+releaseEffect: STEP_SOUND,300,2.75,35

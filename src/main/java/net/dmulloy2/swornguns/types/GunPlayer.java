@@ -18,22 +18,14 @@
  */
 package net.dmulloy2.swornguns.types;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.types.Reloadable;
-import net.dmulloy2.util.CompatUtil;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.InventoryUtil;
-import net.dmulloy2.util.Util;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -56,52 +48,47 @@ public class GunPlayer implements Reloadable
 {
 	private ItemStack lastHeldItem;
 	private Gun currentlyFiring;
-	private List<Gun> guns;
+	private Map<Material, Gun> guns;
 
 	private boolean errorReported;
 	private boolean enabled;
 	private boolean aimedIn;
 	private int ticks;
 
-	private String name;
-	private UUID uniqueId;
-	private Player player;
-	private SwornGuns plugin;
+	private final Player player;
+	private final SwornGuns plugin;
 
 	public GunPlayer(SwornGuns plugin, Player player)
 	{
 		this.plugin = plugin;
 		this.player = player;
-		this.name = player.getName();
-		this.uniqueId = player.getUniqueId();
 		this.enabled = true;
 		this.calculateGuns();
 	}
 
 	// ---- Firing and Tick
 
-	public final void handleClick(Action action)
+	public void handleClick(Action action)
 	{
 		if (! enabled || action == Action.PHYSICAL)
 			return;
 
-		Player player = getPlayer();
-		if (player == null || ! player.isOnline())
+		if (!player.isOnline())
 		{
-			plugin.getPlayers().remove(name);
+			plugin.getPlayers().remove(player.getUniqueId());
 			unload();
 			return;
 		}
 
-		ItemStack inHand = CompatUtil.getItemInMainHand(player);
-		if (inHand == null || inHand.getType() == Material.AIR)
+		ItemStack inHand = player.getInventory().getItemInMainHand();
+		if (inHand.getType() == Material.AIR)
 			return;
 
 		Gun gun = getGun(inHand);
 		if (gun == null)
 			return;
 
-		if (! canFireGun(gun))
+		if (!canFireGun(gun))
 		{
 			if (! canFireGun(gun, false) && gun.isWarnIfNoPermission())
 				player.sendMessage(plugin.getPrefix() + FormatUtil.format("&cYou do not have permission to fire this gun!"));
@@ -157,22 +144,21 @@ public class GunPlayer implements Reloadable
 		}
 	}
 
-	public final void tick()
+	public void tick()
 	{
 		this.ticks++;
 
-		Player player = getPlayer();
-		if (player == null || ! player.isOnline())
+		if (!player.isOnline())
 		{
-			plugin.getPlayers().remove(name);
+			plugin.getPlayers().remove(player.getUniqueId());
 			unload();
 			return;
 		}
 
-		ItemStack hand = CompatUtil.getItemInMainHand(player);
+		ItemStack hand = player.getInventory().getItemInMainHand();
 		this.lastHeldItem = hand;
 
-		if (ticks % 10 == 0 && hand != null)
+		if (ticks % 10 == 0)
 		{
 			if (getGun(hand) == null)
 			{
@@ -181,18 +167,8 @@ public class GunPlayer implements Reloadable
 			}
 		}
 
-		Iterator<Gun> iter = guns.iterator();
-		while (iter.hasNext())
+		for (Gun gun : guns.values())
 		{
-			Gun gun = iter.next();
-
-			// Don't tick null guns
-			if (gun == null)
-			{
-				iter.remove();
-				return;
-			}
-
 			gun.tick();
 
 			if (player.isDead())
@@ -200,7 +176,7 @@ public class GunPlayer implements Reloadable
 				gun.finishReloading();
 			}
 
-			if (hand != null && gun.getMaterial().matches(hand) && isAimedIn() && ! gun.isCanAimLeft() && ! gun.isCanAimRight())
+			if (gun.getMaterial() == hand.getType() && isAimedIn() && ! gun.isCanAimLeft() && ! gun.isCanAimRight())
 			{
 				player.removePotionEffect(PotionEffectType.SLOW);
 				this.aimedIn = false;
@@ -215,28 +191,19 @@ public class GunPlayer implements Reloadable
 
 	// ---- Getters
 
-	public final Player getPlayer()
+	public Player getPlayer()
 	{
-		if (player == null && name != null)
-			return player = Util.matchPlayer(name);
-
 		return player;
 	}
 
-	public final Gun getGun(ItemStack item)
+	public Gun getGun(ItemStack item)
 	{
-		for (Gun gun : guns)
-		{
-			if (gun.getMaterial().matches(item))
-				return gun;
-		}
-
-		return null;
+		return guns.get(item.getType());
 	}
 
 	// ---- Aim
 
-	public final boolean isAimedIn()
+	public boolean isAimedIn()
 	{
 		return aimedIn;
 	}
@@ -257,7 +224,7 @@ public class GunPlayer implements Reloadable
 
 	// ---- Ammo
 
-	public final int getAmmoNeeded(Gun gun)
+	public int getAmmoNeeded(Gun gun)
 	{
 		if (gun.isUnlimitedAmmo())
 			return 0;
@@ -274,26 +241,23 @@ public class GunPlayer implements Reloadable
 		return gun.getAmmoAmtNeeded();
 	}
 
-	public final boolean checkAmmo(Gun gun, int amount)
+	public boolean checkAmmo(Gun gun, int amount)
 	{
-		MyMaterial ammo = gun.getAmmo();
-		return InventoryUtil.amount(getPlayer().getInventory(), ammo.getMaterial(), ammo.getData()) >= amount;
+		return InventoryUtil.amount(player.getInventory(), gun.getAmmo(), (short) -1) >= amount;
 	}
 
-	public final void removeAmmo(Gun gun, int amount)
+	public void removeAmmo(Gun gun, int amount)
 	{
 		if (amount <= 0)
 			return;
 
-		MyMaterial ammo = gun.getAmmo();
-		InventoryUtil.remove(getPlayer().getInventory(), ammo.getMaterial(), ammo.getData(), amount);
+		InventoryUtil.remove(getPlayer().getInventory(), gun.getAmmo(), (short) -1, amount);
 	}
 
 	// ---- Naming
 
-	public final void renameGuns()
+	public void renameGuns()
 	{
-		Player player = getPlayer();
 		PlayerInventory inv = player.getInventory();
 		for (ItemStack item : inv.getContents())
 		{
@@ -336,11 +300,11 @@ public class GunPlayer implements Reloadable
 		StringBuilder add = new StringBuilder();
 		if (gun.isHasClip())
 		{
-			MyMaterial ammo = gun.getAmmo();
+			Material ammo = gun.getAmmo();
 			int maxClip = gun.getMaxClipSize();
 			int ammoAmtNeeded = Math.max(1, gun.getAmmoAmtNeeded());
-			int amount = (int) Math.floor(InventoryUtil.amount(player.getInventory(), ammo.getMaterial(), ammo.getData())
-					/ ammoAmtNeeded);
+			int amount = (int) Math.floor(InventoryUtil.amount(player.getInventory(), ammo, (short) -1)
+					/ (double) ammoAmtNeeded);
 
 			int leftInClip, ammoLeft;
 			if (gun.getReloadType() == ReloadType.CLIP)
@@ -366,16 +330,10 @@ public class GunPlayer implements Reloadable
 				int scale = 4;
 				int reloadTime = Math.max(1, gun.getReloadTime());
 				int bars = (int) Math.round(scale - (((double)gun.getGunReloadTimer() * scale) / reloadTime));
-				for (int i = 0; i < bars; i++)
-				{
-					reload.append("\u25AA");
-				}
+				reload.append("\u25AA".repeat(Math.max(0, bars)));
 
 				int left = scale - bars;
-				for (int ii = 0; ii < left; ii++)
-				{
-					reload.append("\u25AB");
-				}
+				reload.append("\u25AB".repeat(Math.max(0, left)));
 
 				add.append(ChatColor.RED)
 						.append("    ")
@@ -390,7 +348,7 @@ public class GunPlayer implements Reloadable
 
 	// ---- Util
 
-	public final void unload()
+	public void unload()
 	{
 		lastHeldItem = null;
 		currentlyFiring = null;
@@ -398,30 +356,26 @@ public class GunPlayer implements Reloadable
 		if (guns != null)
 			guns.clear();
 		guns = null;
-
-		uniqueId = null;
-		player = null;
-		plugin = null;
 	}
 
-	public final boolean canFireGun(Gun gun)
+	public boolean canFireGun(Gun gun)
 	{
 		return canFireGun(gun, true);
 	}
 
-	public final boolean canFireGun(Gun gun, boolean world)
+	public boolean canFireGun(Gun gun, boolean world)
 	{
 		Player player = getPlayer();
 		if (world && plugin.getDisabledWorlds().contains(player.getWorld().getName()))
 			return false;
 
-		return ! gun.isNeedsPermission() || player.isOp() || player.hasPermission("swornguns.fire." + gun.getFileName())
+		return ! gun.isNeedsPermission() || player.isOp() || player.hasPermission("swornguns.fire." + gun.getGunName())
 				|| player.hasPermission("swornguns.fire.*");
 	}
 
-	public final void calculateGuns()
+	public void calculateGuns()
 	{
-		Map<MyMaterial, List<Gun>> byMaterial = new HashMap<>();
+		Map<Material, List<Gun>> byMaterial = new HashMap<>();
 
 		for (Gun gun : plugin.getLoadedGuns().values())
 		{
@@ -437,9 +391,9 @@ public class GunPlayer implements Reloadable
 			}
 		}
 
-		List<Gun> sortedGuns = new ArrayList<>();
+		Map<Material, Gun> sortedGuns = new LinkedHashMap<>();
 
-		for (Entry<MyMaterial, List<Gun>> entry : byMaterial.entrySet())
+		for (Entry<Material, List<Gun>> entry : byMaterial.entrySet())
 		{
 			Map<Gun, Integer> priorityMap = new HashMap<>();
 			for (Gun gun : entry.getValue())
@@ -451,15 +405,20 @@ public class GunPlayer implements Reloadable
 			sortedEntries.sort((entry1, entry2) -> -entry1.getValue().compareTo(entry2.getValue()));
 
 			Gun gun = sortedEntries.get(0).getKey();
-			sortedGuns.add(gun);
+			sortedGuns.put(gun.getMaterial(), gun);
 		}
 
 		this.guns = sortedGuns;
 	}
 
+	public String getName()
+	{
+		return player.getName();
+	}
+
 	// ---- Integration
 
-	public final boolean unlimitedAmmoEnabled()
+	public boolean unlimitedAmmoEnabled()
 	{
 		if (plugin.isSwornRPGEnabled())
 			return plugin.getSwornRPGHandler().isUnlimitedAmmoEnabled(player);
@@ -482,18 +441,16 @@ public class GunPlayer implements Reloadable
 	@Override
 	public String toString()
 	{
-		return name;
+		return player.getName();
 	}
 
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (obj == null) return false;
 		if (obj == this) return true;
 
-		if (obj instanceof GunPlayer)
+		if (obj instanceof GunPlayer that)
 		{
-			GunPlayer that = (GunPlayer) obj;
 			return this.player.equals(that.player);
 		}
 
@@ -503,6 +460,6 @@ public class GunPlayer implements Reloadable
 	@Override
 	public int hashCode()
 	{
-		return Objects.hashCode(player);
+		return Objects.hashCode(player.getUniqueId());
 	}
 }

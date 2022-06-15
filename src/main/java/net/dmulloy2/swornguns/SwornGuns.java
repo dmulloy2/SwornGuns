@@ -19,11 +19,7 @@
 package net.dmulloy2.swornguns;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -42,15 +38,13 @@ import net.dmulloy2.swornguns.commands.CmdVersion;
 import net.dmulloy2.swornguns.integration.SwornNationsHandler;
 import net.dmulloy2.swornguns.integration.SwornRPGHandler;
 import net.dmulloy2.swornguns.integration.UltimateArenaHandler;
-import net.dmulloy2.swornguns.io.WeaponReader;
+import net.dmulloy2.swornguns.io.WeaponIO;
 import net.dmulloy2.swornguns.listeners.EntityListener;
 import net.dmulloy2.swornguns.listeners.PlayerListener;
 import net.dmulloy2.swornguns.types.Bullet;
-import net.dmulloy2.swornguns.types.EffectType;
+import net.dmulloy2.swornguns.types.EffectData;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
-import net.dmulloy2.swornguns.types.MacFileFilter;
-import net.dmulloy2.types.MyMaterial;
 import net.dmulloy2.util.FormatUtil;
 import net.dmulloy2.util.Util;
 
@@ -77,11 +71,11 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	// Maps
 	private @Getter Map<String, Gun> loadedGuns;
 	private @Getter Map<Integer, Bullet> bullets;
-	private @Getter Map<String, GunPlayer> players;
-	private @Getter Map<Integer, EffectType> effects;
+	private @Getter Map<UUID, GunPlayer> players;
+	private @Getter Map<UUID, EffectData> effects;
 
 	private @Getter List<String> disabledWorlds;
-	private @Getter String prefix = FormatUtil.format("&3[&eSwornGuns&3]&e ");
+	private final @Getter String prefix = FormatUtil.format("&3[&eSwornGuns&3]&e ");
 
 	@Override
 	public void onEnable()
@@ -138,8 +132,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		}
 
 		// Load guns
-		loadGuns();
-		loadProjectiles();
+		loadWeapons();
 
 		getOnlinePlayers();
 
@@ -225,149 +218,80 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 	private static final List<String> stockProjectiles = Arrays.asList("flashbang", "grenade", "molotov", "smokegrenade");
 
-	private void loadProjectiles()
+	private static final List<String> stockGuns = Arrays.asList("AutoShotgun", "DoubleBarrel", "Flamethrower", "Pistol", "Rifle",
+		"RocketLauncher", "Shotgun", "Sniper");
+
+	private void loadWeapons()
 	{
-		int loaded = 0;
+		WeaponIO weaponIO = new WeaponIO(this);
 
-		File dir = new File(getDataFolder(), "projectile");
-
-		File[] children = dir.listFiles(MacFileFilter.get());
-		if (children == null || children.length == 0)
+		List<Gun> guns = weaponIO.loadGuns();
+		if (guns.isEmpty())
 		{
-			for (String s : stockProjectiles)
+			for (String stock : stockGuns)
 			{
-				saveResource("projectile" + File.separator + s, false);
+				saveResource("guns" + File.separator + stock + ".yml", false);
 			}
 
-			children = dir.listFiles(MacFileFilter.get());
+			guns = weaponIO.loadGuns();
 		}
 
-		for (File child : children)
+		for (Gun gun : guns)
 		{
-			WeaponReader reader = new WeaponReader(this, child);
-			if (reader.isLoaded())
-			{
-				Gun gun = reader.getGun();
-				gun.setThrowable(true);
-				loadedGuns.put(child.getName(), gun);
-				if (gun.isNeedsPermission())
-				{
-					PluginManager pm = getServer().getPluginManager();
-					String node = "swornguns.fire." + child.getName();
-					Permission permission = pm.getPermission(node);
-					if (permission == null)
-					{
-						permission = new Permission(node, PermissionDefault.OP);
-						pm.addPermission(permission);
-					}
-				}
-
-				loaded++;
-			}
-			else
-			{
-				logHandler.log(Level.WARNING, "Could not load projectile: {0}", child.getName());
-			}
+			setupPermission(gun);
+			loadedGuns.put(gun.getGunName(), gun);
 		}
 
-		logHandler.log("Loaded {0} projectiles!", loaded);
+		List<Gun> projectiles = weaponIO.loadProjectiles();
+		if (projectiles.isEmpty())
+		{
+			for (String stock : stockProjectiles)
+			{
+				saveResource("projectile" + File.separator + stock + ".yml", false);
+			}
+
+			projectiles = weaponIO.loadProjectiles();
+		}
+
+		for (Gun gun : projectiles)
+		{
+			setupPermission(gun);
+			loadedGuns.put(gun.getGunName(), gun);
+		}
 	}
 
-	private static final List<String> stockGuns = Arrays.asList("AutoShotgun", "DoubleBarrel", "Flamethrower", "Pistol", "Rifle",
-			"RocketLauncher", "Shotgun", "Sniper");
-
-	private void loadGuns()
+	private void setupPermission(Gun gun)
 	{
-		int loaded = 0;
-
-		File dir = new File(getDataFolder(), "guns");
-		if (! dir.exists())
-			dir.mkdirs();
-
-		File[] children = dir.listFiles(MacFileFilter.get());
-		if (children == null || children.length == 0)
+		if (gun.isNeedsPermission())
 		{
-			for (String s : stockGuns)
+			PluginManager pm = getServer().getPluginManager();
+			String node = "swornguns.fire." + gun.getGunName();
+			Permission permission = pm.getPermission(node);
+			if (permission == null)
 			{
-				saveResource("guns" + File.separator + s, false);
-			}
-
-			children = dir.listFiles(MacFileFilter.get());
-		}
-
-		for (File child : children)
-		{
-			WeaponReader reader = new WeaponReader(this, child);
-			if (reader.isLoaded())
-			{
-				Gun gun = reader.getGun();
-				loadedGuns.put(child.getName(), gun);
-				if (gun.isNeedsPermission())
-				{
-					PluginManager pm = getServer().getPluginManager();
-					String node = "swornguns.fire." + child.getName();
-					Permission permission = pm.getPermission(node);
-					if (permission == null)
-					{
-						permission = new Permission(node, PermissionDefault.OP);
-						pm.addPermission(permission);
-					}
-				}
-
-				loaded++;
-			}
-			else
-			{
-				logHandler.log(Level.WARNING, "Could not load gun: {0}", child.getName());
+				permission = new Permission(node, PermissionDefault.OP);
+				pm.addPermission(permission);
 			}
 		}
-
-		logHandler.log("Loaded {0} guns!", loaded);
 	}
 
 	private void getOnlinePlayers()
 	{
 		for (Player player : Util.getOnlinePlayers())
 		{
-			if (! players.containsKey(player.getName()))
-				players.put(player.getName(), new GunPlayer(this, player));
+			if (! players.containsKey(player.getUniqueId()))
+				players.put(player.getUniqueId(), new GunPlayer(this, player));
 		}
 	}
 
 	@Override
 	public GunPlayer getGunPlayer(Player player)
 	{
-		GunPlayer gp = players.get(player.getName());
+		GunPlayer gp = players.get(player.getUniqueId());
 		if (gp == null)
-			players.put(player.getName(), gp = new GunPlayer(this, player));
+			players.put(player.getUniqueId(), gp = new GunPlayer(this, player));
 
 		return gp;
-	}
-
-	@Override
-	@Deprecated
-	public Gun getGun(ItemStack item)
-	{
-		for (Gun gun : loadedGuns.values())
-		{
-			if (gun.getMaterial().matches(item))
-				return gun;
-		}
-
-		return null;
-	}
-
-	@Override
-	@Deprecated
-	public Gun getGun(MyMaterial material)
-	{
-		for (Gun gun : loadedGuns.values())
-		{
-			if (gun.getMaterial().equals(material))
-				return gun;
-		}
-
-		return null;
 	}
 
 	@Override
@@ -376,13 +300,19 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		return loadedGuns.get(gunName);
 	}
 
+	@Override
+	public Collection<Gun> getGuns()
+	{
+		return Collections.unmodifiableCollection(loadedGuns.values());
+	}
+
 	public void onQuit(Player player)
 	{
-		GunPlayer gp = players.get(player.getName());
+		GunPlayer gp = players.get(player.getUniqueId());
 		if (gp != null)
 		{
 			gp.unload();
-			players.remove(player.getName());
+			players.remove(player.getUniqueId());
 		}
 	}
 
@@ -405,27 +335,13 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	}
 
 	@Override
-	public List<Gun> getGunsByType(MyMaterial material)
-	{
-		List<Gun> ret = new ArrayList<>();
-
-		for (Gun gun : loadedGuns.values())
-		{
-			if (gun.getMaterial().equals(material))
-				ret.add(gun);
-		}
-
-		return ret;
-	}
-
-	@Override
 	public List<Gun> getGunsByItem(ItemStack item)
 	{
 		List<Gun> ret = new ArrayList<>();
 
 		for (Gun gun : loadedGuns.values())
 		{
-			if (gun.getMaterial().matches(item))
+			if (gun.getMaterial() == item.getType())
 				ret.add(gun);
 		}
 
@@ -433,13 +349,13 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	}
 
 	@Override
-	public void removeEffect(EffectType effectType)
+	public void removeEffect(EffectData effectType)
 	{
 		effects.remove(effectType.getId());
 	}
 
 	@Override
-	public void addEffect(EffectType effectType)
+	public void addEffect(EffectData effectType)
 	{
 		effects.put(effectType.getId(), effectType);
 	}
@@ -502,19 +418,25 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 			if (! effects.isEmpty())
 			{
-				for (Entry<Integer, EffectType> entry : effects.entrySet())
+				Iterator<Entry<UUID, EffectData>> iter = effects.entrySet().iterator();
+				while (iter.hasNext())
 				{
-					EffectType effect = entry.getValue();
+					EffectData effect = iter.next().getValue();
+
+					boolean finished;
 
 					try
 					{
-						effect.tick();
+						finished = effect.tick();
 					}
 					catch (Throwable ex)
 					{
 						logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking effect " + effect));
-						effects.remove(entry.getKey());
+						finished = true;
 					}
+
+					if (finished)
+						iter.remove();
 				}
 			}
 		}
@@ -528,8 +450,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 		// Reload guns
 		loadedGuns.clear();
-		loadGuns();
-		loadProjectiles();
+		loadWeapons();
 
 		// Refresh players
 		if (! players.isEmpty())

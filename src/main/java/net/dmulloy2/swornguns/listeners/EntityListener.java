@@ -188,13 +188,11 @@ public class EntityListener implements Listener, Reloadable
 	{
 		if (event.getCause() == DamageCause.PROJECTILE)
 		{
-			if (event.getEntity() instanceof Damageable)
+			if (event.getEntity() instanceof Damageable hurt)
 			{
-				Damageable hurt = (Damageable) event.getEntity();
-				if (event.getDamager() instanceof Projectile)
+				if (event.getDamager() instanceof Projectile proj)
 				{
 					// Make sure the projectile is one of our bullets
-					Projectile proj = (Projectile) event.getDamager();
 					Bullet bullet = plugin.getBullet(proj);
 					if (bullet != null)
 					{
@@ -226,9 +224,8 @@ public class EntityListener implements Listener, Reloadable
 
 						// Headshots
 						double mult = 1.0D;
-						if (hurt instanceof LivingEntity)
+						if (hurt instanceof LivingEntity lentity)
 						{
-							LivingEntity lentity = (LivingEntity) hurt;
 							if (isNear(loc, lentity.getEyeLocation(), 0.26D))
 								mult = 1.5D;
 						}
@@ -298,7 +295,7 @@ public class EntityListener implements Listener, Reloadable
 		this.smokeEffect = plugin.getConfig().getBoolean("smoke-effect");
 		this.bulletSoundEnabled = plugin.getConfig().getBoolean("bullet-sound.enabled");
 		this.bulletSound = SwornGuns.getSound(plugin.getConfig().getString("bullet-sound.sound"));
-		this.bloodEffectType = MaterialUtil.getMaterial(plugin.getConfig().getString("blood-effect.block-id"));
+		this.bloodEffectType = Material.matchMaterial(plugin.getConfig().getString("blood-effect.block-id"));
 		this.shatterBlocks = MaterialUtil.fromStrings(plugin.getConfig().getStringList("block-shatter.blocks"));
 	}
 }

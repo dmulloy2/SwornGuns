@@ -66,6 +66,7 @@ public class Bullet
 	private int id;
 
 	private final SwornGuns plugin;
+
 	public Bullet(SwornGuns plugin, GunPlayer shooter, Gun shotFrom, Vector velocity)
 	{
 		this.plugin = plugin;
@@ -76,7 +77,7 @@ public class Bullet
 
 		if (shotFrom.isThrowable())
 		{
-			ItemStack thrown = shotFrom.getMaterial().newItemStack(1);
+			ItemStack thrown = new ItemStack(shotFrom.getMaterial());
 
 			this.projectile = shooter.getPlayer().getWorld().dropItem(shooter.getPlayer().getEyeLocation(), thrown);
 			this.id = projectile.getEntityId();
@@ -90,39 +91,17 @@ public class Bullet
 			String check = shotFrom.getProjType().toLowerCase().replaceAll("_", "").replaceAll(" ", "");
 			switch (check)
 			{
-				case "arrow":
-					mclass = Arrow.class;
-					break;
-				case "egg":
-					mclass = Egg.class;
-					break;
-				case "enderpearl":
-					mclass = EnderPearl.class;
-					break;
-				case "fireball":
-					mclass = Fireball.class;
-					break;
-				case "fish":
-				case "fishhook":
-					mclass = FishHook.class;
-					break;
-				case "largefireball":
-					mclass = LargeFireball.class;
-					break;
-				case "smallfireball":
-					mclass = SmallFireball.class;
-					break;
-				case "thrownexpbottle":
-					mclass = ThrownExpBottle.class;
-					break;
-				case "thrownpotion":
-					mclass = ThrownPotion.class;
-					break;
-				case "witherskull":
-					mclass = WitherSkull.class;
-					break;
-				default:
-					break;
+				case "arrow" -> mclass = Arrow.class;
+				case "egg" -> mclass = Egg.class;
+				case "enderpearl" -> mclass = EnderPearl.class;
+				case "fireball" -> mclass = Fireball.class;
+				case "fish", "fishhook" -> mclass = FishHook.class;
+				case "largefireball" -> mclass = LargeFireball.class;
+				case "smallfireball" -> mclass = SmallFireball.class;
+				case "thrownexpbottle" -> mclass = ThrownExpBottle.class;
+				case "thrownpotion" -> mclass = ThrownPotion.class;
+				case "witherskull" -> mclass = WitherSkull.class;
+				default -> {}
 			}
 
 			this.projectile = shooter.getPlayer().launchProjectile(mclass);
@@ -171,9 +150,12 @@ public class Bullet
 
 		if (ticks > releaseTime)
 		{
-			EffectType eff = shotFrom.getReleaseEffect();
+			EffectData eff = shotFrom.getReleaseEffect();
 			if (eff != null)
+			{
 				eff.start(lastLocation);
+				plugin.addEffect(eff);
+			}
 
 			remove();
 			return;
@@ -398,9 +380,8 @@ public class Bullet
 				List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 				for (Entity entity : entities)
 				{
-					if (entity.isValid() && entity instanceof LivingEntity)
+					if (entity.isValid() && entity instanceof LivingEntity lentity)
 					{
-						LivingEntity lentity = (LivingEntity) entity;
 						if (lentity.getHealth() > 0.0D)
 						{
 							// Call event
@@ -430,9 +411,8 @@ public class Bullet
 			List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 			for (Entity entity : entities)
 			{
-				if (entity.isValid() && entity instanceof LivingEntity)
+				if (entity.isValid() && entity instanceof LivingEntity lentity)
 				{
-					LivingEntity lentity = (LivingEntity) entity;
 					if (lentity.getHealth() > 0.0D)
 					{
 						EntityDamageByEntityEvent event = getDamageEvent(shooter.getPlayer(), lentity, DamageCause.FIRE_TICK, 1.0D);
@@ -457,9 +437,8 @@ public class Bullet
 			List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 			for (Entity entity : entities)
 			{
-				if (entity.isValid() && entity instanceof LivingEntity)
+				if (entity.isValid() && entity instanceof LivingEntity lentity)
 				{
-					LivingEntity lentity = (LivingEntity) entity;
 					if (lentity.getHealth() > 0.0D)
 					{
 						EntityDamageByEntityEvent event = getDamageEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D);
@@ -492,21 +471,19 @@ public class Bullet
 		if (destroyed)
 			return "Destroyed Bullet";
 
-		return "Bullet[shooter=" + shooter + ", shotFrom=" + shotFrom.getFileName() + ", id=" + id + "]";
+		return "Bullet[shooter=" + shooter + ", shotFrom=" + shotFrom.getGunName() + ", id=" + id + "]";
 	}
 
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (obj == null) return false;
 		if (obj == this) return true;
 
 		if (destroyed)
 			return false;
 
-		if (obj instanceof Bullet)
+		if (obj instanceof Bullet that)
 		{
-			Bullet that = (Bullet) obj;
 			return this.shooter.equals(that.shooter) && this.shotFrom.equals(that.shotFrom) && this.id == that.id;
 		}
 

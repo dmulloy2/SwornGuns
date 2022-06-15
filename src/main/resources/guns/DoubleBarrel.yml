@@ -1,0 +1,37 @@
+hasSmokeTrail: true
+needsPermission: true
+canFireLeft: true
+hasClip: true
+reloadGunOnDrop: true
+material: wooden_shovel
+ammo: wheat_seeds
+ammoAmtNeeded: 1
+roundsPerBurst: 2
+reloadTime: 60
+maxDistance: 32
+bulletsPerClick: 7
+bulletDelay: 2
+releaseTime: -1
+maxClipSize: 14
+bulletDelayTime: 14
+clipRemaining: -1
+initialClip: -1
+gunDamage: 1.0
+armorPenetration: 1.0
+explosionDamage: 0.0
+bulletSpeed: 3.0
+accuracy: 0.25
+accuracy_aimed: -1.0
+accuracy_crouched: -1.0
+explodeRadius: 0.0
+fireRadius: 0.0
+flashRadius: 0.0
+knockback: 1.0
+recoil: 1.0
+gunVolume: 1.0
+gunPitch: 2.0
+projType: SNOWBALL
+explosionType: FIREWORK
+reloadType: pump
+displayName: '&eDouble Barrel Shotgun'
+outOfAmmoMessage: '&6This gun needs &cSEEDS'
