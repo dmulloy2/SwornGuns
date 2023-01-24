@@ -21,11 +21,13 @@ package net.dmulloy2.swornguns.listeners;
 import java.util.List;
 
 import net.dmulloy2.swornguns.SwornGuns;
+import net.dmulloy2.swornguns.events.SwornGunsBlockDamageEvent;
 import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornapi.types.Reloadable;
 import net.dmulloy2.swornapi.util.MaterialUtil;
 import net.dmulloy2.swornapi.util.Util;
+import net.dmulloy2.swornguns.types.GunPlayer;
 
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
@@ -79,6 +81,9 @@ public class EntityListener implements Listener, Reloadable
 		Bullet bullet = plugin.getBullet(proj);
 		if (bullet != null)
 		{
+			GunPlayer shooter = bullet.getShooter();
+			Player player = shooter.getPlayer();
+
 			// Attempt to determine which Entity (if any) we hit.
 			// This is necessary because while the ProjectileHitEvent fires reliably,
 			// the EntityDamageByEntityEvent only fires once per round / bullet.
@@ -97,7 +102,7 @@ public class EntityListener implements Listener, Reloadable
 			{
 				if (nearby instanceof Damageable)
 				{
-					if (nearby.equals(bullet.getShooter().getPlayer()))
+					if (nearby.equals(player))
 						continue; // Don't shoot ourselves
 
 					nearby.getLocation(nLoc);
@@ -149,18 +154,12 @@ public class EntityListener implements Listener, Reloadable
 				block.getLocation().getWorld().playEffect(block.getLocation(), Effect.STEP_SOUND, mat);
 			}
 
-			// Make sure they aren't in an arena
-			if (plugin.isUltimateArenaEnabled())
+			// allow UltimateArena and SwornNations to cancel if they'd like
+			SwornGunsBlockDamageEvent sgDamageEvent = new SwornGunsBlockDamageEvent(player, block.getLocation());
+			plugin.getServer().getPluginManager().callEvent(sgDamageEvent);
+			if (sgDamageEvent.isCancelled())
 			{
-				if (plugin.getUltimateArenaHandler().isInArena(bullet.getShooter().getPlayer()))
-					return;
-			}
-
-			// Check with Factions too
-			if (plugin.isSwornNationsEnabled())
-			{
-				if (! plugin.getSwornNationsHandler().checkFactions(block.getLocation(), true))
-					return;
+				return;
 			}
 
 			// Block cracking

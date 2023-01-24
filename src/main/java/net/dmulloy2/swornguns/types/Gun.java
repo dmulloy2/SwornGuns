@@ -28,6 +28,7 @@ import net.dmulloy2.swornapi.util.FormatUtil;
 import net.dmulloy2.swornapi.util.MaterialUtil;
 import net.dmulloy2.swornapi.util.NumberUtil;
 import net.dmulloy2.swornapi.util.Util;
+import net.dmulloy2.swornguns.events.SwornGunFireEvent;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -167,8 +168,13 @@ public class Gun implements Cloneable, ConfigurationSerializable
 				else
 					clipRemaining = initialClip;
 			}
-		
-			int ammoAmtNeeded = owner.getAmmoNeeded(this);
+
+			SwornGunFireEvent event = new SwornGunFireEvent(this, getAmmoAmtNeeded());
+			plugin.getServer().getPluginManager().callEvent(event);
+			if (event.isCancelled())
+				return;
+
+			int ammoAmtNeeded = event.getAmmoNeeded();
 			if (ammoAmtNeeded == 0 || owner.checkAmmo(this, ammoAmtNeeded) || clipRemaining > 0)
 			{
 				if (reloadType == ReloadType.CLIP)

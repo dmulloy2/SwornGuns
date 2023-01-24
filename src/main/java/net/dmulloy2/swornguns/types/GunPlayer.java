@@ -224,23 +224,6 @@ public class GunPlayer implements Reloadable
 
 	// ---- Ammo
 
-	public int getAmmoNeeded(Gun gun)
-	{
-		if (gun.isUnlimitedAmmo())
-			return 0;
-
-		if (plugin.isUltimateArenaEnabled())
-		{
-			if (plugin.getUltimateArenaHandler().isAmmoUnlimited(getPlayer()))
-				return 0;
-		}
-
-		if (unlimitedAmmoEnabled())
-			return 0;
-
-		return gun.getAmmoAmtNeeded();
-	}
-
 	public boolean checkAmmo(Gun gun, int amount)
 	{
 		return InventoryUtil.amount(player.getInventory(), gun.getAmmo(), (short) -1) >= amount;
@@ -414,16 +397,6 @@ public class GunPlayer implements Reloadable
 	public String getName()
 	{
 		return player.getName();
-	}
-
-	// ---- Integration
-
-	public boolean unlimitedAmmoEnabled()
-	{
-		if (plugin.isSwornRPGEnabled())
-			return plugin.getSwornRPGHandler().isUnlimitedAmmoEnabled(player);
-
-		return false;
 	}
 
 	// ---- Generic Methods

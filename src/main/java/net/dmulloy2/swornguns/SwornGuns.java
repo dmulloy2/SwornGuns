@@ -35,9 +35,6 @@ import net.dmulloy2.swornguns.commands.CmdList;
 import net.dmulloy2.swornguns.commands.CmdReload;
 import net.dmulloy2.swornguns.commands.CmdToggle;
 import net.dmulloy2.swornguns.commands.CmdVersion;
-import net.dmulloy2.swornguns.integration.SwornNationsHandler;
-import net.dmulloy2.swornguns.integration.SwornRPGHandler;
-import net.dmulloy2.swornguns.integration.UltimateArenaHandler;
 import net.dmulloy2.swornguns.io.WeaponIO;
 import net.dmulloy2.swornguns.listeners.EntityListener;
 import net.dmulloy2.swornguns.listeners.PlayerListener;
@@ -63,11 +60,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 {
-	// Integration
-	private @Getter UltimateArenaHandler ultimateArenaHandler;
-	private @Getter SwornNationsHandler swornNationsHandler;
-	private @Getter SwornRPGHandler swornRPGHandler;
-
 	// Maps
 	private @Getter Map<String, Gun> loadedGuns;
 	private @Getter Map<Integer, Bullet> bullets;
@@ -98,9 +90,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		logHandler = new LogHandler(this);
 		commandHandler = new CommandHandler(this);
 		permissionHandler = new PermissionHandler(this);
-
-		// Integration
-		setupIntegration();
 
 		// Register commands
 		commandHandler.setCommandPrefix("swornguns");
@@ -181,39 +170,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		bullets = null;
 		players.clear();
 		players = null;
-	}
-
-	private void setupIntegration()
-	{
-		try
-		{
-			swornNationsHandler = new SwornNationsHandler(this);
-		} catch (Throwable ignored) { }
-
-		try
-		{
-			swornRPGHandler = new SwornRPGHandler(this);
-		} catch (Throwable ignored) { }
-
-		try
-		{
-			ultimateArenaHandler = new UltimateArenaHandler(this);
-		} catch (Throwable ignored) { }
-	}
-
-	public final boolean isSwornNationsEnabled()
-	{
-		return swornNationsHandler != null && swornNationsHandler.isEnabled();
-	}
-
-	public final boolean isSwornRPGEnabled()
-	{
-		return swornRPGHandler != null && swornRPGHandler.isEnabled();
-	}
-
-	public final boolean isUltimateArenaEnabled()
-	{
-		return ultimateArenaHandler != null && ultimateArenaHandler.isEnabled();
 	}
 
 	private static final List<String> stockProjectiles = Arrays.asList("flashbang", "grenade", "molotov", "smokegrenade");
