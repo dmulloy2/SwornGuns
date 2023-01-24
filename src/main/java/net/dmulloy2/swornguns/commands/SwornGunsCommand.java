@@ -18,7 +18,7 @@
  */
 package net.dmulloy2.swornguns.commands;
 
-import net.dmulloy2.commands.Command;
+import net.dmulloy2.swornapi.commands.Command;
 import net.dmulloy2.swornguns.SwornGuns;
 
 /**

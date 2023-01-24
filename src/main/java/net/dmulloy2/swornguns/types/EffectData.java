@@ -19,8 +19,8 @@
 package net.dmulloy2.swornguns.types;
 
 import lombok.Data;
-import net.dmulloy2.util.NumberUtil;
-import net.dmulloy2.util.Util;
+import net.dmulloy2.swornapi.util.NumberUtil;
+import net.dmulloy2.swornapi.util.Util;
 
 import org.bukkit.Effect;
 import org.bukkit.Location;

@@ -22,12 +22,12 @@ import java.util.*;
 import java.util.logging.Level;
 
 import lombok.Data;
-import net.dmulloy2.io.FileSerialization;
+import net.dmulloy2.swornapi.io.FileSerialization;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.util.FormatUtil;
-import net.dmulloy2.util.MaterialUtil;
-import net.dmulloy2.util.NumberUtil;
-import net.dmulloy2.util.Util;
+import net.dmulloy2.swornapi.util.FormatUtil;
+import net.dmulloy2.swornapi.util.MaterialUtil;
+import net.dmulloy2.swornapi.util.NumberUtil;
+import net.dmulloy2.swornapi.util.Util;
 
 import org.bukkit.Location;
 import org.bukkit.Material;

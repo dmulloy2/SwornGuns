@@ -86,13 +86,8 @@
               </artifactSet>
               <relocations>
                 <relocation>
-                  <pattern>net.dmulloy2</pattern>
+                  <pattern>net.dmulloy2.swornapi</pattern>
                   <shadedPattern>net.dmulloy2.swornguns.swornapi</shadedPattern>
-                  <excludes>
-                    <exclude>net.dmulloy2.swornguns.*</exclude>
-                    <exclude>net.dmulloy2.swornrpg.*</exclude>
-                    <exclude>net.dmulloy2.ultimatearena.*</exclude>
-                  </excludes>
                 </relocation>
               </relocations>
             </configuration>

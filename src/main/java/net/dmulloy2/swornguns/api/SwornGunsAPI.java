@@ -26,7 +26,7 @@ import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.EffectData;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
-import net.dmulloy2.types.Reloadable;
+import net.dmulloy2.swornapi.types.Reloadable;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;

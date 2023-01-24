@@ -22,13 +22,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import net.dmulloy2.io.IOUtil;
+import net.dmulloy2.swornapi.io.IOUtil;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.EffectData;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.ReloadType;
-import net.dmulloy2.util.NumberUtil;
-import net.dmulloy2.util.Util;
+import net.dmulloy2.swornapi.util.NumberUtil;
+import net.dmulloy2.swornapi.util.Util;
 
 import org.bukkit.Effect;
 

@@ -1,9 +1,9 @@
 package net.dmulloy2.swornguns.io;
 
-import net.dmulloy2.io.FileSerialization;
+import net.dmulloy2.swornapi.io.FileSerialization;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Gun;
-import net.dmulloy2.util.Util;
+import net.dmulloy2.swornapi.util.Util;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;

@@ -25,11 +25,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import lombok.Getter;
-import net.dmulloy2.SwornPlugin;
-import net.dmulloy2.commands.CmdHelp;
-import net.dmulloy2.handlers.CommandHandler;
-import net.dmulloy2.handlers.LogHandler;
-import net.dmulloy2.handlers.PermissionHandler;
+import net.dmulloy2.swornapi.SwornPlugin;
+import net.dmulloy2.swornapi.commands.CmdHelp;
+import net.dmulloy2.swornapi.handlers.CommandHandler;
+import net.dmulloy2.swornapi.handlers.LogHandler;
+import net.dmulloy2.swornapi.handlers.PermissionHandler;
 import net.dmulloy2.swornguns.api.SwornGunsAPI;
 import net.dmulloy2.swornguns.commands.CmdList;
 import net.dmulloy2.swornguns.commands.CmdReload;
@@ -45,8 +45,8 @@ import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.EffectData;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
-import net.dmulloy2.util.FormatUtil;
-import net.dmulloy2.util.Util;
+import net.dmulloy2.swornapi.util.FormatUtil;
+import net.dmulloy2.swornapi.util.Util;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;

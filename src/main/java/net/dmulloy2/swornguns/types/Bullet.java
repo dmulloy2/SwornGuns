@@ -24,7 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.util.Util;
+import net.dmulloy2.swornapi.util.Util;
 
 import org.bukkit.*;
 import org.bukkit.entity.*;

@@ -21,11 +21,11 @@ package net.dmulloy2.swornguns.commands;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.dmulloy2.commands.PaginatedCommand;
+import net.dmulloy2.swornapi.commands.PaginatedCommand;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Gun;
-import net.dmulloy2.util.FormatUtil;
-import net.dmulloy2.util.MaterialUtil;
+import net.dmulloy2.swornapi.util.FormatUtil;
+import net.dmulloy2.swornapi.util.MaterialUtil;
 
 /**
  * @author dmulloy2

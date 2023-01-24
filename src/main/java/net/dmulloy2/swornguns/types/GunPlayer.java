@@ -23,9 +23,9 @@ import java.util.Map.Entry;
 
 import lombok.Data;
 import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.types.Reloadable;
-import net.dmulloy2.util.FormatUtil;
-import net.dmulloy2.util.InventoryUtil;
+import net.dmulloy2.swornapi.types.Reloadable;
+import net.dmulloy2.swornapi.util.FormatUtil;
+import net.dmulloy2.swornapi.util.InventoryUtil;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
