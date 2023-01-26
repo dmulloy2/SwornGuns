@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import lombok.Getter;
 import net.dmulloy2.swornapi.SwornPlugin;
 import net.dmulloy2.swornapi.commands.CmdHelp;
+import net.dmulloy2.swornapi.config.ConfigParser;
 import net.dmulloy2.swornapi.handlers.CommandHandler;
 import net.dmulloy2.swornapi.handlers.LogHandler;
 import net.dmulloy2.swornapi.handlers.PermissionHandler;
@@ -66,7 +67,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	private @Getter Map<UUID, GunPlayer> players;
 	private @Getter Map<UUID, EffectData> effects;
 
-	private @Getter List<String> disabledWorlds;
 	private final @Getter String prefix = FormatUtil.format("&3[&eSwornGuns&3]&e ");
 
 	@Override
@@ -77,14 +77,13 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		// Configuration
 		saveDefaultConfig();
 		reloadConfig();
+		ConfigParser.parse(this, Config.class);
 
 		// Initialize variables
 		loadedGuns = new HashMap<>();
 		bullets = new ConcurrentHashMap<>();
 		players = new ConcurrentHashMap<>();
 		effects = new ConcurrentHashMap<>();
-
-		disabledWorlds = getConfig().getStringList("disabledWorlds");
 
 		// Handlers
 		logHandler = new LogHandler(this);
@@ -403,6 +402,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	{
 		// Config
 		reloadConfig();
+		ConfigParser.parse(this, Config.class);
 
 		// Reload guns
 		loadedGuns.clear();

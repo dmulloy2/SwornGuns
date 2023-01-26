@@ -18,15 +18,15 @@ smoke-effect: true
 # http://jd.bukkit.org/rb/apidocs/org/bukkit/Sound.html
 bullet-sound:
   enabled: true
-  sound: MAGMACUBE_JUMP
+  sound: ENTITY_MAGMA_CUBE_JUMP
 
 # Blocks broken when shot
 block-shatter:
   enabled: true
   blocks:
-    - leaves
+    - oak_leaves
     - glass
-    - thin_glass
+    - glass_pane
     - sand
     - gravel
 

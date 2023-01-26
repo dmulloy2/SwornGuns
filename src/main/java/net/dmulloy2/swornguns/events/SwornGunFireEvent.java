@@ -1,5 +1,6 @@
 package net.dmulloy2.swornguns.events;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -19,6 +20,16 @@ public class SwornGunFireEvent extends Event implements Cancellable
 	{
 		this.gun = gun;
 		this.ammoNeeded = ammoNeeded;
+	}
+
+	public Gun getGun()
+	{
+		return gun;
+	}
+
+	public Player getPlayer()
+	{
+		return gun.getOwner().getPlayer();
 	}
 
 	public int getAmmoNeeded()

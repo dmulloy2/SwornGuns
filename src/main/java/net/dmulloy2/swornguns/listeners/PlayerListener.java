@@ -19,6 +19,8 @@
 package net.dmulloy2.swornguns.listeners;
 
 import lombok.AllArgsConstructor;
+
+import net.dmulloy2.swornguns.Config;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
@@ -91,7 +93,7 @@ public class PlayerListener implements Listener
 	public void onPlayerChangedWorld(PlayerChangedWorldEvent event)
 	{
 		// Updates a player's guns when they change worlds, useful for per-world permissions
-		if (plugin.getConfig().getBoolean("updateGunsOnWorldChange", false))
+		if (Config.updateGunsOnWorldChange)
 		{
 			final Player player = event.getPlayer();
 

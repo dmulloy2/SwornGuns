@@ -20,6 +20,7 @@ package net.dmulloy2.swornguns.listeners;
 
 import java.util.List;
 
+import net.dmulloy2.swornguns.Config;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.events.SwornGunsBlockDamageEvent;
 import net.dmulloy2.swornguns.types.Bullet;
@@ -54,24 +55,13 @@ import org.bukkit.event.entity.ProjectileHitEvent;
  * @author dmulloy2
  */
 
-public class EntityListener implements Listener, Reloadable
+public class EntityListener implements Listener
 {
-	private boolean blockCrack;
-	private boolean blockShatter;
-	private boolean bloodEffectEnabled;
-	private boolean bloodEffectGunsOnly;
-	private boolean smokeEffect;
-	private boolean bulletSoundEnabled;
-
-	private Sound bulletSound;
-	private Material bloodEffectType;
-	private List<Material> shatterBlocks;
-
 	private final SwornGuns plugin;
+
 	public EntityListener(SwornGuns plugin)
 	{
 		this.plugin = plugin;
-		this.reload(); // Load configuration
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -163,7 +153,7 @@ public class EntityListener implements Listener, Reloadable
 			}
 
 			// Block cracking
-			if (blockCrack && mat == Material.STONE)
+			if (Config.blockCrack && mat == Material.STONE)
 			{
 				BlockBreakEvent blockBreak = new BlockBreakEvent(block, bullet.getShooter().getPlayer());
 				plugin.getServer().getPluginManager().callEvent(blockBreak);
@@ -172,7 +162,7 @@ public class EntityListener implements Listener, Reloadable
 			}
 
 			// Block shattering
-			if (blockShatter && shatterBlocks.contains(mat))
+			if (Config.blockShatterEnabled && Config.blockShatterBlocks.contains(mat))
 			{
 				BlockBreakEvent blockBreak = new BlockBreakEvent(block, bullet.getShooter().getPlayer());
 				plugin.getServer().getPluginManager().callEvent(blockBreak);
@@ -198,24 +188,20 @@ public class EntityListener implements Listener, Reloadable
 						// Realism start - gun effects
 						World world = hurt.getWorld();
 
-						if (bloodEffectEnabled && bloodEffectGunsOnly)
+						if (Config.bloodEffectEnabled && Config.bloodEffectGunsOnly && Config.bloodEffectEnabled)
 						{
-							if (bloodEffectType != null)
-							{
-								world.playEffect(hurt.getLocation(), Effect.STEP_SOUND, bloodEffectType);
-								world.playEffect(hurt.getLocation().add(0, 1, 0), Effect.STEP_SOUND, bloodEffectType);
-							}
+							world.playEffect(hurt.getLocation(), Effect.STEP_SOUND, Config.bloodEffectType);
+							world.playEffect(hurt.getLocation().add(0, 1, 0), Effect.STEP_SOUND, Config.bloodEffectType);
 						}
 
-						if (smokeEffect)
+						if (Config.smokeEffect)
 						{
 							world.playEffect(bullet.getShooter().getPlayer().getLocation(), Effect.SMOKE, 5);
 						}
 
-						if (bulletSoundEnabled)
+						if (Config.bulletSoundEnabled && Config.bulletSound != null)
 						{
-							if (bulletSound != null)
-								world.playSound(hurt.getLocation(), bulletSound, 10, 1);
+							world.playSound(hurt.getLocation(), Config.bulletSound, 10, 1);
 						}
 						// Realism end
 
@@ -262,7 +248,7 @@ public class EntityListener implements Listener, Reloadable
 		if (event.isCancelled() || event.getDamage() <= 0.0D)
 			return;
 
-		if (! bloodEffectEnabled || bloodEffectGunsOnly || bloodEffectType == null)
+		if (! Config.bloodEffectEnabled || Config.bloodEffectGunsOnly || Config.bloodEffectType == null)
 			return;
 
 		Entity entity = event.getEntity();
@@ -277,24 +263,10 @@ public class EntityListener implements Listener, Reloadable
 			if (event.getCause() != DamageCause.DROWNING && event.getCause() != DamageCause.LAVA)
 			{
 				World world = entity.getWorld();
-				world.playEffect(entity.getLocation(), Effect.STEP_SOUND, bloodEffectType);
-				world.playEffect(entity.getLocation().add(0, 1, 0), Effect.STEP_SOUND, bloodEffectType);
+				world.playEffect(entity.getLocation(), Effect.STEP_SOUND, Config.bloodEffectType);
+				world.playEffect(entity.getLocation().add(0, 1, 0), Effect.STEP_SOUND, Config.bloodEffectType);
 			}
 		}
 	}
 	// Realism end
-
-	@Override
-	public void reload()
-	{
-		this.blockCrack = plugin.getConfig().getBoolean("block-crack");
-		this.blockShatter = plugin.getConfig().getBoolean("block-shatter.enabled");
-		this.bloodEffectEnabled = plugin.getConfig().getBoolean("blood-effect.enabled");
-		this.bloodEffectGunsOnly = plugin.getConfig().getBoolean("blood-effect.guns-only");
-		this.smokeEffect = plugin.getConfig().getBoolean("smoke-effect");
-		this.bulletSoundEnabled = plugin.getConfig().getBoolean("bullet-sound.enabled");
-		this.bulletSound = SwornGuns.getSound(plugin.getConfig().getString("bullet-sound.sound"));
-		this.bloodEffectType = Material.matchMaterial(plugin.getConfig().getString("blood-effect.block-id"));
-		this.shatterBlocks = MaterialUtil.fromStrings(plugin.getConfig().getStringList("block-shatter.blocks"));
-	}
 }

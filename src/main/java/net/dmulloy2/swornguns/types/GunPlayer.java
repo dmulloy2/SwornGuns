@@ -22,6 +22,8 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import lombok.Data;
+
+import net.dmulloy2.swornguns.Config;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornapi.types.Reloadable;
 import net.dmulloy2.swornapi.util.FormatUtil;
@@ -349,7 +351,7 @@ public class GunPlayer implements Reloadable
 	public boolean canFireGun(Gun gun, boolean world)
 	{
 		Player player = getPlayer();
-		if (world && plugin.getDisabledWorlds().contains(player.getWorld().getName()))
+		if (world && Config.disabledWorlds.contains(player.getWorld().getName()))
 			return false;
 
 		return ! gun.isNeedsPermission() || player.isOp() || player.hasPermission("swornguns.fire." + gun.getGunName())
