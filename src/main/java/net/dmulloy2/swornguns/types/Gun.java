@@ -132,20 +132,22 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		FileSerialization.deserialize(this, config);
 
 		List<String> gunSoundNames = (List<String>) config.get("gunSound");
-		if (gunSoundNames != null)
+		if (gunSoundNames == null)
 		{
-			gunSound.clear();
-			for (String name : gunSoundNames)
+			return;
+		}
+
+		gunSound.clear();
+		for (String name : gunSoundNames)
+		{
+			try
 			{
-				try
-				{
-					gunSound.add(Sound.valueOf(name.toUpperCase()));
-				}
-				catch (IllegalArgumentException ex)
-				{
-					plugin.getLogHandler().log(Level.WARNING, "Invalid sound \"{0}\" configured for gun {1}",
-						name, gunName);
-				}
+				gunSound.add(Sound.valueOf(name.toUpperCase()));
+			}
+			catch (IllegalArgumentException ex)
+			{
+				plugin.getLogHandler().log(Level.WARNING, "Invalid sound \"{0}\" configured for gun {1}",
+					name, gunName);
 			}
 		}
 	}
@@ -159,116 +161,117 @@ public class Gun implements Cloneable, ConfigurationSerializable
 			return;
 
 		Player player = owner.getPlayer();
-		if (player.isOnline() && player.getHealth() > 0.0D)
+		if (!player.isOnline() || player.getHealth() <= 0.0D)
 		{
-			if (reloadType == ReloadType.CLIP && clipRemaining == -1)
-			{
-				if (initialClip < 0 || initialClip > clipSize)
-					clipRemaining = clipSize;
-				else
-					clipRemaining = initialClip;
-			}
+			return;
+		}
 
-			SwornGunFireEvent event = new SwornGunFireEvent(this, getAmmoAmtNeeded());
-			plugin.getServer().getPluginManager().callEvent(event);
-			if (event.isCancelled())
-				return;
-
-			int ammoAmtNeeded = event.getAmmoNeeded();
-			if (ammoAmtNeeded == 0 || owner.checkAmmo(this, ammoAmtNeeded) || clipRemaining > 0)
-			{
-				if (reloadType == ReloadType.CLIP)
-				{
-					clipRemaining--;
-					if (clipRemaining <= 0 && owner.checkAmmo(this, 1))
-					{
-						owner.removeAmmo(this, 1);
-						reloadGun();
-						return;
-					}
-				}
-				else
-				{
-					owner.removeAmmo(this, ammoAmtNeeded);
-
-					if (roundsFired >= maxClipSize && hasClip)
-					{
-						reloadGun();
-						return;
-					}
-				}
-
-				doRecoil(player);
-
-				this.changed = true;
-				this.roundsFired++;
-
-				for (Sound sound : gunSound.toArray(new Sound[0]))
-				{
-					if (sound != null)
-					{
-						if (localGunSound)
-							player.playSound(player.getLocation(), sound, (float) gunVolume, (float) gunPitch);
-						else
-							player.getWorld().playSound(player.getLocation(), sound, (float) gunVolume, (float) gunPitch);
-					}
-				}
-
-				double accuracy = this.accuracy;
-				if (owner.getPlayer().isSneaking() && accuracy_crouched > -1.0D)
-				{
-					accuracy = accuracy_crouched;
-				}
-
-				if (owner.isAimedIn() && accuracy_aimed > -1.0D)
-				{
-					accuracy = accuracy_aimed;
-				}
-
-				for (int i = 0; i < bulletsPerClick; i++)
-				{
-					int acc = (int) (accuracy * 1000.0D);
-
-					if (acc <= 0)
-						acc = 1;
-
-					Location ploc = player.getLocation();
-
-					Random rand = new Random();
-
-					double dir = -ploc.getYaw() - 90.0F;
-					double pitch = -ploc.getPitch();
-					double xwep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
-					double ywep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
-					double zwep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
-					double xd = Math.cos(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch)) + xwep;
-					double yd = Math.sin(Math.toRadians(pitch)) + ywep;
-					double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch)) + zwep;
-
-					Vector vec = new Vector(xd, yd, zd);
-					vec.multiply(bulletSpeed);
-
-					Bullet bullet = new Bullet(plugin, owner, this, vec);
-					plugin.addBullet(bullet);
-				}
-
-				if (roundsFired >= maxClipSize && hasClip)
-					reloadGun();
-			}
+		if (reloadType == ReloadType.CLIP && clipRemaining == -1)
+		{
+			if (initialClip < 0 || initialClip > clipSize)
+				clipRemaining = clipSize;
 			else
+				clipRemaining = initialClip;
+		}
+
+		SwornGunFireEvent event = new SwornGunFireEvent(this, getAmmoAmtNeeded());
+		plugin.getServer().getPluginManager().callEvent(event);
+		if (event.isCancelled())
+			return;
+
+		int ammoAmtNeeded = event.getAmmoNeeded();
+		if (ammoAmtNeeded != 0 && !owner.checkAmmo(this, ammoAmtNeeded) && clipRemaining <= 0)
+		{
+			player.playSound(owner.getPlayer().getLocation(), Sound.ENTITY_ITEM_BREAK, 20.0F, 20.0F);
+
+			if (outOfAmmoMessage.isEmpty())
+				player.sendMessage(plugin.getPrefix()
+					+ FormatUtil.format("&eThis gun needs &b{0}&e!", MaterialUtil.getName(ammo)));
+			else
+				player.sendMessage(plugin.getPrefix()
+					+ FormatUtil.format(outOfAmmoMessage, MaterialUtil.getName(ammo)));
+
+			finishShooting();
+			return;
+		}
+
+		if (reloadType == ReloadType.CLIP)
+		{
+			clipRemaining--;
+			if (clipRemaining <= 0 && owner.checkAmmo(this, 1))
 			{
-				player.playSound(owner.getPlayer().getLocation(), Sound.ENTITY_ITEM_BREAK, 20.0F, 20.0F);
-
-				if (outOfAmmoMessage.isEmpty())
-					player.sendMessage(plugin.getPrefix()
-						+ FormatUtil.format("&eThis gun needs &b{0}&e!", MaterialUtil.getName(ammo)));
-				else
-					player.sendMessage(plugin.getPrefix()
-						+ FormatUtil.format(outOfAmmoMessage, MaterialUtil.getName(ammo)));
-
-				finishShooting();
+				owner.removeAmmo(this, 1);
+				reloadGun();
+				return;
 			}
 		}
+		else
+		{
+			owner.removeAmmo(this, ammoAmtNeeded);
+
+			if (roundsFired >= maxClipSize && hasClip)
+			{
+				reloadGun();
+				return;
+			}
+		}
+
+		doRecoil(player);
+
+		this.changed = true;
+		this.roundsFired++;
+
+		for (Sound sound : gunSound.toArray(new Sound[0]))
+		{
+			if (sound != null)
+			{
+				if (localGunSound)
+					player.playSound(player.getLocation(), sound, (float) gunVolume, (float) gunPitch);
+				else
+					player.getWorld().playSound(player.getLocation(), sound, (float) gunVolume, (float) gunPitch);
+			}
+		}
+
+		double accuracy = this.accuracy;
+		if (owner.getPlayer().isSneaking() && accuracy_crouched > -1.0D)
+		{
+			accuracy = accuracy_crouched;
+		}
+
+		if (owner.isAimedIn() && accuracy_aimed > -1.0D)
+		{
+			accuracy = accuracy_aimed;
+		}
+
+		for (int i = 0; i < bulletsPerClick; i++)
+		{
+			int acc = (int) (accuracy * 1000.0D);
+
+			if (acc <= 0)
+				acc = 1;
+
+			Location ploc = player.getLocation();
+
+			Random rand = new Random();
+
+			double dir = -ploc.getYaw() - 90.0F;
+			double pitch = -ploc.getPitch();
+			double xwep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
+			double ywep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
+			double zwep = (rand.nextInt(acc) - rand.nextInt(acc) + 0.5D) / 1000.0D;
+			double xd = Math.cos(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch)) + xwep;
+			double yd = Math.sin(Math.toRadians(pitch)) + ywep;
+			double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch)) + zwep;
+
+			Vector vec = new Vector(xd, yd, zd);
+			vec.multiply(bulletSpeed);
+
+			Bullet bullet = new Bullet(plugin, owner, this, vec);
+			plugin.addBullet(bullet);
+		}
+
+		if (roundsFired >= maxClipSize && hasClip)
+			reloadGun();
 	}
 
 	/**
@@ -485,20 +488,22 @@ public class Gun implements Cloneable, ConfigurationSerializable
 	 */
 	private void doRecoil(Player player)
 	{
-		if (recoil != 0.0D)
+		if (recoil == 0.0D)
 		{
-			Location ploc = player.getLocation();
-			double dir = -ploc.getYaw() - 90.0F;
-			double pitch = -ploc.getPitch() - 180.0F;
-			double xd = Math.cos(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
-			double yd = Math.sin(Math.toRadians(pitch));
-			double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
-
-			Vector vec = new Vector(xd, yd, zd);
-			vec.multiply(recoil / 2.0D).setY(0);
-
-			player.setVelocity(player.getVelocity().add(vec));
+			return;
 		}
+
+		Location ploc = player.getLocation();
+		double dir = -ploc.getYaw() - 90.0F;
+		double pitch = -ploc.getPitch() - 180.0F;
+		double xd = Math.cos(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
+		double yd = Math.sin(Math.toRadians(pitch));
+		double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
+
+		Vector vec = new Vector(xd, yd, zd);
+		vec.multiply(recoil / 2.0D).setY(0);
+
+		player.setVelocity(player.getVelocity().add(vec));
 	}
 
 	/**
@@ -553,17 +558,6 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		}
 
 		return str;
-	}
-
-	public short getDataFromString(String str)
-	{
-		if (str.contains(":"))
-		{
-			String news = str.substring(str.indexOf(":") + 1);
-			return NumberUtil.toShort(news);
-		}
-
-		return -1;
 	}
 
 	/**

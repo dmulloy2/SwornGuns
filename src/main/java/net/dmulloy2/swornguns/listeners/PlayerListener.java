@@ -25,6 +25,7 @@ import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -64,22 +65,30 @@ public class PlayerListener implements Listener
 	{
 		Item dropped = event.getItemDrop();
 		GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
-		ItemStack lastHold = gp.getLastHeldItem();
-		if (lastHold != null)
+		Material lastHold = gp.getLastHeldType();
+		if (lastHold == null)
 		{
-			Gun gun = gp.getGun(dropped.getItemStack());
-			if (gun != null)
-			{
-				if (lastHold.getType() == dropped.getItemStack().getType())
-				{
-					if (gun.isHasClip() && gun.isChanged() && gun.isReloadGunOnDrop())
-					{
-						gun.reloadGun();
-						event.setCancelled(true);
-					}
-				}
-			}
+			return;
 		}
+
+		Gun gun = gp.getGun(dropped.getItemStack());
+		if (gun == null)
+		{
+			return;
+		}
+
+		if (lastHold != dropped.getItemStack().getType())
+		{
+			return;
+		}
+
+		if (!gun.isHasClip() || !gun.isChanged() || !gun.isReloadGunOnDrop())
+		{
+			return;
+		}
+
+		gun.reloadGun();
+		event.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)

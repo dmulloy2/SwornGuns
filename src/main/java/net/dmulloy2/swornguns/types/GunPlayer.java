@@ -48,7 +48,7 @@ import com.google.common.base.Objects;
 @Data
 public class GunPlayer implements Reloadable
 {
-	private ItemStack lastHeldItem;
+	private Material lastHeldType;
 	private Gun currentlyFiring;
 	private Map<Material, Gun> guns;
 
@@ -158,7 +158,12 @@ public class GunPlayer implements Reloadable
 		}
 
 		ItemStack hand = player.getInventory().getItemInMainHand();
-		this.lastHeldItem = hand;
+		Material handType = hand.getType();
+
+		if (!handType.equals(lastHeldType) && handType != Material.AIR)
+		{
+			this.lastHeldType = handType;
+		}
 
 		if (ticks % 10 == 0)
 		{
@@ -246,96 +251,106 @@ public class GunPlayer implements Reloadable
 		PlayerInventory inv = player.getInventory();
 		for (ItemStack item : inv.getContents())
 		{
-			if (item != null && item.getType() != Material.AIR)
+			if (item == null || item.getType() == Material.AIR)
 			{
-				Gun gun = getGun(item);
-				if (gun != null)
-				{
-					if (canFireGun(gun))
-					{
-						ItemMeta meta = item.getItemMeta();
+				continue;
+			}
 
-						String name = getGunName(player, gun);
-						if (! name.isEmpty())
-							meta.setDisplayName(name);
+			Gun gun = getGun(item);
+			if (gun == null)
+			{
+				continue;
+			}
 
-						List<String> lore = gun.getLore();
-						if (lore != null && ! lore.isEmpty())
-							meta.setLore(lore);
+			ItemMeta meta = item.getItemMeta();
+			if (meta == null)
+			{
+				continue;
+			}
 
-						item.setItemMeta(meta);
-					}
-					else
-					{
-						ItemMeta meta = item.getItemMeta();
-						if (meta.hasDisplayName() && meta.getDisplayName().contains("\u00AB"))
-						{
-							meta.setDisplayName(null);
-							meta.setLore(null);
-							item.setItemMeta(meta);
-						}
-					}
-				}
+			if (canFireGun(gun))
+			{
+				String name = FormatUtil.format(getGunName(player, gun));
+				if (! name.isEmpty())
+					meta.setDisplayName(name);
+
+				List<String> lore = gun.getLore();
+				if (lore != null && ! lore.isEmpty())
+					meta.setLore(lore.stream().map(FormatUtil::format).toList());
+
+				item.setItemMeta(meta);
+			}
+			else if (meta.hasDisplayName() && meta.getDisplayName().contains("\u00AB"))
+			{
+				meta.setDisplayName(null);
+				meta.setLore(null);
+				item.setItemMeta(meta);
 			}
 		}
 	}
 
 	private String getGunName(Player player, Gun gun)
 	{
-		StringBuilder add = new StringBuilder();
-		if (gun.isHasClip())
+		String gunName = gun.getDisplayName();
+		if (gunName == null || gunName.isEmpty())
+			gunName = gun.getGunName();
+
+		if (!gun.isHasClip())
 		{
-			Material ammo = gun.getAmmo();
-			int maxClip = gun.getMaxClipSize();
-			int ammoAmtNeeded = Math.max(1, gun.getAmmoAmtNeeded());
-			int amount = (int) Math.floor(InventoryUtil.amount(player.getInventory(), ammo, (short) -1)
-					/ (double) ammoAmtNeeded);
-
-			int leftInClip, ammoLeft;
-			if (gun.getReloadType() == ReloadType.CLIP)
-			{
-				leftInClip = Math.max(0, gun.getClipRemaining());
-				ammoLeft = (Math.max(1, gun.getClipSize()) * amount) - leftInClip;
-			}
-			else
-			{
-				ammoLeft = Math.max(0, amount - maxClip + gun.getRoundsFired());
-				leftInClip = amount - ammoLeft;
-			}
-
-			add.append(ChatColor.YELLOW)
-					.append("    \u00AB")
-					.append(leftInClip).append(" \uFFE8 ")
-					.append(ammoLeft)
-					.append("\u00BB");
-
-			StringBuilder reload = new StringBuilder();
-			if (gun.isReloading())
-			{
-				int scale = 4;
-				int reloadTime = Math.max(1, gun.getReloadTime());
-				int bars = (int) Math.round(scale - (((double)gun.getGunReloadTimer() * scale) / reloadTime));
-				reload.append("\u25AA".repeat(Math.max(0, bars)));
-
-				int left = scale - bars;
-				reload.append("\u25AB".repeat(Math.max(0, left)));
-
-				add.append(ChatColor.RED)
-						.append("    ")
-						.append(reload.reverse())
-						.append("RELOADING")
-						.append(reload);
-			}
+			return gunName;
 		}
 
-		return gun.getName() + add;
+		StringBuilder add = new StringBuilder();
+		Material ammo = gun.getAmmo();
+		int maxClip = gun.getMaxClipSize();
+		int ammoAmtNeeded = Math.max(1, gun.getAmmoAmtNeeded());
+		int amount = (int) Math.floor(InventoryUtil.amount(player.getInventory(), ammo, (short) -1)
+				/ (double) ammoAmtNeeded);
+
+		int leftInClip, ammoLeft;
+		if (gun.getReloadType() == ReloadType.CLIP)
+		{
+			leftInClip = Math.max(0, gun.getClipRemaining());
+			ammoLeft = (Math.max(1, gun.getClipSize()) * amount) - leftInClip;
+		}
+		else
+		{
+			ammoLeft = Math.max(0, amount - maxClip + gun.getRoundsFired());
+			leftInClip = amount - ammoLeft;
+		}
+
+		add.append(ChatColor.YELLOW)
+				.append("    \u00AB")
+				.append(leftInClip).append(" \uFFE8 ")
+				.append(ammoLeft)
+				.append("\u00BB");
+
+		StringBuilder reload = new StringBuilder();
+		if (gun.isReloading())
+		{
+			int scale = 4;
+			int reloadTime = Math.max(1, gun.getReloadTime());
+			int bars = (int) Math.round(scale - (((double)gun.getGunReloadTimer() * scale) / reloadTime));
+			reload.append("\u25AA".repeat(Math.max(0, bars)));
+
+			int left = scale - bars;
+			reload.append("\u25AB".repeat(Math.max(0, left)));
+
+			add.append(ChatColor.RED)
+					.append("    ")
+					.append(reload.reverse())
+					.append("RELOADING")
+					.append(reload);
+		}
+
+		return gunName + add;
 	}
 
 	// ---- Util
 
 	public void unload()
 	{
-		lastHeldItem = null;
+		lastHeldType = null;
 		currentlyFiring = null;
 
 		if (guns != null)

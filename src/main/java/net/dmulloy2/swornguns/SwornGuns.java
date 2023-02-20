@@ -74,6 +74,11 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	{
 		long start = System.currentTimeMillis();
 
+		// Handlers
+		logHandler = new LogHandler(this);
+		commandHandler = new CommandHandler(this);
+		permissionHandler = new PermissionHandler(this);
+
 		// Configuration
 		saveDefaultConfig();
 		reloadConfig();
@@ -84,11 +89,6 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		bullets = new ConcurrentHashMap<>();
 		players = new ConcurrentHashMap<>();
 		effects = new ConcurrentHashMap<>();
-
-		// Handlers
-		logHandler = new LogHandler(this);
-		commandHandler = new CommandHandler(this);
-		permissionHandler = new PermissionHandler(this);
 
 		// Register commands
 		commandHandler.setCommandPrefix("swornguns");
