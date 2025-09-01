@@ -18,25 +18,30 @@
  */
 package net.dmulloy2.swornguns.types;
 
+import lombok.Data;
+
 import java.util.*;
 import java.util.logging.Level;
 
-import lombok.Data;
-import net.dmulloy2.swornapi.io.FileSerialization;
-import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornapi.util.FormatUtil;
-import net.dmulloy2.swornapi.util.MaterialUtil;
-import net.dmulloy2.swornapi.util.NumberUtil;
-import net.dmulloy2.swornapi.util.Util;
-import net.dmulloy2.swornguns.events.SwornGunFireEvent;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+
+import net.dmulloy2.swornapi.io.FileSerialization;
+import net.dmulloy2.swornapi.util.FormatUtil;
+import net.dmulloy2.swornapi.util.MaterialUtil;
+import net.dmulloy2.swornapi.util.Util;
+import net.dmulloy2.swornguns.SwornGuns;
+import net.dmulloy2.swornguns.events.SwornGunFireEvent;
+import net.kyori.adventure.key.Key;
 
 /**
  * @author dmulloy2
@@ -137,9 +142,18 @@ public class Gun implements Cloneable, ConfigurationSerializable
 			return;
 		}
 
+		Registry<Sound> registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.SOUND_EVENT);
+
 		gunSound.clear();
 		for (String name : gunSoundNames)
 		{
+			Sound sound = registry.get(Key.key(name.toLowerCase()));
+			if (sound != null)
+			{
+				gunSound.add(sound);
+				continue;
+			}
+
 			try
 			{
 				gunSound.add(Sound.valueOf(name.toUpperCase()));

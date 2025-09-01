@@ -18,16 +18,12 @@
  */
 package net.dmulloy2.swornguns.types;
 
+import lombok.Data;
+
 import java.util.*;
 import java.util.Map.Entry;
 
-import lombok.Data;
-
-import net.dmulloy2.swornguns.Config;
-import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornapi.types.Reloadable;
-import net.dmulloy2.swornapi.util.FormatUtil;
-import net.dmulloy2.swornapi.util.InventoryUtil;
+import com.google.common.base.Objects;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -39,7 +35,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.google.common.base.Objects;
+import net.dmulloy2.swornapi.types.Reloadable;
+import net.dmulloy2.swornapi.util.FormatUtil;
+import net.dmulloy2.swornapi.util.InventoryUtil;
+import net.dmulloy2.swornguns.Config;
+import net.dmulloy2.swornguns.SwornGuns;
 
 /**
  * @author dmulloy2
@@ -169,7 +169,7 @@ public class GunPlayer implements Reloadable
 		{
 			if (getGun(hand) == null)
 			{
-				player.removePotionEffect(PotionEffectType.SLOW);
+				player.removePotionEffect(PotionEffectType.SLOWNESS);
 				this.aimedIn = false;
 			}
 		}
@@ -185,7 +185,7 @@ public class GunPlayer implements Reloadable
 
 			if (gun.getMaterial() == hand.getType() && isAimedIn() && ! gun.isCanAimLeft() && ! gun.isCanAimRight())
 			{
-				player.removePotionEffect(PotionEffectType.SLOW);
+				player.removePotionEffect(PotionEffectType.SLOWNESS);
 				this.aimedIn = false;
 			}
 
@@ -219,12 +219,12 @@ public class GunPlayer implements Reloadable
 	{
 		if (aimedIn)
 		{
-			getPlayer().removePotionEffect(PotionEffectType.SLOW);
+			getPlayer().removePotionEffect(PotionEffectType.SLOWNESS);
 			this.aimedIn = false;
 		}
 		else
 		{
-			getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 12000, 4));
+			getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 12000, 4));
 			this.aimedIn = true;
 		}
 	}

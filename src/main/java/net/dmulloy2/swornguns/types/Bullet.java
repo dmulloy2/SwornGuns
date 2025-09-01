@@ -18,15 +18,16 @@
  */
 package net.dmulloy2.swornguns.types;
 
+import lombok.Data;
+
 import java.util.*;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 
-import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornapi.util.Util;
-
 import org.bukkit.*;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -37,7 +38,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import lombok.Data;
+import net.dmulloy2.swornapi.util.Util;
+import net.dmulloy2.swornguns.SwornGuns;
 
 /**
  * @author dmulloy2
@@ -222,59 +224,58 @@ public class Bullet
 			return;
 
 		this.released = true;
-		if (projectile != null)
+		if (projectile == null || shotFrom == null)
 		{
-			this.lastLocation = projectile.getLocation();
+			return;
+		}
 
-			if (shotFrom != null)
+		this.lastLocation = projectile.getLocation();
+
+		int rad = (int) shotFrom.getExplodeRadius();
+		int rad2 = rad;
+		if (shotFrom.getFireRadius() > rad)
+		{
+			rad = (int) shotFrom.getFireRadius();
+			rad2 = 2;
+
+			for (int i = -rad; i <= rad; i++)
 			{
-				int rad = (int) shotFrom.getExplodeRadius();
-				int rad2 = rad;
-				if (shotFrom.getFireRadius() > rad)
+				for (int ii = -rad2 / 2; ii <= rad2 / 2; ii++)
 				{
-					rad = (int) shotFrom.getFireRadius();
-					rad2 = 2;
-
-					for (int i = -rad; i <= rad; i++)
+					for (int iii = -rad; iii <= rad; iii++)
 					{
-						for (int ii = -rad2 / 2; ii <= rad2 / 2; ii++)
+						Location nloc = lastLocation.clone().add(i, ii, iii);
+						if (nloc.distance(lastLocation) <= rad && Util.random(5) == 1)
 						{
-							for (int iii = -rad; iii <= rad; iii++)
-							{
-								Location nloc = lastLocation.clone().add(i, ii, iii);
-								if (nloc.distance(lastLocation) <= rad && Util.random(5) == 1)
-								{
-									nloc.getWorld().playEffect(nloc, Effect.MOBSPAWNER_FLAMES, 2);
-								}
-							}
+							nloc.getWorld().playEffect(nloc, Effect.MOBSPAWNER_FLAMES, 2);
 						}
 					}
 				}
-				else if (rad > 0)
-				{
-					for (int i = -rad; i <= rad; i++)
-					{
-						for (int ii = -rad2 / 2; ii <= rad2 / 2; ii++)
-						{
-							for (int iii = -rad; iii <= rad; iii++)
-							{
-								Location nloc = lastLocation.clone().add(i, ii, iii);
-								if (nloc.distance(lastLocation) <= rad && Util.random(10) == 1)
-								{
-									explosion(nloc);
-								}
-							}
-						}
-					}
-
-					explosion(lastLocation);
-					explosionDamage();
-				}
-
-				fireSpread();
-				flash();
 			}
 		}
+		else if (rad > 0)
+		{
+			for (int i = -rad; i <= rad; i++)
+			{
+				for (int ii = -rad2 / 2; ii <= rad2 / 2; ii++)
+				{
+					for (int iii = -rad; iii <= rad; iii++)
+					{
+						Location nloc = lastLocation.clone().add(i, ii, iii);
+						if (nloc.distance(lastLocation) <= rad && Util.random(10) == 1)
+						{
+							explosion(nloc);
+						}
+					}
+				}
+			}
+
+			explosion(lastLocation);
+			explosionDamage();
+		}
+
+		fireSpread();
+		flash();
 	}
 
 	private void explosion(Location location)
@@ -340,119 +341,130 @@ public class Bullet
 	@SuppressWarnings("Guava")
 	private static final Function<? super Double, Double> ZERO = Functions.constant(-0.0)::apply;
 
-	@SuppressWarnings("deprecation") // Old Event
-	private EntityDamageByEntityEvent getDamageEvent(Entity damager, Entity entity, DamageCause cause, double damage)
+	private boolean canDamage(Entity damager, Entity entity, DamageCause cause, double damage)
 	{
-		try
-		{
-			Map<DamageModifier, Double> modifiers = new HashMap<>();
-			modifiers.put(DamageModifier.BASE, damage);
+		Map<DamageModifier, Double> modifiers = new HashMap<>();
+		modifiers.put(DamageModifier.BASE, damage);
 
-			Map<DamageModifier, Function<? super Double, Double>> functions = new HashMap<>();
-			functions.put(DamageModifier.BASE, ZERO);
+		Map<DamageModifier, Function<? super Double, Double>> functions = new HashMap<>();
+		functions.put(DamageModifier.BASE, ZERO);
 
-			return new EntityDamageByEntityEvent(damager, entity, cause, modifiers, functions);
-		}
-		catch (Throwable ex)
-		{
-			return new EntityDamageByEntityEvent(damager, entity, cause, damage);
-		}
+		DamageSource source = DamageSource
+			.builder(DamageType.PLAYER_ATTACK)
+			.withCausingEntity(damager)
+			.build();
+
+		EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(damager, entity, cause, source, modifiers, functions, false);
+		plugin.getServer().getPluginManager().callEvent(event);
+		return !event.isCancelled();
 	}
 
 	private void explosionDamage()
 	{
-		if (shotFrom.getExplodeRadius() > 0.0D)
+		if (shotFrom.getExplodeRadius() <= 0.0D)
 		{
-			// Create the explosion
-			lastLocation.getWorld().createExplosion(lastLocation, 0.0F);
+			return;
+		}
 
-			if (shotFrom.isThrowable())
-				projectile.teleport(projectile.getLocation().add(0.0D, 1.0D, 0.0D));
+		// Create the explosion
+		lastLocation.getWorld().createExplosion(lastLocation, 0.0F);
 
-			// Calculate damage
-			double damage = shotFrom.getExplosionDamage();
-			if (damage <= 0.0D)
-				damage = shotFrom.getGunDamage();
+		if (shotFrom.isThrowable())
+			projectile.teleport(projectile.getLocation().add(0.0D, 1.0D, 0.0D));
 
-			if (damage > 0.0D)
+		// Calculate damage
+		double damage = shotFrom.getExplosionDamage();
+		if (damage <= 0.0D)
+			damage = shotFrom.getGunDamage();
+
+		if (damage <= 0.0D)
+		{
+			return;
+		}
+
+		double rad = shotFrom.getExplodeRadius();
+		List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
+		for (Entity entity : entities)
+		{
+			if (!entity.isValid() || !(entity instanceof LivingEntity lentity))
 			{
-				double rad = shotFrom.getExplodeRadius();
-				List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
-				for (Entity entity : entities)
-				{
-					if (entity.isValid() && entity instanceof LivingEntity lentity)
-					{
-						if (lentity.getHealth() > 0.0D)
-						{
-							// Call event
-							EntityDamageByEntityEvent event = getDamageEvent(shooter.getPlayer(), lentity, DamageCause.ENTITY_EXPLOSION,
-									damage);
-							plugin.getServer().getPluginManager().callEvent(event);
-							if (! event.isCancelled())
-							{
-								if (lentity.hasLineOfSight(projectile))
-								{
-									lentity.damage(damage, shooter.getPlayer());
-								}
-							}
-						}
-					}
-				}
+				continue;
 			}
+
+			if (lentity.getHealth() <= 0.0D || !lentity.hasLineOfSight(projectile))
+			{
+				continue;
+			}
+
+			if (!canDamage(shooter.getPlayer(), lentity, DamageCause.ENTITY_EXPLOSION, damage))
+			{
+				continue;
+			}
+
+			lentity.damage(damage, shooter.getPlayer());
 		}
 	}
 
 	private void fireSpread()
 	{
-		if (shotFrom.getFireRadius() > 0.0D)
+		if (shotFrom.getFireRadius() <= 0.0D)
 		{
-			lastLocation.getWorld().playSound(lastLocation, Sound.BLOCK_GLASS_BREAK, 20.0F, 20.0F);
-			double rad = shotFrom.getFireRadius();
-			List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
-			for (Entity entity : entities)
+			return;
+		}
+
+		lastLocation.getWorld().playSound(lastLocation, Sound.BLOCK_GLASS_BREAK, 20.0F, 20.0F);
+		double rad = shotFrom.getFireRadius();
+		List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
+		for (Entity entity : entities)
+		{
+			if (!entity.isValid() || !(entity instanceof LivingEntity lentity))
 			{
-				if (entity.isValid() && entity instanceof LivingEntity lentity)
-				{
-					if (lentity.getHealth() > 0.0D)
-					{
-						EntityDamageByEntityEvent event = getDamageEvent(shooter.getPlayer(), lentity, DamageCause.FIRE_TICK, 1.0D);
-						plugin.getServer().getPluginManager().callEvent(event);
-						if (! event.isCancelled())
-						{
-							lentity.setFireTicks(7 * 20);
-							lentity.damage(1.0D, shooter.getPlayer());
-						}
-					}
-				}
+				continue;
 			}
+
+			if (lentity.getHealth() <= 0.0D || !lentity.hasLineOfSight(projectile))
+			{
+				continue;
+			}
+
+			if (!canDamage(shooter.getPlayer(), lentity, DamageCause.FIRE_TICK, 1.0D))
+			{
+				continue;
+			}
+
+			lentity.setFireTicks(7 * 20);
+			lentity.damage(1.0D, shooter.getPlayer());
 		}
 	}
 
 	private void flash()
 	{
-		if (shotFrom.getFlashRadius() > 0.0D)
+		if (shotFrom.getFlashRadius() <= 0.0D)
 		{
-			lastLocation.getWorld().playSound(lastLocation, Sound.ENTITY_GENERIC_SPLASH, 20.0F, 20.0F);
-			double rad = shotFrom.getFlashRadius();
-			List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
-			for (Entity entity : entities)
+			return;
+		}
+
+		lastLocation.getWorld().playSound(lastLocation, Sound.ENTITY_GENERIC_SPLASH, 20.0F, 20.0F);
+		double rad = shotFrom.getFlashRadius();
+		List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
+		for (Entity entity : entities)
+		{
+			if (!entity.isValid() || !(entity instanceof LivingEntity lentity))
 			{
-				if (entity.isValid() && entity instanceof LivingEntity lentity)
-				{
-					if (lentity.getHealth() > 0.0D)
-					{
-						EntityDamageByEntityEvent event = getDamageEvent(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D);
-						plugin.getServer().getPluginManager().callEvent(event);
-						if (! event.isCancelled())
-						{
-							if (lentity.hasLineOfSight(projectile))
-							{
-								lentity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 7 * 20, 1));
-							}
-						}
-					}
-				}
+				continue;
 			}
+
+			if (lentity.getHealth() <= 0.0D || !lentity.hasLineOfSight(projectile))
+			{
+				continue;
+			}
+
+			if (!canDamage(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D))
+			{
+				continue;
+			}
+
+			lentity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 7 * 20, 1));
 		}
 	}
 

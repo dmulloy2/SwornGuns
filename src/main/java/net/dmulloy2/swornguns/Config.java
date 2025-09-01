@@ -1,15 +1,15 @@
 package net.dmulloy2.swornguns;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.BlockType;
 
 import net.dmulloy2.swornapi.config.Key;
-import net.dmulloy2.swornapi.config.ValueOptions;
-import net.dmulloy2.swornapi.config.ValueOptions.ValueOption;
+import net.dmulloy2.swornapi.config.KnownRegistry;
+import net.dmulloy2.swornapi.config.TransformRegistry;
 
 public class Config
 {
@@ -17,8 +17,8 @@ public class Config
 	public static boolean bloodEffectEnabled = true;
 
 	@Key("blood-effect.block-id")
-	@ValueOptions(ValueOption.PARSE_MATERIAL)
-	public static Material bloodEffectType = Material.REDSTONE_BLOCK;
+	@TransformRegistry(KnownRegistry.BLOCK)
+	public static BlockType bloodEffectType = BlockType.REDSTONE_BLOCK;
 
 	@Key("blood-effect.guns-only")
 	public static boolean bloodEffectGunsOnly = false;
@@ -30,14 +30,14 @@ public class Config
 	public static boolean bulletSoundEnabled = true;
 
 	@Key("bullet-sound.sound")
-	@ValueOptions(ValueOption.PARSE_ENUM)
+	@TransformRegistry(KnownRegistry.SOUND)
 	public static Sound bulletSound = Sound.ENTITY_MAGMA_CUBE_JUMP;
 
 	@Key("block-shatter.enabled")
 	public static boolean blockShatterEnabled = true;
 
 	@Key("block-shatter.blocks")
-	public static List<Material> blockShatterBlocks = Arrays.asList(
+	public static List<Material> blockShatterBlocks = List.of(
 		Material.OAK_LEAVES,
 		Material.GLASS,
 		Material.GLASS_PANE,

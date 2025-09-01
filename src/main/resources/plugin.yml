@@ -1,6 +1,6 @@
 name: SwornGuns
 main: net.dmulloy2.swornguns.SwornGuns
-version: ${project.version}${project.build.number}
+version: ${version}
 author: dmulloy2
 description: Guns in Minecraft!
 api-version: "1.13"

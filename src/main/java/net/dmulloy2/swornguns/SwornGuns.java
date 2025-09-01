@@ -18,19 +18,32 @@
  */
 package net.dmulloy2.swornguns;
 
+import lombok.Getter;
+
 import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import net.dmulloy2.swornapi.SwornPlugin;
 import net.dmulloy2.swornapi.commands.CmdHelp;
 import net.dmulloy2.swornapi.config.ConfigParser;
 import net.dmulloy2.swornapi.handlers.CommandHandler;
 import net.dmulloy2.swornapi.handlers.LogHandler;
 import net.dmulloy2.swornapi.handlers.PermissionHandler;
+import net.dmulloy2.swornapi.util.FormatUtil;
+import net.dmulloy2.swornapi.util.Util;
 import net.dmulloy2.swornguns.api.SwornGunsAPI;
 import net.dmulloy2.swornguns.commands.CmdList;
 import net.dmulloy2.swornguns.commands.CmdReload;
@@ -43,17 +56,6 @@ import net.dmulloy2.swornguns.types.Bullet;
 import net.dmulloy2.swornguns.types.EffectData;
 import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornguns.types.GunPlayer;
-import net.dmulloy2.swornapi.util.FormatUtil;
-import net.dmulloy2.swornapi.util.Util;
-
-import org.bukkit.Sound;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * @author dmulloy2
@@ -232,7 +234,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 	private void getOnlinePlayers()
 	{
-		for (Player player : Util.getOnlinePlayers())
+		for (Player player : Bukkit.getOnlinePlayers())
 		{
 			if (! players.containsKey(player.getUniqueId()))
 				players.put(player.getUniqueId(), new GunPlayer(this, player));

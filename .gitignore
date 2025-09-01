@@ -6,3 +6,6 @@ target/
 *.iml
 *.class
 *.jar
+.gradle/
+build/
+out/

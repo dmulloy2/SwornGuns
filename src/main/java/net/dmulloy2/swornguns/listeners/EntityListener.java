@@ -20,28 +20,9 @@ package net.dmulloy2.swornguns.listeners;
 
 import java.util.List;
 
-import net.dmulloy2.swornguns.Config;
-import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.events.SwornGunsBlockDamageEvent;
-import net.dmulloy2.swornguns.types.Bullet;
-import net.dmulloy2.swornguns.types.Gun;
-import net.dmulloy2.swornapi.types.Reloadable;
-import net.dmulloy2.swornapi.util.MaterialUtil;
-import net.dmulloy2.swornapi.util.Util;
-import net.dmulloy2.swornguns.types.GunPlayer;
-
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Damageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -50,6 +31,14 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
+
+import net.dmulloy2.swornapi.util.Util;
+import net.dmulloy2.swornguns.Config;
+import net.dmulloy2.swornguns.SwornGuns;
+import net.dmulloy2.swornguns.events.SwornGunsBlockDamageEvent;
+import net.dmulloy2.swornguns.types.Bullet;
+import net.dmulloy2.swornguns.types.Gun;
+import net.dmulloy2.swornguns.types.GunPlayer;
 
 /**
  * @author dmulloy2
@@ -116,6 +105,7 @@ public class EntityListener implements Listener
 
 			if (hurt != null)
 			{
+				// TODO we don't check if this is cancelled
 				// Call the damage event, which will be handled below
 				EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(proj, hurt, DamageCause.PROJECTILE, 0);
 				plugin.getServer().getPluginManager().callEvent(damageEvent);
