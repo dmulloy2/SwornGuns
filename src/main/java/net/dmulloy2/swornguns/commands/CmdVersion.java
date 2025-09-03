@@ -38,7 +38,7 @@ public class CmdVersion extends SwornGunsCommand
 	public void perform()
 	{
 		sendMessage("&3 ---- &eSwornGuns &3----");
-		sendMessage("&bVersion&e: {0}", plugin.getDescription().getVersion());
+		sendMessage("&bVersion&e: {0}", plugin.getPluginMeta().getVersion());
 		sendMessage("&bAuthor&e: dmulloy2");
 		sendMessage("&bIssues&e: https://github.com/dmulloy2/SwornGuns/issues");
 	}

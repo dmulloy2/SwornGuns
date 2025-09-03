@@ -123,28 +123,25 @@ public class Bullet
 		}
 	}
 
-	public final void tick()
+	public final boolean tick()
 	{
 		// Make sure the bullet is still valid
 		if (dead || destroyNextTick || projectile == null || shooter == null)
 		{
-			remove();
-			return;
+			return false;
 		}
 
 		// Remove the bullet if it's below bedrock
 		if (projectile.getLocation().getY() <= 0.0D)
 		{
-			remove();
-			return;
+			return false;
 		}
 
 		// Make sure the shooter is still valid
 		Player player = shooter.getPlayer();
 		if (player == null || ! player.isOnline() || player.getHealth() <= 0.0D)
 		{
-			remove();
-			return;
+			return false;
 		}
 
 		this.ticks++;
@@ -159,8 +156,7 @@ public class Bullet
 				plugin.addEffect(eff);
 			}
 
-			remove();
-			return;
+			return false;
 		}
 
 		if (shotFrom.isHasSmokeTrail())
@@ -170,8 +166,7 @@ public class Bullet
 
 		if (shotFrom.isThrowable() && ticks == 90)
 		{
-			remove();
-			return;
+			return false;
 		}
 
 		if (active)
@@ -192,17 +187,11 @@ public class Bullet
 			projectile.setVelocity(velocity);
 		}
 
-		if (ticks > 200)
-		{
-			remove();
-		}
+		return ticks <= 200;
 	}
 
 	public final void remove()
 	{
-		// Unregister
-		plugin.removeBullet(this);
-
 		if (destroyed)
 			return;
 

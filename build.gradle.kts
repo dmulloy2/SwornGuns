@@ -66,6 +66,10 @@ tasks {
         useJUnitPlatform()
     }
 
+    compileJava {
+        options.isDeprecation = true
+    }
+
     processResources {
         var buildNumber = System.getenv("BUILD_NUMBER")
         var fullVersion = if (isSnapshot && buildNumber != null)

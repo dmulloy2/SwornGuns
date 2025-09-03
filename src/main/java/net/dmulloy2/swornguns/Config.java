@@ -3,7 +3,6 @@ package net.dmulloy2.swornguns;
 import java.util.Collections;
 import java.util.List;
 
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockType;
 
@@ -37,12 +36,13 @@ public class Config
 	public static boolean blockShatterEnabled = true;
 
 	@Key("block-shatter.blocks")
-	public static List<Material> blockShatterBlocks = List.of(
-		Material.OAK_LEAVES,
-		Material.GLASS,
-		Material.GLASS_PANE,
-		Material.SAND,
-		Material.GRAVEL
+	@TransformRegistry(KnownRegistry.BLOCK)
+	public static List<BlockType> blockShatterBlocks = List.of(
+		BlockType.OAK_LEAVES,
+		BlockType.GLASS,
+		BlockType.GLASS_PANE,
+		BlockType.SAND,
+		BlockType.GRAVEL
 	);
 
 	@Key("block-crack")

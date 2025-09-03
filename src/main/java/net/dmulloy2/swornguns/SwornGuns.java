@@ -22,12 +22,10 @@ import lombok.Getter;
 
 import java.io.File;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -129,7 +127,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		// Update timer
 		new UpdateTimer().runTaskTimer(this, 20L, 1L);
 
-		logHandler.log("{0} has been enabled. Took {1} ms.", getDescription().getFullName(), System.currentTimeMillis() - start);
+		logHandler.log("SwornGuns has been enabled. Took {0} ms.", System.currentTimeMillis() - start);
 	}
 
 	@Override
@@ -158,7 +156,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 
 		clearMemory();
 
-		logHandler.log("{0} has been disabled. Took {1} ms.", getDescription().getFullName(), System.currentTimeMillis() - start);
+		logHandler.log("SwornGuns has been disabled. Took {0} ms.", System.currentTimeMillis() - start);
 	}
 
 	private void clearMemory()
@@ -317,84 +315,81 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		effects.put(effectType.getId(), effectType);
 	}
 
-	public static Sound getSound(String sound)
-	{
-		try
-		{
-			return Sound.valueOf(sound.toUpperCase().replaceAll(" ", "_"));
-		} catch (Throwable ignored) { }
-		return null;
-	}
-
 	public class UpdateTimer extends BukkitRunnable
 	{
 		@Override
 		public void run()
 		{
-			if (! players.isEmpty())
+			Iterator<GunPlayer> playerIter = players.values().iterator();
+			while (playerIter.hasNext())
 			{
-				for (GunPlayer player : players.values())
+				GunPlayer player = playerIter.next();
+
+				try
 				{
-					try
+					if (!player.tick())
 					{
-						player.tick();
+						playerIter.remove();
 					}
-					catch (Throwable ex)
+				}
+				catch (Throwable ex)
+				{
+					if (! player.isErrorReported())
 					{
-						if (! player.isErrorReported())
-						{
-							logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + player.getName()));
-							player.setErrorReported(true);
-						}
+						logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + player.getName()));
+						player.setErrorReported(true);
 					}
 				}
 			}
 
-			if (! bullets.isEmpty())
+			Iterator<Bullet> bulletIter = bullets.values().iterator();
+			while (bulletIter.hasNext())
 			{
-				for (Entry<Integer, Bullet> entry : bullets.entrySet())
-				{
-					Bullet bullet = entry.getValue();
+				boolean finished = false;
+				Bullet bullet = bulletIter.next();
 
+				try
+				{
+					finished = !bullet.tick();
+				}
+				catch (Throwable ex)
+				{
+					logHandler.warn(ex, "Failed to tick bullet " + bullet);
+				}
+
+				if (finished)
+				{
 					try
 					{
-						bullet.tick();
+						bulletIter.remove();
+						bullet.remove();
 					}
 					catch (Throwable ex)
 					{
-						logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking bullet " + bullet));
-
-						try
-						{
-							bullets.remove(entry.getKey());
-							bullet.remove();
-						} catch (Throwable ignored) { }
+						logHandler.warn(ex, "Failed to remove bullet " + bullet);
 					}
 				}
 			}
 
-			if (! effects.isEmpty())
+			Iterator<EffectData> effectIter = effects.values().iterator();
+			while (effectIter.hasNext())
 			{
-				Iterator<Entry<UUID, EffectData>> iter = effects.entrySet().iterator();
-				while (iter.hasNext())
+				EffectData effect = effectIter.next();
+
+				boolean finished;
+
+				try
 				{
-					EffectData effect = iter.next().getValue();
-
-					boolean finished;
-
-					try
-					{
-						finished = effect.tick();
-					}
-					catch (Throwable ex)
-					{
-						logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking effect " + effect));
-						finished = true;
-					}
-
-					if (finished)
-						iter.remove();
+					finished = effect.tick();
 				}
+				catch (Throwable ex)
+				{
+					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking effect " + effect));
+					finished = true;
+				}
+
+				if (finished)
+					effectIter.remove();
 			}
 		}
 	}

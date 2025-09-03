@@ -23,12 +23,10 @@ import lombok.Data;
 import java.util.*;
 import java.util.logging.Level;
 
-import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Entity;
@@ -41,7 +39,9 @@ import net.dmulloy2.swornapi.util.MaterialUtil;
 import net.dmulloy2.swornapi.util.Util;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.events.SwornGunFireEvent;
-import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 /**
  * @author dmulloy2
@@ -119,7 +119,9 @@ public class Gun implements Cloneable, ConfigurationSerializable
 	private EffectData releaseEffect;
 
 	private transient List<Sound> gunSound = new ArrayList<>();
-	private transient List<String> lore = new ArrayList<>();
+
+	private List<String> lore = new ArrayList<>();
+	private transient List<Component> loreComponents = new ArrayList<>();
 
 	private transient GunPlayer owner;
 	private transient final SwornGuns plugin;
@@ -130,38 +132,71 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		this.plugin = plugin;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void loadFromConfig(Map<String, Object> config)
 	{
 		// deserialize all the primitive values
 		FileSerialization.deserialize(this, config);
 
+		readGunSounds(config);
+		readLore(config);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void readLore(Map<String, Object> config)
+	{
+		List<String> loreLines = (List<String>) config.get("lore");
+		if (loreLines == null)
+		{
+			return;
+		}
+
+		for (String line : loreLines)
+		{
+			try
+			{
+				if (line.contains("{"))
+				{
+					loreComponents.add(GsonComponentSerializer.gson().deserialize(line));
+				}
+				else
+				{
+					loreComponents.add(LegacyComponentSerializer.legacyAmpersand().deserialize(line));
+				}
+			}
+			catch (Exception ex)
+			{
+				plugin.getLogHandler().log(Level.WARNING, "Invalid lore line \"{0}\" configured for gun {1}", line, gunName);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void readGunSounds(Map<String, Object> config)
+	{
 		List<String> gunSoundNames = (List<String>) config.get("gunSound");
 		if (gunSoundNames == null)
 		{
 			return;
 		}
 
-		Registry<Sound> registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.SOUND_EVENT);
-
 		gunSound.clear();
 		for (String name : gunSoundNames)
 		{
-			Sound sound = registry.get(Key.key(name.toLowerCase()));
-			if (sound != null)
-			{
-				gunSound.add(sound);
-				continue;
-			}
-
 			try
 			{
-				gunSound.add(Sound.valueOf(name.toUpperCase()));
+				Sound sound = Util.getRegistryEntry(RegistryKey.SOUND_EVENT, name);
+				if (sound != null)
+				{
+					gunSound.add(sound);
+				}
+				else
+				{
+					plugin.getLogHandler().log(Level.WARNING, "Invalid sound \"{0}\" configured for gun {1}", name, gunName);
+				}
 			}
-			catch (IllegalArgumentException ex)
+			catch (Exception ex)
 			{
-				plugin.getLogHandler().log(Level.WARNING, "Invalid sound \"{0}\" configured for gun {1}",
-					name, gunName);
+				plugin.getLogHandler().log(Level.WARNING, "Invalid sound \"{0}\" configured for gun {1}", name, gunName);
 			}
 		}
 	}
@@ -299,8 +334,10 @@ public class Gun implements Cloneable, ConfigurationSerializable
 	/**
 	 * Handles bullet movement, cooldowns, etc
 	 */
-	public final void tick()
+	public final boolean tick()
 	{
+		boolean changed = false;
+
 		this.ticks++;
 		this.lastFired++;
 		this.timer--;
@@ -309,9 +346,11 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		if (gunReloadTimer < 0)
 		{
 			if (reloading)
+			{
 				finishReloading();
-
-			this.reloading = false;
+				this.reloading = false;
+				changed = true;
+			}
 		}
 
 		gunSounds();
@@ -330,20 +369,31 @@ public class Gun implements Cloneable, ConfigurationSerializable
 					this.bulletsShot++;
 
 					if (bulletsShot <= roundsPerBurst)
+					{
 						shoot();
+					}
 					else
+					{
 						finishShooting();
+					}
+					changed = true;
 				}
 			}
 			else
 			{
 				shoot();
 				finishShooting();
+				changed = true;
 			}
 		}
 
 		if (reloading)
+		{
 			this.firing = false;
+			changed = true;
+		}
+
+		return changed;
 	}
 
 	/**
@@ -382,7 +432,7 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		g.isThrowable = this.isThrowable;
 		g.projType = this.projType;
 		g.needsPermission = this.needsPermission;
-		g.gunSound = this.gunSound;
+		g.gunSound = new ArrayList<>(this.gunSound);
 		g.bulletDelayTime = this.bulletDelayTime;
 		g.hasClip = this.hasClip;
 		g.maxClipSize = this.maxClipSize;
@@ -395,6 +445,7 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		g.releaseTime = this.releaseTime;
 		g.canGoPastMaxDistance = this.canGoPastMaxDistance;
 		g.priority = this.priority;
+		g.loreComponents = new ArrayList<>(this.loreComponents);
 
 		if (releaseEffect != null)
 		{
@@ -630,7 +681,7 @@ public class Gun implements Cloneable, ConfigurationSerializable
 	{
 		for (String name : val.split(","))
 		{
-			Sound sound = SwornGuns.getSound(name);
+			Sound sound = Util.getRegistryEntry(RegistryKey.SOUND_EVENT, name);
 			if (sound != null)
 				gunSound.add(sound);
 		}

@@ -25,12 +25,10 @@ import java.util.Map.Entry;
 
 import com.google.common.base.Objects;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -40,6 +38,9 @@ import net.dmulloy2.swornapi.util.FormatUtil;
 import net.dmulloy2.swornapi.util.InventoryUtil;
 import net.dmulloy2.swornguns.Config;
 import net.dmulloy2.swornguns.SwornGuns;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 /**
  * @author dmulloy2
@@ -146,15 +147,14 @@ public class GunPlayer implements Reloadable
 		}
 	}
 
-	public void tick()
+	public boolean tick()
 	{
 		this.ticks++;
 
 		if (!player.isOnline())
 		{
-			plugin.getPlayers().remove(player.getUniqueId());
 			unload();
-			return;
+			return false;
 		}
 
 		ItemStack hand = player.getInventory().getItemInMainHand();
@@ -167,23 +167,40 @@ public class GunPlayer implements Reloadable
 
 		if (ticks % 10 == 0)
 		{
-			if (getGun(hand) == null)
+			if (this.aimedIn && getGun(hand) == null)
 			{
 				player.removePotionEffect(PotionEffectType.SLOWNESS);
 				this.aimedIn = false;
 			}
 		}
 
+		ItemStack[] items = null;
+
 		for (Gun gun : guns.values())
 		{
-			gun.tick();
+			boolean changed = gun.tick();
+			if (changed)
+			{
+				if (items == null)
+				{
+					items = player.getInventory().getContents();
+				}
+
+				for (ItemStack item : items)
+				{
+					if (item != null && item.getType() == gun.getMaterial())
+					{
+						renameGun(item, gun);
+					}
+				}
+			}
 
 			if (player.isDead())
 			{
 				gun.finishReloading();
 			}
 
-			if (gun.getMaterial() == hand.getType() && isAimedIn() && ! gun.isCanAimLeft() && ! gun.isCanAimRight())
+			if (this.aimedIn && gun.getMaterial() == hand.getType() && isAimedIn() && ! gun.isCanAimLeft() && ! gun.isCanAimRight())
 			{
 				player.removePotionEffect(PotionEffectType.SLOWNESS);
 				this.aimedIn = false;
@@ -193,7 +210,7 @@ public class GunPlayer implements Reloadable
 				this.currentlyFiring = null;
 		}
 
-		renameGuns();
+		return true;
 	}
 
 	// ---- Getters
@@ -246,50 +263,33 @@ public class GunPlayer implements Reloadable
 
 	// ---- Naming
 
-	public void renameGuns()
+	private void renameGun(ItemStack item, Gun gun)
 	{
-		PlayerInventory inv = player.getInventory();
-		for (ItemStack item : inv.getContents())
+		ItemMeta meta = item.getItemMeta();
+		if (meta == null)
 		{
-			if (item == null || item.getType() == Material.AIR)
-			{
-				continue;
-			}
+			return;
+		}
 
-			Gun gun = getGun(item);
-			if (gun == null)
-			{
-				continue;
-			}
+		if (canFireGun(gun))
+		{
+			meta.customName(getGunName(gun));
 
-			ItemMeta meta = item.getItemMeta();
-			if (meta == null)
-			{
-				continue;
-			}
+			List<Component> lore = gun.getLoreComponents();
+			if (lore != null && ! lore.isEmpty())
+				meta.lore(gun.getLoreComponents());
 
-			if (canFireGun(gun))
-			{
-				String name = FormatUtil.format(getGunName(player, gun));
-				if (! name.isEmpty())
-					meta.setDisplayName(name);
-
-				List<String> lore = gun.getLore();
-				if (lore != null && ! lore.isEmpty())
-					meta.setLore(lore.stream().map(FormatUtil::format).toList());
-
-				item.setItemMeta(meta);
-			}
-			else if (meta.hasDisplayName() && meta.getDisplayName().contains("\u00AB"))
-			{
-				meta.setDisplayName(null);
-				meta.setLore(null);
-				item.setItemMeta(meta);
-			}
+			item.setItemMeta(meta);
+		}
+		else if (meta.hasCustomName() && FormatUtil.componentContains(meta.customName(), "\u00AB"))
+		{
+			meta.customName(null);
+			meta.lore(null);
+			item.setItemMeta(meta);
 		}
 	}
 
-	private String getGunName(Player player, Gun gun)
+	private Component getGunName(Gun gun)
 	{
 		String gunName = gun.getDisplayName();
 		if (gunName == null || gunName.isEmpty())
@@ -297,10 +297,9 @@ public class GunPlayer implements Reloadable
 
 		if (!gun.isHasClip())
 		{
-			return gunName;
+			return Component.text(gunName, NamedTextColor.YELLOW);
 		}
 
-		StringBuilder add = new StringBuilder();
 		Material ammo = gun.getAmmo();
 		int maxClip = gun.getMaxClipSize();
 		int ammoAmtNeeded = Math.max(1, gun.getAmmoAmtNeeded());
@@ -319,15 +318,11 @@ public class GunPlayer implements Reloadable
 			leftInClip = amount - ammoLeft;
 		}
 
-		add.append(ChatColor.YELLOW)
-				.append("    \u00AB")
-				.append(leftInClip).append(" \uFFE8 ")
-				.append(ammoLeft)
-				.append("\u00BB");
+		TextComponent.Builder builder = Component.text(gunName, NamedTextColor.YELLOW).toBuilder();
 
-		StringBuilder reload = new StringBuilder();
 		if (gun.isReloading())
 		{
+			StringBuilder reload = new StringBuilder();
 			int scale = 4;
 			int reloadTime = Math.max(1, gun.getReloadTime());
 			int bars = (int) Math.round(scale - (((double)gun.getGunReloadTimer() * scale) / reloadTime));
@@ -336,14 +331,14 @@ public class GunPlayer implements Reloadable
 			int left = scale - bars;
 			reload.append("\u25AB".repeat(Math.max(0, left)));
 
-			add.append(ChatColor.RED)
-					.append("    ")
-					.append(reload.reverse())
-					.append("RELOADING")
-					.append(reload);
+			builder.append(Component.text("    " + reload.reverse() + "RELOADING" + reload, NamedTextColor.RED));
+		}
+		else
+		{
+			builder.append(Component.text("    \u00AB" + leftInClip + " \uFFE8 " + ammoLeft + "\u00BB", NamedTextColor.RED));
 		}
 
-		return gunName + add;
+		return builder.build();
 	}
 
 	// ---- Util
