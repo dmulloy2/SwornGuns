@@ -32,5 +32,3 @@ gunPitch: 2.0
 projType: SNOWBALL
 explosionType: FIREWORK
 reloadType: individual_bullet
-displayName: '&ePistol'
-outOfAmmoMessage: '&6This gun needs &cSNOW BALLS'

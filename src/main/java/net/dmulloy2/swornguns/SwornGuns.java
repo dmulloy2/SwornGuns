@@ -49,11 +49,9 @@ import net.dmulloy2.swornguns.commands.CmdToggle;
 import net.dmulloy2.swornguns.commands.CmdVersion;
 import net.dmulloy2.swornguns.io.WeaponIO;
 import net.dmulloy2.swornguns.listeners.EntityListener;
+import net.dmulloy2.swornguns.listeners.InventoryListener;
 import net.dmulloy2.swornguns.listeners.PlayerListener;
-import net.dmulloy2.swornguns.types.Bullet;
-import net.dmulloy2.swornguns.types.EffectData;
-import net.dmulloy2.swornguns.types.Gun;
-import net.dmulloy2.swornguns.types.GunPlayer;
+import net.dmulloy2.swornguns.types.*;
 
 /**
  * @author dmulloy2
@@ -62,10 +60,9 @@ import net.dmulloy2.swornguns.types.GunPlayer;
 public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 {
 	// Maps
-	private @Getter Map<String, Gun> loadedGuns;
-	private @Getter Map<Integer, Bullet> bullets;
+	private @Getter Map<String, GunData> loadedGuns;
+	private @Getter Map<UUID, Bullet> bullets;
 	private @Getter Map<UUID, GunPlayer> players;
-	private @Getter Map<UUID, EffectData> effects;
 
 	private final @Getter String prefix = FormatUtil.format("&3[&eSwornGuns&3]&e ");
 
@@ -88,10 +85,9 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		loadedGuns = new HashMap<>();
 		bullets = new ConcurrentHashMap<>();
 		players = new ConcurrentHashMap<>();
-		effects = new ConcurrentHashMap<>();
 
 		// Register commands
-		commandHandler.setCommandPrefix("swornguns");
+		commandHandler.setCommandPrefix("swornguns", "gun", "guns");
 
 		CmdHelp cmdHelp = new CmdHelp(this);
 		commandHandler.registerPrefixedCommand(cmdHelp);
@@ -105,6 +101,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new PlayerListener(this), this);
 		pm.registerEvents(new EntityListener(this), this);
+		pm.registerEvents(new InventoryListener(this), this);
 
 		// Files
 		File guns = new File(getDataFolder(), "guns");
@@ -159,12 +156,16 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 		logHandler.log("SwornGuns has been disabled. Took {0} ms.", System.currentTimeMillis() - start);
 	}
 
+	@Override
+	public boolean isPaperPlugin()
+	{
+		return true;
+	}
+
 	private void clearMemory()
 	{
 		loadedGuns.clear();
 		loadedGuns = null;
-		effects.clear();
-		effects = null;
 		bullets.clear();
 		bullets = null;
 		players.clear();
@@ -180,7 +181,7 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	{
 		WeaponIO weaponIO = new WeaponIO(this);
 
-		List<Gun> guns = weaponIO.loadGuns();
+		List<GunData> guns = weaponIO.loadGuns();
 		if (guns.isEmpty())
 		{
 			for (String stock : stockGuns)
@@ -191,13 +192,13 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 			guns = weaponIO.loadGuns();
 		}
 
-		for (Gun gun : guns)
+		for (GunData gun : guns)
 		{
 			setupPermission(gun);
-			loadedGuns.put(gun.getGunName(), gun);
+			loadedGuns.put(gun.gunName(), gun);
 		}
 
-		List<Gun> projectiles = weaponIO.loadProjectiles();
+		List<GunData> projectiles = weaponIO.loadProjectiles();
 		if (projectiles.isEmpty())
 		{
 			for (String stock : stockProjectiles)
@@ -208,19 +209,19 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 			projectiles = weaponIO.loadProjectiles();
 		}
 
-		for (Gun gun : projectiles)
+		for (GunData gun : projectiles)
 		{
 			setupPermission(gun);
-			loadedGuns.put(gun.getGunName(), gun);
+			loadedGuns.put(gun.gunName(), gun);
 		}
 	}
 
-	private void setupPermission(Gun gun)
+	private void setupPermission(GunData gun)
 	{
-		if (gun.isNeedsPermission())
+		if (gun.needsPermission())
 		{
 			PluginManager pm = getServer().getPluginManager();
-			String node = "swornguns.fire." + gun.getGunName();
+			String node = "swornguns.fire." + gun.gunName();
 			Permission permission = pm.getPermission(node);
 			if (permission == null)
 			{
@@ -250,13 +251,13 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	}
 
 	@Override
-	public Gun getGun(String gunName)
+	public GunData getGun(String gunName)
 	{
 		return loadedGuns.get(gunName);
 	}
 
 	@Override
-	public Collection<Gun> getGuns()
+	public Collection<GunData> getGuns()
 	{
 		return Collections.unmodifiableCollection(loadedGuns.values());
 	}
@@ -274,45 +275,33 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 	@Override
 	public void removeBullet(Bullet bullet)
 	{
-		bullets.remove(bullet.getId());
+		bullets.remove(bullet.id());
 	}
 
 	@Override
 	public void addBullet(Bullet bullet)
 	{
-		bullets.put(bullet.getId(), bullet);
+		bullets.put(bullet.id(), bullet);
 	}
 
 	@Override
 	public Bullet getBullet(Entity proj)
 	{
-		return bullets.get(proj.getEntityId());
+		return bullets.get(proj.getUniqueId());
 	}
 
 	@Override
-	public List<Gun> getGunsByItem(ItemStack item)
+	public List<GunData> getGunsByItem(ItemStack item)
 	{
-		List<Gun> ret = new ArrayList<>();
+		List<GunData> ret = new ArrayList<>();
 
-		for (Gun gun : loadedGuns.values())
+		for (GunData gun : loadedGuns.values())
 		{
-			if (gun.getMaterial() == item.getType())
+			if (gun.material() == item.getType())
 				ret.add(gun);
 		}
 
 		return ret;
-	}
-
-	@Override
-	public void removeEffect(EffectData effectType)
-	{
-		effects.remove(effectType.getId());
-	}
-
-	@Override
-	public void addEffect(EffectData effectType)
-	{
-		effects.put(effectType.getId(), effectType);
 	}
 
 	public class UpdateTimer extends BukkitRunnable
@@ -334,62 +323,12 @@ public class SwornGuns extends SwornPlugin implements SwornGunsAPI
 				}
 				catch (Throwable ex)
 				{
-					if (! player.isErrorReported())
+					if (! player.errorReported())
 					{
 						logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking player " + player.getName()));
-						player.setErrorReported(true);
+						player.errorReported(true);
 					}
 				}
-			}
-
-			Iterator<Bullet> bulletIter = bullets.values().iterator();
-			while (bulletIter.hasNext())
-			{
-				boolean finished = false;
-				Bullet bullet = bulletIter.next();
-
-				try
-				{
-					finished = !bullet.tick();
-				}
-				catch (Throwable ex)
-				{
-					logHandler.warn(ex, "Failed to tick bullet " + bullet);
-				}
-
-				if (finished)
-				{
-					try
-					{
-						bulletIter.remove();
-						bullet.remove();
-					}
-					catch (Throwable ex)
-					{
-						logHandler.warn(ex, "Failed to remove bullet " + bullet);
-					}
-				}
-			}
-
-			Iterator<EffectData> effectIter = effects.values().iterator();
-			while (effectIter.hasNext())
-			{
-				EffectData effect = effectIter.next();
-
-				boolean finished;
-
-				try
-				{
-					finished = effect.tick();
-				}
-				catch (Throwable ex)
-				{
-					logHandler.log(Level.WARNING, Util.getUsefulStack(ex, "ticking effect " + effect));
-					finished = true;
-				}
-
-				if (finished)
-					effectIter.remove();
 			}
 		}
 	}

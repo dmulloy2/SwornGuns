@@ -18,7 +18,10 @@
  */
 package net.dmulloy2.swornguns.types;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import java.util.*;
 
@@ -36,6 +39,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import net.dmulloy2.swornapi.util.Util;
@@ -45,8 +49,10 @@ import net.dmulloy2.swornguns.SwornGuns;
  * @author dmulloy2
  */
 
-@Data
-public class Bullet
+@Getter
+@ToString(of={"shooter", "shotFrom"})
+@Accessors(fluent = true)
+public class Bullet extends BukkitRunnable
 {
 	private int ticks;
 	private int releaseTime;
@@ -55,7 +61,7 @@ public class Bullet
 	private boolean active;
 	private boolean released;
 	private boolean destroyed;
-	private boolean destroyNextTick;
+	private @Setter boolean destroyNextTick;
 
 	private Entity projectile;
 	private Vector velocity;
@@ -63,9 +69,10 @@ public class Bullet
 	private Location lastLocation;
 	private Location startLocation;
 
+	private GunData data;
 	private GunPlayer shooter;
 	private Gun shotFrom;
-	private int id;
+	private UUID id;
 
 	private final SwornGuns plugin;
 
@@ -73,57 +80,60 @@ public class Bullet
 	{
 		this.plugin = plugin;
 		this.shotFrom = shotFrom;
+		this.data = shotFrom.data();
 		this.shooter = shooter;
 		this.velocity = velocity;
 		this.active = true;
 
-		if (shotFrom.isThrowable())
+		if (data.isThrowable())
 		{
-			ItemStack thrown = new ItemStack(shotFrom.getMaterial());
+			ItemStack thrown = new ItemStack(data.material());
 
-			this.projectile = shooter.getPlayer().getWorld().dropItem(shooter.getPlayer().getEyeLocation(), thrown);
-			this.id = projectile.getEntityId();
-
-			((Item) projectile).setPickupDelay(9999999);
+			this.projectile = shooter.player().getWorld().dropItem(shooter.player().getEyeLocation(), thrown, item -> {
+				item.setCanMobPickup(false);
+				item.setCanPlayerPickup(false);
+			});
 		}
 		else
 		{
-			Class<? extends Projectile> mclass = Snowball.class;
-
-			String check = shotFrom.getProjType().toLowerCase().replaceAll("_", "").replaceAll(" ", "");
-			switch (check)
-			{
-				case "arrow" -> mclass = Arrow.class;
-				case "egg" -> mclass = Egg.class;
-				case "enderpearl" -> mclass = EnderPearl.class;
-				case "fireball" -> mclass = Fireball.class;
-				case "fish", "fishhook" -> mclass = FishHook.class;
-				case "largefireball" -> mclass = LargeFireball.class;
-				case "smallfireball" -> mclass = SmallFireball.class;
-				case "thrownexpbottle" -> mclass = ThrownExpBottle.class;
-				case "thrownpotion" -> mclass = ThrownPotion.class;
-				case "witherskull" -> mclass = WitherSkull.class;
-				default -> {}
-			}
-
-			this.projectile = shooter.getPlayer().launchProjectile(mclass);
-			this.id = projectile.getEntityId();
-
-			((Projectile) projectile).setShooter(shooter.getPlayer());
+			Class<? extends Projectile> projectileClass = data.projectileClass();
+			this.projectile = shooter.player().launchProjectile(projectileClass, velocity);
 		}
+		this.id = projectile.getUniqueId();
+
 		this.startLocation = projectile.getLocation();
 
-		if (shotFrom.getReleaseTime() == -1)
+		if (data.releaseTime() == -1)
 		{
-			this.releaseTime = 80 + (shotFrom.isThrowable() ? 0 : 1) * 400;
+			this.releaseTime = 80 + (data.isThrowable() ? 0 : 1) * 400;
 		}
 		else
 		{
-			this.releaseTime = shotFrom.getReleaseTime();
+			this.releaseTime = data.releaseTime();
 		}
 	}
 
-	public final boolean tick()
+	@Override
+	public void run()
+	{
+		boolean keepAlive = false;
+
+		try
+		{
+			keepAlive = tick();
+		}
+		catch (Exception ex)
+		{
+			plugin.getLogHandler().warn(ex, "Ticking bullet " + this);
+		}
+
+		if (!keepAlive)
+		{
+			remove();
+		}
+	}
+
+	private boolean tick()
 	{
 		// Make sure the bullet is still valid
 		if (dead || destroyNextTick || projectile == null || shooter == null)
@@ -138,7 +148,7 @@ public class Bullet
 		}
 
 		// Make sure the shooter is still valid
-		Player player = shooter.getPlayer();
+		Player player = shooter.player();
 		if (player == null || ! player.isOnline() || player.getHealth() <= 0.0D)
 		{
 			return false;
@@ -149,22 +159,21 @@ public class Bullet
 
 		if (ticks > releaseTime)
 		{
-			EffectData eff = shotFrom.getReleaseEffect();
+			EffectData eff = data.releaseEffect();
 			if (eff != null)
 			{
-				eff.start(lastLocation);
-				plugin.addEffect(eff);
+				new EffectTask(eff, lastLocation).runTaskTimer(plugin, 1L, 1L);
 			}
 
 			return false;
 		}
 
-		if (shotFrom.isHasSmokeTrail())
+		if (data.hasSmokeTrail())
 		{
 			lastLocation.getWorld().playEffect(lastLocation, Effect.SMOKE, 0);
 		}
 
-		if (shotFrom.isThrowable() && ticks == 90)
+		if (data.isThrowable() && ticks == 90)
 		{
 			return false;
 		}
@@ -174,10 +183,10 @@ public class Bullet
 			if (lastLocation.getWorld().equals(startLocation.getWorld()))
 			{
 				double dis = lastLocation.distance(startLocation);
-				if (dis > shotFrom.getMaxDistance())
+				if (dis > data.maxDistance())
 				{
 					this.active = false;
-					if (! shotFrom.isThrowable() && ! shotFrom.isCanGoPastMaxDistance())
+					if (! data.isThrowable() && ! data.canGoPastMaxDistance())
 					{
 						velocity.multiply(0.25D);
 					}
@@ -194,6 +203,9 @@ public class Bullet
 	{
 		if (destroyed)
 			return;
+
+		plugin.removeBullet(this);
+		cancel();
 
 		this.dead = true;
 
@@ -213,18 +225,18 @@ public class Bullet
 			return;
 
 		this.released = true;
-		if (projectile == null || shotFrom == null)
+		if (projectile == null)
 		{
 			return;
 		}
 
 		this.lastLocation = projectile.getLocation();
 
-		int rad = (int) shotFrom.getExplodeRadius();
+		int rad = (int) data.explodeRadius();
 		int rad2 = rad;
-		if (shotFrom.getFireRadius() > rad)
+		if (data.fireRadius() > rad)
 		{
-			rad = (int) shotFrom.getFireRadius();
+			rad = (int) data.fireRadius();
 			rad2 = 2;
 
 			for (int i = -rad; i <= rad; i++)
@@ -269,13 +281,13 @@ public class Bullet
 
 	private void explosion(Location location)
 	{
-		if (shotFrom.getExplosionType().equals("TNT"))
+		if (data.explosionType().equals("TNT"))
 		{
 			double x = location.getX();
 			double y = location.getY();
 			double z = location.getZ();
 
-			location.getWorld().createExplosion(x, y, z, (float) shotFrom.getExplodeRadius(), false, false);
+			location.getWorld().createExplosion(x, y, z, (float) data.explodeRadius(), false, false);
 		}
 		else
 		{
@@ -341,6 +353,7 @@ public class Bullet
 		DamageSource source = DamageSource
 			.builder(DamageType.PLAYER_ATTACK)
 			.withCausingEntity(damager)
+			.withDirectEntity(projectile)
 			.build();
 
 		EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(damager, entity, cause, source, modifiers, functions, false);
@@ -350,7 +363,7 @@ public class Bullet
 
 	private void explosionDamage()
 	{
-		if (shotFrom.getExplodeRadius() <= 0.0D)
+		if (data.explodeRadius() <= 0.0D)
 		{
 			return;
 		}
@@ -358,20 +371,20 @@ public class Bullet
 		// Create the explosion
 		lastLocation.getWorld().createExplosion(lastLocation, 0.0F);
 
-		if (shotFrom.isThrowable())
+		if (data.isThrowable())
 			projectile.teleport(projectile.getLocation().add(0.0D, 1.0D, 0.0D));
 
 		// Calculate damage
-		double damage = shotFrom.getExplosionDamage();
+		double damage = data.explosionDamage();
 		if (damage <= 0.0D)
-			damage = shotFrom.getGunDamage();
+			damage = data.gunDamage();
 
 		if (damage <= 0.0D)
 		{
 			return;
 		}
 
-		double rad = shotFrom.getExplodeRadius();
+		double rad = data.explodeRadius();
 		List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 		for (Entity entity : entities)
 		{
@@ -385,24 +398,24 @@ public class Bullet
 				continue;
 			}
 
-			if (!canDamage(shooter.getPlayer(), lentity, DamageCause.ENTITY_EXPLOSION, damage))
+			if (!canDamage(shooter.player(), lentity, DamageCause.ENTITY_EXPLOSION, damage))
 			{
 				continue;
 			}
 
-			lentity.damage(damage, shooter.getPlayer());
+			lentity.damage(damage, shooter.player());
 		}
 	}
 
 	private void fireSpread()
 	{
-		if (shotFrom.getFireRadius() <= 0.0D)
+		if (data.fireRadius() <= 0.0D)
 		{
 			return;
 		}
 
 		lastLocation.getWorld().playSound(lastLocation, Sound.BLOCK_GLASS_BREAK, 20.0F, 20.0F);
-		double rad = shotFrom.getFireRadius();
+		double rad = data.fireRadius();
 		List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 		for (Entity entity : entities)
 		{
@@ -416,25 +429,25 @@ public class Bullet
 				continue;
 			}
 
-			if (!canDamage(shooter.getPlayer(), lentity, DamageCause.FIRE_TICK, 1.0D))
+			if (!canDamage(shooter.player(), lentity, DamageCause.FIRE_TICK, 1.0D))
 			{
 				continue;
 			}
 
 			lentity.setFireTicks(7 * 20);
-			lentity.damage(1.0D, shooter.getPlayer());
+			lentity.damage(1.0D, shooter.player());
 		}
 	}
 
 	private void flash()
 	{
-		if (shotFrom.getFlashRadius() <= 0.0D)
+		if (data.flashRadius() <= 0.0D)
 		{
 			return;
 		}
 
 		lastLocation.getWorld().playSound(lastLocation, Sound.ENTITY_GENERIC_SPLASH, 20.0F, 20.0F);
-		double rad = shotFrom.getFlashRadius();
+		double rad = data.flashRadius();
 		List<Entity> entities = projectile.getNearbyEntities(rad, rad, rad);
 		for (Entity entity : entities)
 		{
@@ -448,7 +461,7 @@ public class Bullet
 				continue;
 			}
 
-			if (!canDamage(shooter.getPlayer(), lentity, DamageCause.CUSTOM, 0.0D))
+			if (!canDamage(shooter.player(), lentity, DamageCause.CUSTOM, 0.0D))
 			{
 				continue;
 			}
@@ -457,43 +470,18 @@ public class Bullet
 		}
 	}
 
+	public boolean isHeadshot(LivingEntity entity)
+	{
+		Location location = projectile.getLocation();
+		return Math.abs(location.getY() - entity.getEyeLocation().getY()) <= 0.26D;
+	}
+
 	public final void destroy()
 	{
 		this.destroyed = true;
 		this.projectile = null;
 		this.velocity = null;
-		this.shotFrom = null;
+		this.data = null;
 		this.shooter = null;
-	}
-
-	@Override
-	public String toString()
-	{
-		if (destroyed)
-			return "Destroyed Bullet";
-
-		return "Bullet[shooter=" + shooter + ", shotFrom=" + shotFrom.getGunName() + ", id=" + id + "]";
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (obj == this) return true;
-
-		if (destroyed)
-			return false;
-
-		if (obj instanceof Bullet that)
-		{
-			return this.shooter.equals(that.shooter) && this.shotFrom.equals(that.shotFrom) && this.id == that.id;
-		}
-
-		return false;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		return Objects.hash(shooter, shotFrom, id);
 	}
 }

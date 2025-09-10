@@ -31,5 +31,4 @@ gunPitch: 2.0
 projType: SNOWBALL
 explosionType: FIREWORK
 reloadType: normal
-displayName: '&eRocket Launcher'
-outOfAmmoMessage: '&6This gun needs &cTNT'
+displayName: 'Rocket Launcher'

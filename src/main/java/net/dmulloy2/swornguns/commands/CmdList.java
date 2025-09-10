@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.dmulloy2.swornapi.commands.PaginatedCommand;
-import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.types.Gun;
 import net.dmulloy2.swornapi.util.FormatUtil;
 import net.dmulloy2.swornapi.util.MaterialUtil;
+import net.dmulloy2.swornguns.SwornGuns;
+import net.dmulloy2.swornguns.types.GunData;
 
 /**
  * @author dmulloy2
@@ -61,13 +61,13 @@ public class CmdList extends PaginatedCommand
 	public List<String> getLines(int startIndex, int endIndex)
 	{
 		List<String> lines = new ArrayList<>();
-		List<Gun> guns = new ArrayList<>(plugin.getLoadedGuns().values());
+		List<GunData> guns = new ArrayList<>(plugin.getLoadedGuns().values());
 		for (int i = startIndex; i < endIndex && i < getListSize(); i++)
 		{
-			Gun gun = guns.get(i);
+			GunData gun = guns.get(i);
 			lines.add(FormatUtil.format(" &b- &e{0}  &bType: &e{1}  &bAmmo: &e{2} x {3}",
-				gun.getName(), MaterialUtil.getName(gun.getMaterial()), MaterialUtil.getName(gun.getAmmo()),
-				gun.getAmmoAmtNeeded()));
+				gun.gunName(), MaterialUtil.getName(gun.material()), MaterialUtil.getName(gun.ammo()),
+				gun.ammoAmtNeeded()));
 		}
 
 		return lines;

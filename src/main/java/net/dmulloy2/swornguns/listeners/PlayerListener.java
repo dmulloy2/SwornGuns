@@ -20,24 +20,21 @@ package net.dmulloy2.swornguns.listeners;
 
 import lombok.AllArgsConstructor;
 
-import net.dmulloy2.swornguns.Config;
-import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.types.Gun;
-import net.dmulloy2.swornguns.types.GunPlayer;
-
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import net.dmulloy2.swornguns.Config;
+import net.dmulloy2.swornguns.SwornGuns;
+import net.dmulloy2.swornguns.types.Gun;
+import net.dmulloy2.swornguns.types.GunPlayer;
 
 /**
  * @author dmulloy2
@@ -65,8 +62,13 @@ public class PlayerListener implements Listener
 	{
 		Item dropped = event.getItemDrop();
 		GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
-		Material lastHold = gp.getLastHeldType();
+		Material lastHold = gp.lastHeldType();
 		if (lastHold == null)
+		{
+			return;
+		}
+
+		if (lastHold != dropped.getItemStack().getType())
 		{
 			return;
 		}
@@ -77,25 +79,30 @@ public class PlayerListener implements Listener
 			return;
 		}
 
-		if (lastHold != dropped.getItemStack().getType())
+		if (gun.tryReload())
 		{
-			return;
+			event.setCancelled(true);
 		}
-
-		if (!gun.isHasClip() || !gun.isChanged() || !gun.isReloadGunOnDrop())
-		{
-			return;
-		}
-
-		gun.reloadGun();
-		event.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
+		ItemStack item = event.getItem();
+		if (item == null || item.getType() == Material.AIR)
+		{
+			return;
+		}
+
+		Action action = event.getAction();
+		if (action == Action.PHYSICAL)
+		{
+			return;
+		}
+
 		GunPlayer gp = plugin.getGunPlayer(event.getPlayer());
-		gp.handleClick(event.getAction());
+		boolean left = action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK;
+		gp.handleClick(item, left);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)

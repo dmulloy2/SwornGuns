@@ -18,24 +18,25 @@
  */
 package net.dmulloy2.swornguns.types;
 
-import lombok.Data;
-import net.dmulloy2.swornapi.util.NumberUtil;
-import net.dmulloy2.swornapi.util.Util;
-
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-
-import com.google.common.base.Objects;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import java.util.UUID;
+
+import org.bukkit.Effect;
+
+import net.dmulloy2.swornapi.util.NumberUtil;
 
 /**
  * @author dmulloy2
  */
 
-@Data
+@Getter
+@Accessors(fluent=true)
+@EqualsAndHashCode(of={"type", "radius", "maxDuration", "specialDat"})
+@ToString(of={"type", "radius", "maxDuration", "specialDat"})
 public class EffectData
 {
 	private transient UUID id = UUID.randomUUID();
@@ -45,7 +46,6 @@ public class EffectData
 
 	private Effect type;
 	private double radius;
-	private Location location;
 
 	private byte specialDat = -1;
 
@@ -56,98 +56,6 @@ public class EffectData
 		this.type = type;
 		this.radius = radius;
 		this.specialDat = specialDat;
-	}
-
-	public void start(Location location)
-	{
-		this.location = location;
-		this.duration = maxDuration;
-	}
-
-	@Override
-	public EffectData clone()
-	{
-		return new EffectData(type, maxDuration, radius, specialDat);
-	}
-
-	public boolean tick()
-	{
-		this.duration -= 1;
-
-		if (duration < 0)
-		{
-			return false;
-		}
-
-		double yRad = radius;
-		if (type.equals(Effect.MOBSPAWNER_FLAMES))
-		{
-			yRad = 0.75D;
-
-			World world = location.getWorld();
-			if (world != null)
-			{
-				for (Player player : world.getPlayers())
-				{
-					if (location.distance(player.getLocation()) < radius)
-					{
-						player.setFireTicks(20);
-					}
-				}
-			}
-		}
-
-		for (double i = -radius; i <= radius; i += 1.0D)
-		{
-			for (double ii = -radius; ii <= radius; ii += 1.0D)
-			{
-				for (double iii = 0.0D; iii <= yRad * 2.0D; iii += 1.0D)
-				{
-					int rand = Util.random(8);
-					if (rand == 2)
-					{
-						Location newloc = location.clone().add(i, iii - 1.0D, ii);
-						Location testLoc = location.clone().add(0.0D, yRad - 1.0D, 0.0D);
-						if (newloc.distance(testLoc) <= radius)
-						{
-							byte dat = (byte) Util.random(8);
-
-							if (specialDat > -1)
-								dat = specialDat;
-
-							newloc.getWorld().playEffect(newloc, type, dat);
-						}
-					}
-				}
-			}
-		}
-
-		return true;
-	}
-
-	@Override
-	public String toString()
-	{
-		return "EffectData[type=" + type + ", radius=" + radius + ", duration=" + duration + "]";
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (obj == this) return true;
-
-		if (obj instanceof EffectData that)
-		{
-			return this.type.equals(that.type) && this.radius == that.radius && this.duration == that.duration;
-		}
-
-		return false;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		return Objects.hashCode(type, radius, duration);
 	}
 
 	public Object serialize()

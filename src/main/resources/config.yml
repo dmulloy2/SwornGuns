@@ -18,7 +18,7 @@ smoke-effect: true
 # http://jd.bukkit.org/rb/apidocs/org/bukkit/Sound.html
 bullet-sound:
   enabled: true
-  sound: ENTITY_MAGMA_CUBE_JUMP
+  sound: entity.magma_cube.jump
 
 # Blocks broken when shot
 block-shatter:

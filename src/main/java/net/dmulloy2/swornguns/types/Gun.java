@@ -18,187 +18,74 @@
  */
 package net.dmulloy2.swornguns.types;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
-
-import io.papermc.paper.registry.RegistryKey;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
-import net.dmulloy2.swornapi.io.FileSerialization;
 import net.dmulloy2.swornapi.util.FormatUtil;
+import net.dmulloy2.swornapi.util.InventoryUtil;
 import net.dmulloy2.swornapi.util.MaterialUtil;
 import net.dmulloy2.swornapi.util.Util;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.events.SwornGunFireEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 
 /**
  * @author dmulloy2
  */
 
-@Data
-public class Gun implements Cloneable, ConfigurationSerializable
+@Getter
+@Accessors(fluent = true)
+@EqualsAndHashCode(of={"data", "owner"})
+@ToString(of={"data", "owner"})
+public class Gun
 {
-	private boolean canHeadshot;
-	private boolean isThrowable;
-	private boolean hasSmokeTrail;
-	private boolean localGunSound;
-	private boolean canAimLeft;
-	private boolean canAimRight;
-	private boolean canGoPastMaxDistance;
-	private boolean needsPermission;
-	private boolean canFireRight;
-	private boolean canFireLeft;
-	private boolean hasClip = true;
-	private boolean reloadGunOnDrop = true;
-	private boolean firing;
-	private boolean reloading;
-	private boolean changed;
-	private boolean unlimitedAmmo;
-	private boolean warnIfNoPermission;
-
-	private Material material;
-	private Material ammo;
-
-	private int ammoAmtNeeded;
-	private int roundsPerBurst;
-	private int reloadTime;
-	private int maxDistance;
-	private int bulletsPerClick;
-	private int bulletsShot;
-	private int bulletDelay = 2;
-	private int releaseTime = -1;
-	private int maxClipSize = 30;
-	private int bulletDelayTime = 10;
 	private int roundsFired;
 	private int gunReloadTimer;
 	private int timer;
 	private int lastFired;
 	private int ticks;
 	private int heldDownTicks;
-	private int priority;
 	private int clipRemaining = -1;
-	private int clipSize;
-	private int initialClip = -1;
+	private int bulletsShot;
 
-	private double gunDamage;
-	private double armorPenetration;
-	private double explosionDamage = -1.0D;
-	private double bulletSpeed;
-	private double accuracy;
-	private double accuracy_aimed = -1.0D;
-	private double accuracy_crouched = -1.0D;
-	private double explodeRadius;
-	private double fireRadius;
-	private double flashRadius;
-	private double knockback;
-	private double recoil;
+	private boolean firing;
+	private boolean reloading;
+	private boolean changed;
 
-	private double gunVolume = 1.0D;
-	private double gunPitch = 2.0D;
+	private @Setter boolean dirty = true;
 
-	private String projType = "";
-	private String explosionType = "FIREWORK";
-	private ReloadType reloadType = ReloadType.NORMAL;
+	private final Player player;
+	private final GunData data;
+	private final GunPlayer owner;
+	private final SwornGuns plugin;
 
-	private transient String gunName;
-	private String displayName;
-	private String outOfAmmoMessage = "";
-
-	private EffectData releaseEffect;
-
-	private transient List<Sound> gunSound = new ArrayList<>();
-
-	private List<String> lore = new ArrayList<>();
-	private transient List<Component> loreComponents = new ArrayList<>();
-
-	private transient GunPlayer owner;
-	private transient final SwornGuns plugin;
-
-	public Gun(String name, SwornGuns plugin)
+	public Gun(GunData data, GunPlayer owner, SwornGuns plugin)
 	{
-		this.gunName = name;
+		this.data = data;
+		this.owner = owner;
 		this.plugin = plugin;
-	}
-
-	public void loadFromConfig(Map<String, Object> config)
-	{
-		// deserialize all the primitive values
-		FileSerialization.deserialize(this, config);
-
-		readGunSounds(config);
-		readLore(config);
-	}
-
-	@SuppressWarnings("unchecked")
-	private void readLore(Map<String, Object> config)
-	{
-		List<String> loreLines = (List<String>) config.get("lore");
-		if (loreLines == null)
-		{
-			return;
-		}
-
-		for (String line : loreLines)
-		{
-			try
-			{
-				if (line.contains("{"))
-				{
-					loreComponents.add(GsonComponentSerializer.gson().deserialize(line));
-				}
-				else
-				{
-					loreComponents.add(LegacyComponentSerializer.legacyAmpersand().deserialize(line));
-				}
-			}
-			catch (Exception ex)
-			{
-				plugin.getLogHandler().log(Level.WARNING, "Invalid lore line \"{0}\" configured for gun {1}", line, gunName);
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private void readGunSounds(Map<String, Object> config)
-	{
-		List<String> gunSoundNames = (List<String>) config.get("gunSound");
-		if (gunSoundNames == null)
-		{
-			return;
-		}
-
-		gunSound.clear();
-		for (String name : gunSoundNames)
-		{
-			try
-			{
-				Sound sound = Util.getRegistryEntry(RegistryKey.SOUND_EVENT, name);
-				if (sound != null)
-				{
-					gunSound.add(sound);
-				}
-				else
-				{
-					plugin.getLogHandler().log(Level.WARNING, "Invalid sound \"{0}\" configured for gun {1}", name, gunName);
-				}
-			}
-			catch (Exception ex)
-			{
-				plugin.getLogHandler().log(Level.WARNING, "Invalid sound \"{0}\" configured for gun {1}", name, gunName);
-			}
-		}
+		this.player = owner.player();
 	}
 
 	/**
@@ -209,21 +96,20 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		if (reloading || owner == null)
 			return;
 
-		Player player = owner.getPlayer();
 		if (!player.isOnline() || player.getHealth() <= 0.0D)
 		{
 			return;
 		}
 
-		if (reloadType == ReloadType.CLIP && clipRemaining == -1)
+		if (data.reloadType() == ReloadType.CLIP && clipRemaining == -1)
 		{
-			if (initialClip < 0 || initialClip > clipSize)
-				clipRemaining = clipSize;
+			if (data.initialClip() < 0 || data.initialClip() > data.clipSize())
+				clipRemaining = data.clipSize();
 			else
-				clipRemaining = initialClip;
+				clipRemaining = data.initialClip();
 		}
 
-		SwornGunFireEvent event = new SwornGunFireEvent(this, getAmmoAmtNeeded());
+		SwornGunFireEvent event = new SwornGunFireEvent(this, data.ammoAmtNeeded());
 		plugin.getServer().getPluginManager().callEvent(event);
 		if (event.isCancelled())
 			return;
@@ -231,20 +117,20 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		int ammoAmtNeeded = event.getAmmoNeeded();
 		if (ammoAmtNeeded != 0 && !owner.checkAmmo(this, ammoAmtNeeded) && clipRemaining <= 0)
 		{
-			player.playSound(owner.getPlayer().getLocation(), Sound.ENTITY_ITEM_BREAK, 20.0F, 20.0F);
+			player.playSound(owner.player().getLocation(), Sound.ENTITY_ITEM_BREAK, 20.0F, 20.0F);
 
-			if (outOfAmmoMessage.isEmpty())
+			if (data.outOfAmmoMessage().isEmpty())
 				player.sendMessage(plugin.getPrefix()
-					+ FormatUtil.format("&eThis gun needs &b{0}&e!", MaterialUtil.getName(ammo)));
+					+ FormatUtil.format("&eThis gun needs &b{0}&e!", MaterialUtil.getName(data.ammo())));
 			else
 				player.sendMessage(plugin.getPrefix()
-					+ FormatUtil.format(outOfAmmoMessage, MaterialUtil.getName(ammo)));
+					+ FormatUtil.format(data.outOfAmmoMessage(), MaterialUtil.getName(data.ammo())));
 
 			finishShooting();
 			return;
 		}
 
-		if (reloadType == ReloadType.CLIP)
+		if (data.reloadType() == ReloadType.CLIP)
 		{
 			clipRemaining--;
 			if (clipRemaining <= 0 && owner.checkAmmo(this, 1))
@@ -258,41 +144,41 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		{
 			owner.removeAmmo(this, ammoAmtNeeded);
 
-			if (roundsFired >= maxClipSize && hasClip)
+			if (roundsFired >= data.maxClipSize() && data.hasClip())
 			{
 				reloadGun();
 				return;
 			}
 		}
 
-		doRecoil(player);
+		doRecoil();
 
 		this.changed = true;
 		this.roundsFired++;
 
-		for (Sound sound : gunSound.toArray(new Sound[0]))
+		for (Sound sound : data.gunSound())
 		{
 			if (sound != null)
 			{
-				if (localGunSound)
-					player.playSound(player.getLocation(), sound, (float) gunVolume, (float) gunPitch);
+				if (data.localGunSound())
+					player.playSound(player.getLocation(), sound, (float) data.gunVolume(), (float) data.gunPitch());
 				else
-					player.getWorld().playSound(player.getLocation(), sound, (float) gunVolume, (float) gunPitch);
+					player.getWorld().playSound(player.getLocation(), sound, (float) data.gunVolume(), (float) data.gunPitch());
 			}
 		}
 
-		double accuracy = this.accuracy;
-		if (owner.getPlayer().isSneaking() && accuracy_crouched > -1.0D)
+		double accuracy = data.accuracy();
+		if (owner.player().isSneaking() && data.accuracy_crouched() > -1.0D)
 		{
-			accuracy = accuracy_crouched;
+			accuracy = data.accuracy_crouched();
 		}
 
-		if (owner.isAimedIn() && accuracy_aimed > -1.0D)
+		if (owner.aimedIn() && data.accuracy_aimed() > -1.0D)
 		{
-			accuracy = accuracy_aimed;
+			accuracy = data.accuracy_aimed();
 		}
 
-		for (int i = 0; i < bulletsPerClick; i++)
+		for (int i = 0; i < data.bulletsPerClick(); i++)
 		{
 			int acc = (int) (accuracy * 1000.0D);
 
@@ -313,22 +199,15 @@ public class Gun implements Cloneable, ConfigurationSerializable
 			double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch)) + zwep;
 
 			Vector vec = new Vector(xd, yd, zd);
-			vec.multiply(bulletSpeed);
+			vec.multiply(data.bulletSpeed());
 
 			Bullet bullet = new Bullet(plugin, owner, this, vec);
 			plugin.addBullet(bullet);
+			bullet.runTaskTimer(plugin, 1L, 1L);
 		}
 
-		if (roundsFired >= maxClipSize && hasClip)
+		if (roundsFired >= data.maxClipSize() && data.hasClip())
 			reloadGun();
-	}
-
-	/**
-	 * Makes this gun generic again
-	 */
-	public final void clear()
-	{
-		this.owner = null;
 	}
 
 	/**
@@ -336,7 +215,8 @@ public class Gun implements Cloneable, ConfigurationSerializable
 	 */
 	public final boolean tick()
 	{
-		boolean changed = false;
+		boolean changed = dirty;
+		this.dirty = false;
 
 		this.ticks++;
 		this.lastFired++;
@@ -362,13 +242,13 @@ public class Gun implements Cloneable, ConfigurationSerializable
 
 		if ((heldDownTicks >= 2 && timer <= 0) || firing && ! reloading)
 		{
-			if (roundsPerBurst > 1)
+			if (data.roundsPerBurst() > 1)
 			{
-				if (ticks % bulletDelay == 0)
+				if (ticks % data.bulletDelay() == 0)
 				{
 					this.bulletsShot++;
 
-					if (bulletsShot <= roundsPerBurst)
+					if (bulletsShot <= data.roundsPerBurst())
 					{
 						shoot();
 					}
@@ -396,63 +276,44 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		return changed;
 	}
 
-	/**
-	 * Returns an exact replica of this gun
-	 *
-	 * @return An exact replica of this gun
-	 */
-	private Gun copy()
+	public double calculateDamage(boolean isHeadshot)
 	{
-		Gun g = new Gun(gunName, plugin);
+		double mult = isHeadshot && data.canHeadshot() ? 1.5D : 1.0D;
+		return data.gunDamage() * mult;
+	}
 
-		g.gunName = this.gunName;
-		g.material = this.material;
-		g.ammo = this.ammo;
-		g.ammoAmtNeeded = this.ammoAmtNeeded;
-		g.roundsPerBurst = this.roundsPerBurst;
-		g.bulletsPerClick = this.bulletsPerClick;
-		g.bulletSpeed = this.bulletSpeed;
-		g.accuracy = this.accuracy;
-		g.accuracy_aimed = this.accuracy_aimed;
-		g.accuracy_crouched = this.accuracy_crouched;
-		g.maxDistance = this.maxDistance;
-		g.gunVolume = this.gunVolume;
-		g.gunDamage = this.gunDamage;
-		g.explodeRadius = this.explodeRadius;
-		g.fireRadius = this.fireRadius;
-		g.flashRadius = this.flashRadius;
-		g.canHeadshot = this.canHeadshot;
-		g.reloadTime = this.reloadTime;
-		g.canAimLeft = this.canAimLeft;
-		g.canAimRight = this.canAimRight;
-		g.canFireLeft = this.canFireLeft;
-		g.canFireRight = this.canFireRight;
-		g.hasSmokeTrail = this.hasSmokeTrail;
-		g.armorPenetration = this.armorPenetration;
-		g.isThrowable = this.isThrowable;
-		g.projType = this.projType;
-		g.needsPermission = this.needsPermission;
-		g.gunSound = new ArrayList<>(this.gunSound);
-		g.bulletDelayTime = this.bulletDelayTime;
-		g.hasClip = this.hasClip;
-		g.maxClipSize = this.maxClipSize;
-		g.reloadGunOnDrop = this.reloadGunOnDrop;
-		g.localGunSound = this.localGunSound;
-		g.explosionDamage = this.explosionDamage;
-		g.recoil = this.recoil;
-		g.knockback = this.knockback;
-		g.reloadType = this.reloadType;
-		g.releaseTime = this.releaseTime;
-		g.canGoPastMaxDistance = this.canGoPastMaxDistance;
-		g.priority = this.priority;
-		g.loreComponents = new ArrayList<>(this.loreComponents);
-
-		if (releaseEffect != null)
+	public void armorPenetration(Damageable hurt, double eventDamage)
+	{
+		double armorPenetration = data.armorPenetration();
+		if (armorPenetration > 0.0D && hurt.getHealth() - eventDamage > 0.0D)
 		{
-			g.releaseEffect = this.releaseEffect.clone();
+			double newHealth = Math.max(0, hurt.getHealth() - armorPenetration);
+			hurt.setHealth(newHealth);
+		}
+	}
+
+	public boolean tryReload()
+	{
+		if (!data.hasClip() || !changed || !data.reloadGunOnDrop())
+		{
+			return false;
 		}
 
-		return g;
+		reloadGun();
+		return true;
+	}
+
+	boolean fire()
+	{
+		if (timer <= 0)
+		{
+			this.heldDownTicks++;
+			this.lastFired = 0;
+			this.firing = true;
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -461,10 +322,10 @@ public class Gun implements Cloneable, ConfigurationSerializable
 	public void reloadGun()
 	{
 		this.reloading = true;
-		this.gunReloadTimer = reloadTime;
+		this.gunReloadTimer = data.reloadTime();
 
-		if (reloadType == ReloadType.CLIP)
-			this.clipRemaining = clipSize;
+		if (data.reloadType() == ReloadType.CLIP)
+			this.clipRemaining = data.clipSize();
 	}
 
 	/**
@@ -476,67 +337,67 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		{
 			if (reloading)
 			{
-				int amtReload = reloadTime - gunReloadTimer;
-				if (reloadType == ReloadType.BOLT)
+				int amtReload = data.reloadTime() - gunReloadTimer;
+				if (data.reloadType() == ReloadType.BOLT)
 				{
 					if (amtReload == 6)
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.5F);
-					if (amtReload == reloadTime - 4)
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.5F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.5F);
+					if (amtReload == data.reloadTime() - 4)
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.5F);
 				}
-				else if (reloadType == ReloadType.PUMP || reloadType == ReloadType.INDIVIDUAL_BULLET)
+				else if (data.reloadType() == ReloadType.PUMP || data.reloadType() == ReloadType.INDIVIDUAL_BULLET)
 				{
-					int rep = (reloadTime - 10) / getMaxClipSize();
-					if (amtReload >= 5 && amtReload <= reloadTime - 5 && amtReload % rep == 0)
+					int rep = (data.reloadTime() - 10) / data.maxClipSize();
+					if (amtReload >= 5 && amtReload <= data.reloadTime() - 5 && amtReload % rep == 0)
 					{
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.0F);
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1.0F, 2.0F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.0F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1.0F, 2.0F);
 					}
 
-					if (amtReload == reloadTime - 3)
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
-					else if (amtReload == reloadTime - 1)
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
+					if (amtReload == data.reloadTime() - 3)
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
+					else if (amtReload == data.reloadTime() - 1)
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
 				}
 				else
 				{
 					if (amtReload == 6)
 					{
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 1.0F, 2.0F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 1.0F, 2.0F);
 					}
 
-					if (amtReload == reloadTime / 2)
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 0.33F, 2.0F);
+					if (amtReload == data.reloadTime() / 2)
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 0.33F, 2.0F);
 
-					if (amtReload == reloadTime - 4)
+					if (amtReload == data.reloadTime() - 4)
 					{
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 2.0F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0F, 2.0F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 2.0F);
 					}
 				}
 			}
 			else
 			{
-				if (reloadType == ReloadType.PUMP)
+				if (data.reloadType() == ReloadType.PUMP)
 				{
 					if (timer == 8)
 					{
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0F, 2.0F);
 					}
 
 					if (timer == 6)
 					{
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_PISTON_CONTRACT, 1.0F, 2.0F);
 					}
 				}
 
-				if (reloadType == ReloadType.BOLT)
+				if (data.reloadType() == ReloadType.BOLT)
 				{
-					if (timer == getBulletDelayTime() - 4)
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.25F);
+					if (timer == data.bulletDelayTime() - 4)
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 2.0F, 1.25F);
 					if (timer == 6)
-						owner.getPlayer().playSound(owner.getPlayer().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.25F);
+						owner.player().playSound(owner.player().getLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 1.0F, 1.25F);
 				}
 			}
 		}
@@ -546,14 +407,9 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		}
 	}
 
-	/**
-	 * Handles recoil for a player
-	 *
-	 * @param player {@link Player} to handle recoil for
-	 */
-	private void doRecoil(Player player)
+	private void doRecoil()
 	{
-		if (recoil == 0.0D)
+		if (data.recoil() == 0.0D)
 		{
 			return;
 		}
@@ -566,7 +422,7 @@ public class Gun implements Cloneable, ConfigurationSerializable
 		double zd = -Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(pitch));
 
 		Vector vec = new Vector(xd, yd, zd);
-		vec.multiply(recoil / 2.0D).setY(0);
+		vec.multiply(data.recoil() / 2.0D).setY(0);
 
 		player.setVelocity(player.getVelocity().add(vec));
 	}
@@ -579,9 +435,9 @@ public class Gun implements Cloneable, ConfigurationSerializable
 	 */
 	public void doKnockback(Entity entity, Vector speed)
 	{
-		if (knockback > 0.0D)
+		if (data.knockback() > 0.0D)
 		{
-			speed.normalize().setY(0.6D).multiply(knockback / 4.0D);
+			speed.normalize().setY(0.6D).multiply(data.knockback() / 4.0D);
 			entity.setVelocity(speed);
 		}
 	}
@@ -603,131 +459,82 @@ public class Gun implements Cloneable, ConfigurationSerializable
 	private void finishShooting()
 	{
 		this.bulletsShot = 0;
-		this.timer = bulletDelayTime;
+		this.timer = data.bulletDelayTime();
 		this.firing = false;
 	}
 
-	/**
-	 * @return Name of the gun
-	 */
-	public String getName()
+	void applyCustomName(ItemStack item)
 	{
-		return gunName;
-	}
-
-	public String getValueFromString(String str)
-	{
-		if (str.contains(":"))
+		ItemMeta meta = item.getItemMeta();
+		if (meta == null)
 		{
-			return str.substring(0, str.indexOf(":"));
+			return;
 		}
 
-		return str;
-	}
-
-	/**
-	 * Sets the gun's type
-	 *
-	 * @param val The gun's type
-	 */
-	public void setGunType(String val)
-	{
-		Material material = Material.matchMaterial(val);
-		if (material == null)
+		if (owner.canFireGun(data))
 		{
-			throw new IllegalArgumentException("Invalid gun material: " + val);
+			meta.customName(buildDisplayName());
+
+			List<Component> lore = data.loreComponents();
+			if (lore != null && ! lore.isEmpty())
+				meta.lore(data.loreComponents());
+
+			item.setItemMeta(meta);
 		}
-
-		this.material = material;
-	}
-
-	/**
-	 * Sets the gun's ammo type
-	 *
-	 * @param val The gun's ammo type
-	 */
-	public void setAmmoType(String val)
-	{
-		Material material = Material.matchMaterial(val);
-		if (material == null)
+		else if (meta.hasCustomName() && FormatUtil.componentContains(meta.customName(), "\u00AB"))
 		{
-			throw new IllegalArgumentException("Invalid ammo material: " + val);
-		}
-
-		this.ammo = material;
-	}
-
-	/**
-	 * Sets this gun's lore
-	 *
-	 * @param val Composite lore string
-	 */
-	public void setLore(String val)
-	{
-		lore.clear();
-
-		for (String s : val.split(";"))
-		{
-			lore.add(FormatUtil.format(s));
+			meta.customName(null);
+			meta.lore(null);
+			item.setItemMeta(meta);
 		}
 	}
 
-	/**
-	 * Adds gun sounds from a composite string
-	 *
-	 * @param val Composite string of sounds
-	 */
-	public void addGunSounds(String val)
+	private Component buildDisplayName()
 	{
-		for (String name : val.split(","))
+		String gunName = data.displayName();
+
+		if (!data.hasClip())
 		{
-			Sound sound = Util.getRegistryEntry(RegistryKey.SOUND_EVENT, name);
-			if (sound != null)
-				gunSound.add(sound);
-		}
-	}
-
-	@Override
-	public String toString()
-	{
-		return "Gun[name=" + gunName + ", material=" + material + ", priority=" + priority + "]";
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (obj == null) return false;
-		if (obj == this) return true;
-
-		if (obj instanceof Gun that)
-		{
-			return this.gunName.equals(that.gunName) && this.material.equals(that.material) && this.priority == that.priority;
+			return Component.text(gunName, Style.style(NamedTextColor.YELLOW, TextDecoration.ITALIC.withState(false)));
 		}
 
-		return false;
-	}
+		Material ammo = data.ammo();
+		int maxClip = data.maxClipSize();
+		int ammoAmtNeeded = Math.max(1, data.ammoAmtNeeded());
+		int amount = (int) Math.floor(InventoryUtil.amount(player.getInventory(), ammo) / (double) ammoAmtNeeded);
 
-	@Override
-	public int hashCode()
-	{
-		return Objects.hash(gunName, material, priority);
-	}
-
-	@Override
-	public Gun clone()
-	{
-		try
+		int leftInClip, ammoLeft;
+		if (data.reloadType() == ReloadType.CLIP)
 		{
-			Gun clone = (Gun) super.clone();
-			clone.clear();
-			return clone;
-		} catch (Throwable ignored) { }
-		return copy();
-	}
+			leftInClip = Math.max(0, clipRemaining);
+			ammoLeft = (Math.max(1, data.clipSize()) * amount) - leftInClip;
+		}
+		else
+		{
+			ammoLeft = Math.max(0, amount - maxClip + roundsFired);
+			leftInClip = amount - ammoLeft;
+		}
 
-	@Override
-	public Map<String, Object> serialize()
-	{
-		return FileSerialization.serialize(this);
+		TextComponent.Builder builder = Component.text(gunName, Style.style(NamedTextColor.YELLOW, TextDecoration.ITALIC.withState(false))).toBuilder();
+
+		if (reloading)
+		{
+			StringBuilder reload = new StringBuilder();
+			int scale = 4;
+			int reloadTime = Math.max(1, data.reloadTime());
+			int bars = (int) Math.round(scale - (((double)gunReloadTimer * scale) / reloadTime));
+			reload.append("\u25AA".repeat(Math.max(0, bars)));
+
+			int left = scale - bars;
+			reload.append("\u25AB".repeat(Math.max(0, left)));
+
+			builder.append(Component.text("    " + reload.reverse() + "RELOADING" + reload, NamedTextColor.RED));
+		}
+		else
+		{
+			builder.append(Component.text("    \u00AB" + leftInClip + " \uFFE8 " + ammoLeft + "\u00BB", NamedTextColor.RED));
+		}
+
+		return builder.build();
 	}
 }

@@ -32,6 +32,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.inventory.ItemStack;
 
 import net.dmulloy2.swornapi.util.Util;
 import net.dmulloy2.swornguns.Config;
@@ -64,8 +65,8 @@ public class EntityListener implements Listener
 			return;
 		}
 
-		GunPlayer shooter = bullet.getShooter();
-		Player player = shooter.getPlayer();
+		GunPlayer shooter = bullet.shooter();
+		Player player = shooter.player();
 
 		// Attempt to determine which Entity (if any) we hit.
 		// This is necessary because while the ProjectileHitEvent fires reliably,
@@ -116,7 +117,7 @@ public class EntityListener implements Listener
 		}
 
 		bullet.onHit();
-		bullet.setDestroyNextTick(true);
+		bullet.destroyNextTick(true);
 
 		// ---- Effects
 		Block block = loc.getBlock();
@@ -149,7 +150,7 @@ public class EntityListener implements Listener
 		// Block cracking
 		if (Config.blockCrack && mat == Material.STONE)
 		{
-			BlockBreakEvent blockBreak = new BlockBreakEvent(block, bullet.getShooter().getPlayer());
+			BlockBreakEvent blockBreak = new BlockBreakEvent(block, bullet.shooter().player());
 			plugin.getServer().getPluginManager().callEvent(blockBreak);
 			if (! blockBreak.isCancelled())
 				block.setType(Material.COBBLESTONE);
@@ -158,7 +159,7 @@ public class EntityListener implements Listener
 		// Block shattering
 		if (Config.blockShatterEnabled && Config.blockShatterBlocks.contains(mat.asBlockType()))
 		{
-			BlockBreakEvent blockBreak = new BlockBreakEvent(block, bullet.getShooter().getPlayer());
+			BlockBreakEvent blockBreak = new BlockBreakEvent(block, bullet.shooter().player());
 			plugin.getServer().getPluginManager().callEvent(blockBreak);
 			if (! blockBreak.isCancelled())
 				block.breakNaturally();
@@ -168,11 +169,40 @@ public class EntityListener implements Listener
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
 	{
-		if (event.getCause() != DamageCause.PROJECTILE)
+		if (event.getCause() == DamageCause.PROJECTILE)
+		{
+			handleProjectileDamage(event);
+		}
+		else if (event.getCause() == DamageCause.ENTITY_ATTACK)
+		{
+			handleMeleeDamage(event);
+		}
+	}
+
+	private void handleMeleeDamage(EntityDamageByEntityEvent event)
+	{
+		if (!(event.getDamager() instanceof Player player))
 		{
 			return;
 		}
 
+		GunPlayer gp = plugin.getGunPlayer(player);
+		if (gp == null)
+		{
+			return;
+		}
+
+		ItemStack item = player.getInventory().getItemInMainHand();
+		if (item.getType() == Material.AIR)
+		{
+			return;
+		}
+
+		gp.handleClick(item, true);
+	}
+
+	private void handleProjectileDamage(EntityDamageByEntityEvent event)
+	{
 		if (!(event.getEntity() instanceof Damageable hurt))
 		{
 			return;
@@ -201,7 +231,7 @@ public class EntityListener implements Listener
 
 		if (Config.smokeEffect)
 		{
-			world.playEffect(bullet.getShooter().getPlayer().getLocation(), Effect.SMOKE, 5);
+			world.playEffect(bullet.shooter().player().getLocation(), Effect.SMOKE, 5);
 		}
 
 		if (Config.bulletSoundEnabled && Config.bulletSound != null)
@@ -210,36 +240,14 @@ public class EntityListener implements Listener
 		}
 		// Realism end
 
-		Location loc = proj.getLocation();
+		boolean isHeadshot = hurt instanceof LivingEntity lentity && bullet.isHeadshot(lentity);
 
-		// Headshots
-		double mult = 1.0D;
-		if (hurt instanceof LivingEntity lentity)
-		{
-			if (isNear(loc, lentity.getEyeLocation(), 0.26D))
-				mult = 1.5D;
-		}
-
-		Gun shotFrom = bullet.getShotFrom();
-
-		// Deal the damage
-		double damage = shotFrom.getGunDamage() * mult;
+		Gun gun = bullet.shotFrom();
+		double damage = gun.calculateDamage(isHeadshot);
 		event.setDamage(damage);
 
-		// Armor penetration
-		double armorPenetration = shotFrom.getArmorPenetration();
-		if (armorPenetration > 0.0D && hurt.getHealth() - event.getFinalDamage() > 0.0D)
-		{
-			double newHealth = Math.max(0, hurt.getHealth() - armorPenetration);
-			hurt.setHealth(newHealth);
-		}
-
-		shotFrom.doKnockback(hurt, bullet.getVelocity());
-	}
-
-	private boolean isNear(Location location, Location eyeLocation, double d)
-	{
-		return Math.abs(location.getY() - eyeLocation.getY()) <= d;
+		gun.armorPenetration(hurt, event.getFinalDamage());
+		gun.doKnockback(hurt, bullet.velocity());
 	}
 
 	// Realism start - blood effects

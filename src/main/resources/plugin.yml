@@ -3,7 +3,7 @@ main: net.dmulloy2.swornguns.SwornGuns
 version: ${version}
 author: dmulloy2
 description: Guns in Minecraft!
-api-version: "1.13"
+api-version: '1.21.8'
 commands: 
   swornguns:
     description: SwornGuns root command

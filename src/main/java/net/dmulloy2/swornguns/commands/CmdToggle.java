@@ -45,7 +45,7 @@ public class CmdToggle extends SwornGunsCommand
 			return;
 		}
 
-		gp.setEnabled(! gp.isEnabled());
-		sendpMessage("&eYou have turned gun firing {0}&e!", gp.isEnabled() ? "&aon" : "&coff");
+		gp.enabled(! gp.enabled());
+		sendpMessage("&eYou have turned gun firing {0}&e!", gp.enabled() ? "&aon" : "&coff");
 	}
 }

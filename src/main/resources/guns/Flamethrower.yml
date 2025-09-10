@@ -33,5 +33,3 @@ gunPitch: 2.0
 projType: SNOWBALL
 explosionType: FIREWORK
 reloadType: normal
-displayName: '&eFlamethrower'
-outOfAmmoMessage: '&6This gun needs &cNETHER WART'

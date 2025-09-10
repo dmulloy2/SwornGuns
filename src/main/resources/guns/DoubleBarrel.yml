@@ -33,5 +33,4 @@ gunPitch: 2.0
 projType: SNOWBALL
 explosionType: FIREWORK
 reloadType: pump
-displayName: '&eDouble Barrel Shotgun'
-outOfAmmoMessage: '&6This gun needs &cSEEDS'
+displayName: 'Double Barrel Shotgun'

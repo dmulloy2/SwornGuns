@@ -21,16 +21,13 @@ package net.dmulloy2.swornguns.api;
 import java.util.Collection;
 import java.util.List;
 
-import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.types.Bullet;
-import net.dmulloy2.swornguns.types.EffectData;
-import net.dmulloy2.swornguns.types.Gun;
-import net.dmulloy2.swornguns.types.GunPlayer;
-import net.dmulloy2.swornapi.types.Reloadable;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import net.dmulloy2.swornapi.types.Reloadable;
+import net.dmulloy2.swornguns.SwornGuns;
+import net.dmulloy2.swornguns.types.*;
 
 /**
  * API Implementation for {@link SwornGuns}
@@ -42,7 +39,7 @@ public interface SwornGunsAPI extends Reloadable
 {
 	GunPlayer getGunPlayer(Player player);
 
-	Gun getGun(String gunName);
+	GunData getGun(String gunName);
 
 	void removeBullet(Bullet bullet);
 
@@ -50,11 +47,7 @@ public interface SwornGunsAPI extends Reloadable
 
 	Bullet getBullet(Entity proj);
 
-	List<Gun> getGunsByItem(ItemStack item);
+	List<GunData> getGunsByItem(ItemStack item);
 
-	Collection<Gun> getGuns();
-
-	void removeEffect(EffectData effectType);
-
-	void addEffect(EffectData effectType);
+	Collection<GunData> getGuns();
 }

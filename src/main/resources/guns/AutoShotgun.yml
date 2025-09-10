@@ -33,5 +33,4 @@ gunPitch: 2.0
 projType: SNOWBALLL
 explosionType: FIREWORK
 reloadType: normal
-displayName: '&eAutoShotty'
-outOfAmmoMessage: '&6This gun needs &cSEEDS'
+displayName: 'Auto Shotgun'

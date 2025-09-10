@@ -1,15 +1,15 @@
 package net.dmulloy2.swornguns.io;
 
-import net.dmulloy2.swornapi.io.FileSerialization;
-import net.dmulloy2.swornguns.SwornGuns;
-import net.dmulloy2.swornguns.types.Gun;
-import net.dmulloy2.swornapi.util.Util;
-import org.bukkit.configuration.file.YamlConfiguration;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import net.dmulloy2.swornapi.util.Util;
+import net.dmulloy2.swornguns.SwornGuns;
+import net.dmulloy2.swornguns.types.GunData;
 
 public class WeaponIO
 {
@@ -20,23 +20,21 @@ public class WeaponIO
 		this.plugin = plugin;
 	}
 
-	public List<Gun> loadGuns()
+	public List<GunData> loadGuns()
 	{
 		File gunFolder = new File(plugin.getDataFolder(), "guns");
-		return loadWeapons(gunFolder);
+		return loadWeapons(gunFolder, false);
 	}
 
-	public List<Gun> loadProjectiles()
+	public List<GunData> loadProjectiles()
 	{
 		File projFolder = new File(plugin.getDataFolder(), "projectile");
-		List<Gun> projectiles = loadWeapons(projFolder);
-		projectiles.forEach(proj -> proj.setThrowable(true));
-		return projectiles;
+		return loadWeapons(projFolder, true);
 	}
 
-	private List<Gun> loadWeapons(File folder)
+	private List<GunData> loadWeapons(File folder, boolean isThrowable)
 	{
-		List<Gun> guns = new ArrayList<>();
+		List<GunData> guns = new ArrayList<>();
 
 		File[] files = folder.listFiles();
 		if (files == null || files.length == 0)
@@ -55,43 +53,17 @@ public class WeaponIO
 
 				try
 				{
-					Gun gun = new Gun(gunName, plugin);
+					GunData gun = new GunData(gunName, isThrowable);
 
 					YamlConfiguration config = new YamlConfiguration();
 					config.load(file);
-					gun.loadFromConfig(config.getValues(true));
+					gun.loadFromConfig(config.getValues(true), plugin.getLogHandler());
 
 					guns.add(gun);
 				}
 				catch (Exception ex)
 				{
 					plugin.getLogHandler().log(Level.WARNING, Util.getUsefulStack(ex, "Loading gun {0}", fileName));
-				}
-			}
-			else if (!fileName.contains("."))
-			{
-				// load and convert legacy gun
-
-				try
-				{
-					LegacyWeaponReader legacyReader = new LegacyWeaponReader(plugin, file);
-					Gun gun = legacyReader.load();
-					if (gun == null)
-						continue;
-
-					guns.add(gun);
-
-					File yamlFile = new File(folder, fileName + ".yml");
-					if (!yamlFile.exists())
-					{
-						FileSerialization.save(gun, yamlFile);
-					}
-
-					file.delete();
-				}
-				catch (Exception ex)
-				{
-					plugin.getLogHandler().log(Level.WARNING, Util.getUsefulStack(ex, "Loading legacy gun {0}", fileName));
 				}
 			}
 		}

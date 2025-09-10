@@ -32,5 +32,3 @@ gunPitch: 2.0
 projType: SNOWBALL
 explosionType: FIREWORK
 reloadType: bolt
-displayName: '&eSniper'
-outOfAmmoMessage: '&6This gun needs &cCLAY BALLS'

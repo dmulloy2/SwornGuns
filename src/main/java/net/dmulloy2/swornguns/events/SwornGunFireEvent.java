@@ -29,7 +29,7 @@ public class SwornGunFireEvent extends Event implements Cancellable
 
 	public Player getPlayer()
 	{
-		return gun.getOwner().getPlayer();
+		return gun.owner().player();
 	}
 
 	public int getAmmoNeeded()
