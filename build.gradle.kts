@@ -11,26 +11,7 @@ version = "3.0.0-SNAPSHOT"
 description = "SwornGuns"
 
 var isSnapshot = version.toString().endsWith("-SNAPSHOT")
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-
-    maven {
-        name = "WorldEdit"
-        url = uri("https://maven.enginehub.org/repo/")
-    }
-
-    maven {
-        name = "Essentials"
-        url = uri("https://ci.ender.zone/plugin/repository/everything/")
-    }
-
-    maven {
-        name = "Vault"
-        url = uri("https://jitpack.io")
-    }
-}
+var isJenkins = System.getenv("BUILD_NUMBER") != null
 
 dependencies {
     compileOnly("org.projectlombok:lombok:1.18.38")
@@ -39,7 +20,11 @@ dependencies {
     implementation("org.dizitart:nitrite:4.3.0")
     implementation("org.dizitart:nitrite-mvstore-adapter:4.3.0")
 
-    implementation("net.dmulloy2:swornapi:2.0.0-SNAPSHOT")
+    if (isJenkins) {
+        implementation("com.github.dmulloy2:SwornAPI:-SNAPSHOT")
+    } else {
+        implementation("net.dmulloy2:swornapi:2.0.0-SNAPSHOT")
+    }
 }
 
 java {
