@@ -11,3 +11,4 @@ target/
 build/
 out/
 .idea/
+.DS_Store

@@ -33,9 +33,13 @@ java {
 }
 
 tasks {
-    named<ShadowJar>("shadowJar"){
+    named<ShadowJar>("shadowJar")  {
         dependencies {
-            include(dependency("net.dmulloy2:swornapi:.*"))
+            if (isJenkins) {
+                include(dependency("com.github.dmulloy2:SwornAPI:.*"))
+            } else {
+                include(dependency("net.dmulloy2:swornapi:.*"))
+            }
         }
         relocate("net.dmulloy2.swornapi", "net.dmulloy2.swornrpg.swornapi")
         archiveFileName.set("SwornGuns.jar")
