@@ -18,7 +18,9 @@
  */
 package net.dmulloy2.swornguns.listeners;
 
-import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -33,8 +35,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 
-import net.dmulloy2.swornapi.util.Util;
 import net.dmulloy2.swornguns.Config;
 import net.dmulloy2.swornguns.SwornGuns;
 import net.dmulloy2.swornguns.events.SwornGunsBlockDamageEvent;
@@ -49,6 +52,7 @@ import net.dmulloy2.swornguns.types.GunPlayer;
 public class EntityListener implements Listener
 {
 	private final SwornGuns plugin;
+	private final Map<UUID, Integer> restoreNoDamageTicks = new ConcurrentHashMap<>();
 
 	public EntityListener(SwornGuns plugin)
 	{
@@ -68,59 +72,29 @@ public class EntityListener implements Listener
 		GunPlayer shooter = bullet.shooter();
 		Player player = shooter.player();
 
-		// Attempt to determine which Entity (if any) we hit.
-		// This is necessary because while the ProjectileHitEvent fires reliably,
-		// the EntityDamageByEntityEvent only fires once per round / bullet.
-
-		// This seems to work well enough, although I hope to find a better solution.
-
-		Damageable hurt = null;
-		double hurtDistance = -1.0D;
-
 		Location loc = proj.getLocation();
-		Location nLoc = new Location(null, 0, 0, 0);
-
-		double radius = 2.0D;
-		List<Entity> nearbyEntities = proj.getNearbyEntities(radius, radius, radius);
-		for (Entity nearby : nearbyEntities)
+		Damageable hitEntity = resolveHitEntity(event, bullet, player);
+		if (Config.debugProjectileHits)
 		{
-			if (nearby instanceof Damageable)
-			{
-				if (nearby.equals(player))
-					continue; // Don't shoot ourselves
-
-				nearby.getLocation(nLoc);
-
-				// Exact match
-				if (Util.coordsEqual(loc, nLoc))
-				{
-					hurt = (Damageable) nearby;
-					break;
-				}
-
-				// Find the closest entity
-				double distance = nLoc.distanceSquared(loc);
-				if (hurt == null || distance < hurtDistance)
-				{
-					hurt = (Damageable) nearby;
-					hurtDistance = distance;
-				}
-			}
-		}
-
-		if (hurt != null)
-		{
-			// TODO we don't check if this is cancelled
-			// Call the damage event, which will be handled below
-			EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(proj, hurt, DamageCause.PROJECTILE, 0);
-			plugin.getServer().getPluginManager().callEvent(damageEvent);
+			String hitType = hitEntity != null ? hitEntity.getType().name() : "none";
+			plugin.getLogger().info("[SwornGuns] Projectile hit resolved to entity=" + hitType + " at " + formatLocation(loc));
 		}
 
 		bullet.onHit();
 		bullet.destroyNextTick(true);
 
+		if (hitEntity != null)
+		{
+			return;
+		}
+
 		// ---- Effects
-		Block block = loc.getBlock();
+		Block block = event.getHitBlock();
+		if (block == null)
+		{
+			block = loc.getBlock();
+		}
+
 		Material mat = block.getType();
 
 		// Try to get a non-AIR block
@@ -179,6 +153,17 @@ public class EntityListener implements Listener
 		}
 	}
 
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onEntityDamageByEntityMonitor(EntityDamageByEntityEvent event)
+	{
+		if (event.getCause() != DamageCause.PROJECTILE)
+		{
+			return;
+		}
+
+		handleProjectileDamageMonitor(event);
+	}
+
 	private void handleMeleeDamage(EntityDamageByEntityEvent event)
 	{
 		if (!(event.getDamager() instanceof Player player))
@@ -220,10 +205,89 @@ public class EntityListener implements Listener
 			return;
 		}
 
-		// Realism start - gun effects
+		boolean isHeadshot = hurt instanceof LivingEntity lentity && bullet.isHeadshot(lentity);
+
+		Gun gun = bullet.shotFrom();
+		double damage = gun.calculateDamage(isHeadshot);
+		event.setDamage(damage);
+
+		if (Config.projectileOnlyNoHitDelay && hurt instanceof LivingEntity living)
+		{
+			applyProjectileNoHitDelay(living);
+		}
+
+		if (! Config.hitmarkerOnlyOnRealDamage && event.getFinalDamage() > 0.0D)
+		{
+			playProjectileHitEffects(bullet, hurt);
+		}
+	}
+
+	private void applyProjectileNoHitDelay(LivingEntity living)
+	{
+		int hitDelayTicks = Math.max(0, Config.projectileNoHitDelayTicks);
+		UUID uuid = living.getUniqueId();
+
+		// Apply a projectile-only hit delay override before damage is finalized.
+		// This prevents vanilla invulnerability from throttling automatic guns/shotgun pellets.
+		restoreNoDamageTicks.computeIfAbsent(uuid, key -> {
+			int originalMax = living.getMaximumNoDamageTicks();
+			Bukkit.getScheduler().runTask(plugin, () -> restoreNoDamageTicks(living.getUniqueId()));
+			return originalMax;
+		});
+
+		living.setMaximumNoDamageTicks(hitDelayTicks);
+		living.setNoDamageTicks(hitDelayTicks);
+		living.setLastDamage(0.0D);
+	}
+
+	private void restoreNoDamageTicks(UUID entityId)
+	{
+		Integer originalMax = restoreNoDamageTicks.remove(entityId);
+		if (originalMax == null)
+		{
+			return;
+		}
+
+		Entity entity = Bukkit.getEntity(entityId);
+		if (entity instanceof LivingEntity living && living.isValid())
+		{
+			living.setMaximumNoDamageTicks(originalMax);
+		}
+	}
+
+	private void handleProjectileDamageMonitor(EntityDamageByEntityEvent event)
+	{
+		if (!(event.getEntity() instanceof Damageable hurt))
+		{
+			return;
+		}
+
+		if (!(event.getDamager() instanceof Projectile proj))
+		{
+			return;
+		}
+
+		Bullet bullet = plugin.getBullet(proj);
+		if (bullet == null || event.getFinalDamage() <= 0.0D)
+		{
+			return;
+		}
+
+		if (Config.hitmarkerOnlyOnRealDamage)
+		{
+			playProjectileHitEffects(bullet, hurt);
+		}
+
+		Gun gun = bullet.shotFrom();
+		gun.armorPenetration(hurt, event.getFinalDamage());
+		gun.doKnockback(hurt, bullet.velocity().clone());
+	}
+
+	private void playProjectileHitEffects(Bullet bullet, Damageable hurt)
+	{
 		World world = hurt.getWorld();
 
-		if (Config.bloodEffectEnabled && Config.bloodEffectGunsOnly)
+		if (Config.bloodEffectEnabled && Config.bloodEffectGunsOnly && Config.bloodEffectType != null)
 		{
 			world.playEffect(hurt.getLocation(), Effect.STEP_SOUND, Config.bloodEffectType);
 			world.playEffect(hurt.getLocation().add(0, 1, 0), Effect.STEP_SOUND, Config.bloodEffectType);
@@ -238,16 +302,67 @@ public class EntityListener implements Listener
 		{
 			world.playSound(hurt.getLocation(), Config.bulletSound, 10, 1);
 		}
-		// Realism end
+	}
 
-		boolean isHeadshot = hurt instanceof LivingEntity lentity && bullet.isHeadshot(lentity);
+	private Damageable resolveHitEntity(ProjectileHitEvent event, Bullet bullet, Player shooter)
+	{
+		if (event.getHitEntity() instanceof Damageable hit && isValidProjectileTarget(hit, shooter, event.getEntity()))
+		{
+			return hit;
+		}
 
-		Gun gun = bullet.shotFrom();
-		double damage = gun.calculateDamage(isHeadshot);
-		event.setDamage(damage);
+		Location start = bullet.previousLocation();
+		if (start == null)
+		{
+			start = bullet.lastLocation();
+		}
 
-		gun.armorPenetration(hurt, event.getFinalDamage());
-		gun.doKnockback(hurt, bullet.velocity());
+		Location end = event.getEntity().getLocation();
+		if (start == null || start.getWorld() == null || ! start.getWorld().equals(end.getWorld()))
+		{
+			return null;
+		}
+
+		Vector path = end.toVector().subtract(start.toVector());
+		double distance = path.length();
+		if (distance <= 0.0D)
+		{
+			return null;
+		}
+
+		RayTraceResult result = start.getWorld().rayTrace(
+			start,
+			path.normalize(),
+			distance,
+			FluidCollisionMode.NEVER,
+			true,
+			0.2D,
+			entity -> isValidProjectileTarget(entity, shooter, event.getEntity())
+		);
+
+		if (result != null && result.getHitEntity() instanceof Damageable hit)
+		{
+			return hit;
+		}
+
+		return null;
+	}
+
+	private boolean isValidProjectileTarget(Entity entity, Player shooter, Projectile projectile)
+	{
+		return entity instanceof Damageable
+			&& entity.isValid()
+			&& ! entity.equals(shooter)
+			&& ! entity.equals(projectile);
+	}
+
+	private String formatLocation(Location location)
+	{
+		return String.format("%s %.2f %.2f %.2f",
+			location.getWorld() != null ? location.getWorld().getName() : "unknown",
+			location.getX(),
+			location.getY(),
+			location.getZ());
 	}
 
 	// Realism start - blood effects

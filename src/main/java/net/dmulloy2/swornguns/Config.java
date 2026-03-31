@@ -48,6 +48,18 @@ public class Config
 	@Key("block-crack")
 	public static boolean blockCrack = true;
 
+	@Key("projectile_only_no_hit_delay")
+	public static boolean projectileOnlyNoHitDelay = true;
+
+	@Key("projectile_no_hit_delay_ticks")
+	public static int projectileNoHitDelayTicks = 0;
+
+	@Key("hitmarker_only_on_real_damage")
+	public static boolean hitmarkerOnlyOnRealDamage = true;
+
+	@Key("debug_projectile_hits")
+	public static boolean debugProjectileHits = false;
+
 	@Key("debug")
 	public static boolean debug = false;
 
