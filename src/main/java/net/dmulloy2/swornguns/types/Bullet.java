@@ -66,6 +66,7 @@ public class Bullet extends BukkitRunnable
 	private Entity projectile;
 	private Vector velocity;
 
+	private Location previousLocation;
 	private Location lastLocation;
 	private Location startLocation;
 
@@ -102,6 +103,8 @@ public class Bullet extends BukkitRunnable
 		this.id = projectile.getUniqueId();
 
 		this.startLocation = projectile.getLocation();
+		this.previousLocation = startLocation.clone();
+		this.lastLocation = startLocation.clone();
 
 		if (data.releaseTime() == -1)
 		{
@@ -155,6 +158,7 @@ public class Bullet extends BukkitRunnable
 		}
 
 		this.ticks++;
+		this.previousLocation = lastLocation != null ? lastLocation.clone() : projectile.getLocation().clone();
 		this.lastLocation = projectile.getLocation();
 
 		if (ticks > releaseTime)
